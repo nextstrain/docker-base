@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+
+# The default is to run the local data dev server, but any of the package.json
+# "scripts" can be run by giving their name.
+cmd="${1:-start:local}"
+
+if [[ $# -gt 0 ]]; then
+   shift
+fi
+
+cd /nextstrain/auspice
+exec npm run "$cmd" "$@"

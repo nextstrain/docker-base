@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+    # If the container is run with no arguments, then print a message and exit.
+    cut -c 9- <<<"
+        This is the Nextstrain pathogen build container.  It has a complete
+        Nextstrain environment installed which is normally accessed via the
+        \`nextstrain\` command on your computer (not in the container).
+        
+        If you're seeing this message though, you're probably not using the
+        \`nextstrain\` command.  Welcome!  :-)
+        
+        The default container entrypoint will exec a command-line of your
+        choosing in the build environment.  You can use this functionality to
+        debug or develop Nextstrain pathogen builds and components.  Refer to
+        the source of the \`nextstrain\` command for examples.
+    "
+else
+    # Otherwise, setup any build environment variables and exec into whatever
+    # command is provided.  The -I option means that a missing envdir directory
+    # is ignored.  (s6-envdir, like all s6 tools and this entrypoint script
+    # itself, uses exec-chaining.)
+    export HOME=/tmp
+    exec s6-envdir -I /nextstrain/build/envdir "$@"
+fi
