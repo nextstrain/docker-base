@@ -1,6 +1,7 @@
 # Docker image for nextstrain/base
 
-This is the source for creating the `nextstrain/base` Docker image.
+This is the source for creating the `nextstrain/base` Docker image.  Currently
+the image is published as [`quay.io/nextstrain/base`][].
 
 Ideally most pathogen builds are supported by this base image without further
 customization.  The possibility remains, however, for pathogens to define and
@@ -44,6 +45,7 @@ use case, which is somewhat atypical.
 The [Dockerfile reference documentation][] is quite handy for looking up the
 details of each Dockerfile command (`COPY`, `ADD`, etc).
 
+[`quay.io/nextstrain/base`]: https://quay.io/repository/nextstrain/base?tab=tags
 [Alpine Linux]: https://alpinelinux.org
 [Alpine Linux package index]: https://pkgs.alpinelinux.org/packages?branch=v3.7&repo=main&arch=x86_64
 [multi-stage build]: https://docs.docker.com/develop/develop-images/multistage-build/
