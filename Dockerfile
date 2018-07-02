@@ -126,7 +126,6 @@ RUN apk add --no-cache \
         nodejs \
         python2 \
         python3 \
-        s6 \
         suitesparse
 
 # Add custom built programs

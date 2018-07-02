@@ -17,10 +17,8 @@ if [[ $# -eq 0 ]]; then
         the source of the \`nextstrain\` command for examples.
     "
 else
-    # Otherwise, setup any build environment variables and exec into whatever
-    # command is provided.  The -I option means that a missing envdir directory
-    # is ignored.  (s6-envdir, like all s6 tools and this entrypoint script
-    # itself, uses exec-chaining.)
+    # Otherwise, setup a temporary home (since we're probably an unknown UID)
+    # and exec into whatever command is provided.
     export HOME=/tmp
-    exec s6-envdir -I /nextstrain/build/envdir "$@"
+    exec "$@"
 fi
