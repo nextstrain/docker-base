@@ -17,6 +17,7 @@ RUN apk add --no-cache \
         ca-certificates \
         curl \
         freetype-dev \
+        git \
         gmp-dev \
         libpng-dev \
         nodejs \
@@ -104,9 +105,6 @@ RUN pip3 uninstall --yes --verbose augur
 
 # Install Node deps
 RUN cd /nextstrain/auspice && npm install
-
-# Install Snakemake
-RUN pip3 install --no-cache-dir snakemake
 
 # Install envdir, which is used by pathogen builds
 RUN pip3 install --no-cache-dir envdir
