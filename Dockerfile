@@ -49,9 +49,47 @@ WORKDIR /build/IQ-TREE
 RUN curl -fsSL https://github.com/Cibiv/IQ-TREE/releases/download/v1.6.5/iqtree-1.6.5-Linux.tar.gz \
   | tar xzvpf - --strip-components=1
 
+# Install Python 2 depedencies
+# May be upgraded by augur/requirements.txt
+RUN CVXOPT_BLAS_LIB=openblas \
+    CVXOPT_LAPACK_LIB=openblas \
+        pip2 install --global-option=build_ext \
+            --global-option="-I/usr/include/suitesparse" \
+            cvxopt==1.1.9
+
+RUN pip2 install biopython==1.69
+RUN pip2 install boto==2.38
+RUN pip2 install future==0.16.0
+RUN pip2 install GitPython==2.1.10
+RUN pip2 install ipdb==0.10.1
+RUN pip2 install matplotlib==2.2.2
+RUN pip2 install pandas==0.17.1
+RUN pip2 install pytest==3.2.1
+RUN pip2 install seaborn==0.6.0
+
+# Install Python 3 dependencies
+# May be upgraded by augur/setup.py
+
+# cvxopt is an dep we explicitly pre-install because it is particularly fussy.
+# It is separated out from the rest of the installs to ensures that pip wheels
+# can be used for as much as possible, since using --global-option disables use
+# of wheels.
+RUN CVXOPT_BLAS_LIB=openblas \
+    CVXOPT_LAPACK_LIB=openblas \
+        pip3 install --global-option=build_ext \
+            --global-option="-I/usr/include/suitesparse" \
+            cvxopt==1.1.9
+RUN pip3 install bcbio-gff==0.6.4
+RUN pip3 install biopython==1.69
+RUN pip3 install boto==2.38
+RUN pip3 install ipdb==0.10.1
+RUN pip3 install matplotlib==2.2.2
+RUN pip3 install pandas==0.17.1
+RUN pip3 install seaborn==0.6.0
+RUN pip3 install snakemake==5.1.5
 
 # Add Nextstrain components
-# 
+#
 # sacra
 WORKDIR /nextstrain/sacra
 
@@ -78,22 +116,10 @@ RUN curl -fsSL https://api.github.com/repos/nextstrain/auspice/tarball/master \
 
 
 # Install Python 2 deps
-RUN pip2 install --no-cache-dir \
-        --requirement=/nextstrain/{sacra,fauna}/requirements.txt
+RUN pip2 install --requirement=/nextstrain/{sacra,fauna}/requirements.txt
 
 # Install Python 3 deps
-#
-# cvxopt is an dep we explicitly pre-install because it is particularly fussy.
-# It is separated out from the rest of the installs to ensures that pip wheels
-# can be used for as much as possible, since using --global-option disables use
-# of wheels.
-RUN CVXOPT_BLAS_LIB=openblas \
-    CVXOPT_LAPACK_LIB=openblas \
-        pip3 install --no-cache-dir \
-            --global-option=build_ext \
-            --global-option="-I/usr/include/suitesparse" \
-            cvxopt==1.1.9
-RUN pip3 install --no-cache-dir --process-dependency-links /nextstrain/augur
+RUN pip3 install --process-dependency-links /nextstrain/augur
 
 # …but remove global augur install.  We'll later install a tiny wrapper in
 # /usr/bin/augur that runs out of /nextstrain/augur, which makes replacing the
@@ -107,7 +133,7 @@ RUN pip3 uninstall --yes --verbose augur
 RUN cd /nextstrain/auspice && npm install
 
 # Install envdir, which is used by pathogen builds
-RUN pip3 install --no-cache-dir envdir
+RUN pip3 install envdir
 
 
 # ———————————————————————————————————————————————————————————————————— #
