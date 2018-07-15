@@ -45,6 +45,10 @@ use case, which is somewhat atypical.
 The [Dockerfile reference documentation][] is quite handy for looking up the
 details of each Dockerfile command (`COPY`, `ADD`, etc).
 
+### Continuous integration
+
+The Docker image is automatically built with Travis CI and pushed to the Docker registry. The most recent build can be seen at [travis-ci.com/nextstrain/docker-base/](https://travis-ci.com/nextstrain/docker-base/) and Travis CI build instructions can be found in this repo's `.travis.yml` file.
+
 [`nextstrain/base`]: https://hub.docker.com/r/nextstrain/base/
 [Alpine Linux]: https://alpinelinux.org
 [Alpine Linux package index]: https://pkgs.alpinelinux.org/packages?branch=v3.7&repo=main&arch=x86_64
