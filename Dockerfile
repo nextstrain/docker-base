@@ -27,8 +27,6 @@ RUN apk add --no-cache \
         suitesparse-dev
 
 # Downloading dependencies, these should be pinned to specific versions
-# Rather than downloading master from GitHub
-# This is to ensure compatibility, but also to aid caching
 
 # mafft
 WORKDIR /build/mafft
@@ -89,8 +87,13 @@ RUN pip3 install snakemake==5.1.5
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir
 
+
 # Add Nextstrain components
-#
+
+# Allow caching to be avoided from here on out by calling
+# docker build --build-arg CACHE_DATE="$(date)"
+ARG CACHE_DATE
+
 # sacra
 WORKDIR /nextstrain/sacra
 
@@ -105,6 +108,7 @@ RUN curl -fsSL https://api.github.com/repos/nextstrain/fauna/tarball/master \
 
 # augur
 WORKDIR /nextstrain/augur
+ARG AUGUR=master
 
 RUN curl -fsSL https://api.github.com/repos/nextstrain/augur/tarball/master \
   | tar xzvpf - --strip-components=1

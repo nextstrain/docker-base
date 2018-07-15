@@ -11,8 +11,16 @@ before_install:
   - docker pull nextstrain/base-builder
   - docker pull nextstrain/base
 install:
-  - docker build --cache-from nextstrain/base-builder --cache-from nextstrain/base -t nextstrain/base-builder --target builder .
-  - docker build --cache-from nextstrain/base-builder --cache-from nextstrain/base -t nextstrain/base .
+  - |
+    docker build --build-arg CACHE_DATE="$(date)" \
+      --cache-from nextstrain/base-builder \
+      --cache-from nextstrain/base \
+      -t nextstrain/base-builder --target builder .
+  - |
+    docker build --build-arg CACHE_DATE="$(date)" \
+      --cache-from nextstrain/base-builder \
+      --cache-from nextstrain/base \
+      -t nextstrain/base .
 script:
   - echo "Build finished"
 after_success:
