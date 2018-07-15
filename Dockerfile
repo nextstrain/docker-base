@@ -26,6 +26,9 @@ RUN apk add --no-cache \
         py2-{pip,setuptools} \
         suitesparse-dev
 
+# Downloading dependencies, these should be pinned to specific versions
+# Rather than downloading master from GitHub
+# This is to ensure compatibility, but also to aid caching
 
 # mafft
 WORKDIR /build/mafft
@@ -34,13 +37,13 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.402-linux.tgz \
 
 # RAxML
 WORKDIR /build/RAxML
-RUN curl -fsSL https://api.github.com/repos/stamatak/standard-RAxML/tarball/master \
+RUN curl -fsSL https://api.github.com/repos/stamatak/standard-RAxML/tarball/v8.2.12 \
   | tar xzvpf - --strip-components=1
 RUN make -f Makefile.AVX.PTHREADS.gcc   # AVX should be widely-supported enough
 
 # FastTree
 WORKDIR /build/FastTree
-RUN curl -fsSL https://api.github.com/repos/tsibley/FastTree/tarball/master \
+RUN curl -fsSL https://api.github.com/repos/tsibley/FastTree/tarball/50c5b098ea085b46de30bfc29da5e3f113353e6f \
   | tar xzvpf - --strip-components=1
 RUN make FastTreeDblMP
 
@@ -49,36 +52,31 @@ WORKDIR /build/IQ-TREE
 RUN curl -fsSL https://github.com/Cibiv/IQ-TREE/releases/download/v1.6.5/iqtree-1.6.5-Linux.tar.gz \
   | tar xzvpf - --strip-components=1
 
-# Install Python 2 depedencies
-# May be upgraded by augur/requirements.txt
-RUN CVXOPT_BLAS_LIB=openblas \
-    CVXOPT_LAPACK_LIB=openblas \
-        pip2 install --global-option=build_ext \
-            --global-option="-I/usr/include/suitesparse" \
-            cvxopt==1.1.9
+# Install Python 2 dependencies
+# These may be upgraded by sacra/requirements.txt or fauna/requirements.txt
+# but having them here enables caching
 
 RUN pip2 install biopython==1.69
 RUN pip2 install boto==2.38
-RUN pip2 install future==0.16.0
-RUN pip2 install GitPython==2.1.10
-RUN pip2 install ipdb==0.10.1
-RUN pip2 install matplotlib==2.2.2
 RUN pip2 install pandas==0.17.1
-RUN pip2 install pytest==3.2.1
-RUN pip2 install seaborn==0.6.0
+RUN pip2 install rethinkdb==2.3.0.post6
+RUN pip2 install requests==2.11.1
+RUN pip2 install unidecode==1.0.22
+RUN pip2 install xlrd==1.0.0
 
 # Install Python 3 dependencies
-# May be upgraded by augur/setup.py
+# These may be upgraded by augur/setup.py,
+# but having them here enables caching
 
-# cvxopt is an dep we explicitly pre-install because it is particularly fussy.
+# cvxopt install is particularly fussy.
 # It is separated out from the rest of the installs to ensures that pip wheels
 # can be used for as much as possible, since using --global-option disables use
 # of wheels.
 RUN CVXOPT_BLAS_LIB=openblas \
-    CVXOPT_LAPACK_LIB=openblas \
-        pip3 install --global-option=build_ext \
-            --global-option="-I/usr/include/suitesparse" \
-            cvxopt==1.1.9
+  CVXOPT_LAPACK_LIB=openblas \
+    pip3 install --global-option=build_ext \
+      --global-option="-I/usr/include/suitesparse" \
+      cvxopt==1.1.9
 RUN pip3 install bcbio-gff==0.6.4
 RUN pip3 install biopython==1.69
 RUN pip3 install boto==2.38
@@ -87,6 +85,9 @@ RUN pip3 install matplotlib==2.2.2
 RUN pip3 install pandas==0.17.1
 RUN pip3 install seaborn==0.6.0
 RUN pip3 install snakemake==5.1.5
+
+# Install envdir, which is used by pathogen builds
+RUN pip3 install envdir
 
 # Add Nextstrain components
 #
@@ -116,7 +117,8 @@ RUN curl -fsSL https://api.github.com/repos/nextstrain/auspice/tarball/master \
 
 
 # Install Python 2 deps
-RUN pip2 install --requirement=/nextstrain/{sacra,fauna}/requirements.txt
+RUN pip2 install --requirement=/nextstrain/sacra/requirements.txt
+RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
 
 # Install Python 3 deps
 RUN pip3 install --process-dependency-links /nextstrain/augur
@@ -129,12 +131,9 @@ RUN pip3 install --process-dependency-links /nextstrain/augur
 # there's not an --only-deps option to pip that we can use in the previous RUN.
 RUN pip3 uninstall --yes --verbose augur
 
-# Install Node deps
+# Install Node deps, fresh install is only ~40 seconds
+# so not worrying about caching these as we did the Python deps
 RUN cd /nextstrain/auspice && npm install
-
-# Install envdir, which is used by pathogen builds
-RUN pip3 install envdir
-
 
 # ———————————————————————————————————————————————————————————————————— #
 
