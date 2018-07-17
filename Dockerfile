@@ -108,7 +108,6 @@ RUN curl -fsSL https://api.github.com/repos/nextstrain/fauna/tarball/master \
 
 # augur
 WORKDIR /nextstrain/augur
-ARG AUGUR=master
 
 RUN curl -fsSL https://api.github.com/repos/nextstrain/augur/tarball/master \
   | tar xzvpf - --strip-components=1
