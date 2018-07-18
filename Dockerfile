@@ -22,6 +22,7 @@ RUN apk add --no-cache \
         libpng-dev \
         nodejs \
         nodejs-npm \
+        perl \
         python{2,3}-dev \
         py2-{pip,setuptools} \
         suitesparse-dev
@@ -49,6 +50,12 @@ RUN make FastTreeDblMP
 WORKDIR /build/IQ-TREE
 RUN curl -fsSL https://github.com/Cibiv/IQ-TREE/releases/download/v1.6.5/iqtree-1.6.5-Linux.tar.gz \
   | tar xzvpf - --strip-components=1
+
+# vcftools
+WORKDIR /build/vcftools
+RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.15/vcftools-0.1.15.tar.gz \
+  | tar xzvpf - --strip-components=2
+RUN ./configure --prefix=$PWD/built && make && make install
 
 # Install Python 2 dependencies
 # These may be upgraded by sacra/requirements.txt or fauna/requirements.txt
@@ -153,6 +160,7 @@ RUN apk add --no-cache \
         lapack \
         libpng \
         nodejs \
+        perl \
         python2 \
         python3 \
         suitesparse
@@ -166,6 +174,9 @@ COPY --from=builder \
     /build/FastTree/FastTreeDblMP \
     /build/IQ-TREE/bin/iqtree \
     /usr/local/bin/
+
+COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
+COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 
 # Ensure all container users can execute these programs
 RUN chmod a+rX /usr/local/bin/* /usr/local/libexec/*
