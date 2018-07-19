@@ -48,7 +48,7 @@ RUN make FastTreeDblMP
 
 # IQ-TREE
 WORKDIR /build/IQ-TREE
-RUN curl -fsSL https://github.com/Cibiv/IQ-TREE/releases/download/v1.6.5/iqtree-1.6.5-Linux.tar.gz \
+RUN curl -fsSL https://github.com/Cibiv/IQ-TREE/releases/download/v1.6.6/iqtree-1.6.6-Linux.tar.gz \
   | tar xzvpf - --strip-components=1
 
 # vcftools
