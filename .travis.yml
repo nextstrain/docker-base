@@ -24,7 +24,7 @@ install:
 script:
   - echo "Build finished"
 after_success:
-  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
       echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin;
       docker push nextstrain/base-builder;
       docker push nextstrain/base;
