@@ -141,9 +141,12 @@ RUN pip3 install --process-dependency-links /nextstrain/augur
 # there's not an --only-deps option to pip that we can use in the previous RUN.
 RUN pip3 uninstall --yes --verbose augur
 
-# Install Node deps, fresh install is only ~40 seconds
-# so not worrying about caching these as we did the Python deps
-RUN cd /nextstrain/auspice && npm install
+# Install Node deps and build auspice.  A fresh install is only ~40 seconds, so
+# we're not worrying about caching these as we did the Python deps.  Building
+# auspice means we can run it without hot-reloading, which is time-consuming
+# and generally unnecessary in the container image.
+RUN cd /nextstrain/auspice && npm install && npm run build
+
 
 # ———————————————————————————————————————————————————————————————————— #
 
