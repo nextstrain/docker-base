@@ -1,10 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-# The default is to run the non-dev server with local data, but any of the
-# package.json "scripts" can be run by giving their name and args.
+# The default is to run the server (server.js, via npm run server)
+# local data is specified via /local URLs, which are displayed by the CLI
+# P.S. any of the package.json "scripts" can be run by giving their name and args.
 if [[ $# -eq 0 ]]; then
-    set -- server:local
+    set -- server
 fi
 
 cd /nextstrain/auspice
