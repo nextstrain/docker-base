@@ -8,24 +8,29 @@ services:
   - docker
 sudo: required
 before_install:
+  - export DATESTRING=$(date +%F-%H-%M-%S)
   - docker pull nextstrain/base-builder
   - docker pull nextstrain/base
 install:
   - |
-    docker build --build-arg CACHE_DATE="$(date)" \
+    docker build --build-arg CACHE_DATE=$DATESTRING \
       --cache-from nextstrain/base-builder \
       --cache-from nextstrain/base \
-      -t nextstrain/base-builder --target builder .
+      -t nextstrain/base-builder:latest --target builder .
   - |
-    docker build --build-arg CACHE_DATE="$(date)" \
+    docker build --build-arg CACHE_DATE=$DATESTRING \
       --cache-from nextstrain/base-builder \
       --cache-from nextstrain/base \
-      -t nextstrain/base .
+      -t nextstrain/base:latest .
 script:
   - echo "Build finished"
 after_success:
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
       echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin;
-      docker push nextstrain/base-builder;
-      docker push nextstrain/base;
+      docker push nextstrain/base-builder:latest;
+      docker push nextstrain/base:latest;
+      docker tag nextstrain/base-builder:latest nextstrain/base-builder:$DATESTRING;
+      docker tag nextstrain/base:latest nextstrain/base:$DATESTRING;
+      docker push nextstrain/base-builder:$DATESTRING;
+      docker push nextstrain/base:$DATESTRING;
     fi
