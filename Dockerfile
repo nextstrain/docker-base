@@ -122,7 +122,7 @@ RUN curl -fsSL https://api.github.com/repos/nextstrain/augur/tarball/master \
 # auspice
 WORKDIR /nextstrain/auspice
 
-RUN curl -fsSL https://api.github.com/repos/nextstrain/auspice/tarball/master \
+RUN curl -fsSL https://api.github.com/repos/nextstrain/auspice/tarball/release \
   | tar xzvpf - --strip-components=1
 
 
