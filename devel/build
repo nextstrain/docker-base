@@ -9,6 +9,7 @@
 #
 set -euo pipefail
 
+export GIT_REVISION=$(git describe --tags --abbrev=40 --always --dirty || true)
 
 # The nextstrain/base Dockerfile is a multi-stage with both a "builder" target
 # and a main target.  To enable proper caching via --cache-from we need both
@@ -20,6 +21,7 @@ set -euo pipefail
 
 docker build \
     --build-arg CACHE_DATE \
+    --build-arg GIT_REVISION \
     --cache-from nextstrain/base-builder \
     --cache-from nextstrain/base \
     --tag nextstrain/base-builder \
@@ -28,6 +30,7 @@ docker build \
 
 docker build \
     --build-arg CACHE_DATE \
+    --build-arg GIT_REVISION \
     --cache-from nextstrain/base-builder \
     --cache-from nextstrain/base \
     --tag nextstrain/base \
