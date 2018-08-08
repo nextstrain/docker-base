@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# Push images built in a Travis CI job.  Expects to be run only from
+# steps in .travis.yml!
+#
+set -euo pipefail
+
+if [[ $TRAVIS != "true" ]]; then
+    echo "This script is only intended to run under Travis CI." >&2
+    exit 1
+fi
+
+if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
+    echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin
+
+    if [[ "$TRAVIS_BRANCH" == "master" ]]; then
+        ./devel/push
+    else
+        # From `man docker-image-tag`: The tag name must be valid ASCII and may
+        # contain lowercase and uppercase letters, digits, underscores, periods
+        # and hyphens.
+        tag=branch-${TRAVIS_BRANCH//[^A-Za-z0-9._-]/-}
+        ./devel/tag $tag
+        ./devel/push $tag
+    fi
+fi
