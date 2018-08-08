@@ -13,7 +13,4 @@ script:
   - ./devel/build
 
 after_success:
-  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
-      echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin;
-      ./devel/push;
-    fi
+  - ./devel/push-from-travis

@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Push images built in a Travis CI job.  Expects to be run only from
+# steps in .travis.yml!
+#
+set -euo pipefail
+
+if [[ $TRAVIS != "true" ]]; then
+    echo "This script is only intended to run under Travis CI." >&2
+    exit 1
+fi
+
+if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
+    echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin
+    ./devel/push
+fi
