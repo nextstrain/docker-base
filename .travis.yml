@@ -1,31 +1,19 @@
-# The nextstrain/base Dockerfile is a multi-stage with both a "builder" target
-# and a main target. To enable proper caching via --cache-from we need both
-# these images available to pull layers from. This means pulling both in at the
-# start and pushing both up at the end.
-# Calling `docker run nextstrain/base` will still only pull down the small base image
-# rather than pulling down the larger nextstrain/base-builder image
 services:
   - docker
+
 sudo: required
+
 before_install:
-  - docker pull nextstrain/base-builder
-  - docker pull nextstrain/base
+  - export CACHE_DATE="$(date --utc +%Y%m%dT%H%M%SZ)"
+
 install:
-  - |
-    docker build --build-arg CACHE_DATE="$(date)" \
-      --cache-from nextstrain/base-builder \
-      --cache-from nextstrain/base \
-      -t nextstrain/base-builder --target builder .
-  - |
-    docker build --build-arg CACHE_DATE="$(date)" \
-      --cache-from nextstrain/base-builder \
-      --cache-from nextstrain/base \
-      -t nextstrain/base .
+  - ./devel/pull
+
 script:
-  - echo "Build finished"
+  - ./devel/build
+
 after_success:
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
       echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin;
-      docker push nextstrain/base-builder;
-      docker push nextstrain/base;
+      ./devel/push;
     fi
