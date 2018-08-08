@@ -47,7 +47,13 @@ details of each Dockerfile command (`COPY`, `ADD`, etc).
 
 ### Continuous integration
 
-The Docker image is automatically built with Travis CI and pushed to the Docker registry. The most recent build can be seen at [travis-ci.com/nextstrain/docker-base/](https://travis-ci.com/nextstrain/docker-base/) and Travis CI build instructions can be found in this repo's `.travis.yml` file.
+Every push to this repository triggers a new build of the image on [Travis
+CI][].  This helps ensure the image builds successfully with the new commits.
+
+Images built from the `master` branch are additionally pushed to the [Docker
+registry][`nextstrain/base`].  The build instructions used by Travis are in
+this repo's `.travis.yml`.
+
 
 [`nextstrain/base`]: https://hub.docker.com/r/nextstrain/base/
 [Alpine Linux]: https://alpinelinux.org
@@ -55,3 +61,4 @@ The Docker image is automatically built with Travis CI and pushed to the Docker 
 [multi-stage build]: https://docs.docker.com/develop/develop-images/multistage-build/
 [Docker best practices]: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 [Dockerfile reference documentation]: https://docs.docker.com/engine/reference/builder/
+[Travis CI]: https://travis-ci.com/nextstrain/docker-base/
