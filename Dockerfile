@@ -159,6 +159,9 @@ RUN apk add --no-cache \
         python3 \
         suitesparse
 
+# Configure the prompt for interactive usage
+COPY prompt.sh /etc/profile.d/
+
 # Add custom built programs
 ENV MAFFT_BINARIES=/usr/local/libexec
 COPY --from=builder /build/mafft/bin/     /usr/local/bin/
