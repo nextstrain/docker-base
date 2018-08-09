@@ -101,29 +101,20 @@ RUN pip3 install envdir
 # docker build --build-arg CACHE_DATE="$(date)"
 ARG CACHE_DATE
 
-# sacra
-WORKDIR /nextstrain/sacra
+# Add download helper
+COPY devel/download-repo /devel/
 
-RUN curl -fsSL https://api.github.com/repos/nextstrain/sacra/tarball/master \
-  | tar xzvpf - --strip-components=1
+# sacra
+RUN /devel/download-repo https://github.com/nextstrain/sacra /nextstrain/sacra
 
 # fauna
-WORKDIR /nextstrain/fauna
-
-RUN curl -fsSL https://api.github.com/repos/nextstrain/fauna/tarball/master \
-  | tar xzvpf - --strip-components=1
+RUN /devel/download-repo https://github.com/nextstrain/fauna /nextstrain/fauna
 
 # augur
-WORKDIR /nextstrain/augur
-
-RUN curl -fsSL https://api.github.com/repos/nextstrain/augur/tarball/master \
-  | tar xzvpf - --strip-components=1
+RUN /devel/download-repo https://github.com/nextstrain/augur /nextstrain/augur
 
 # auspice
-WORKDIR /nextstrain/auspice
-
-RUN curl -fsSL https://api.github.com/repos/nextstrain/auspice/tarball/release \
-  | tar xzvpf - --strip-components=1
+RUN /devel/download-repo https://github.com/nextstrain/auspice /nextstrain/auspice
 
 
 # Install Python 2 deps

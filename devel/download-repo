@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+src="$1"
+dst="$2"
+
+# Create the destination directory and move into it
+mkdir -p "$dst"
+cd "$dst"
+
+# Clone the source repo into the destination, shallowly
+git clone --depth=20 "$src" .
+
+# Record the git revision (always a sha) and id (based on the closest tag)
+git rev-parse HEAD > .GIT_REVISION
+git describe --always --dirty > .GIT_ID
+
+# Clean up the git history; we needed it above but the image does not.
+rm -rf .git
