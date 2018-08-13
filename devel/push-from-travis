@@ -14,7 +14,8 @@ if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
     echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_LOGIN --password-stdin
 
     if [[ "$TRAVIS_BRANCH" == "master" ]]; then
-        ./devel/push
+        ./devel/tag build-$CACHE_DATE
+        ./devel/push latest build-$CACHE_DATE
     else
         # From `man docker-image-tag`: The tag name must be valid ASCII and may
         # contain lowercase and uppercase letters, digits, underscores, periods
