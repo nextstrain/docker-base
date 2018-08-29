@@ -148,6 +148,7 @@ FROM alpine:3.7
 # Add system runtime deps
 RUN apk add --no-cache \
         ca-certificates \
+        curl \
         bash \
         freetype \
         gmp \
@@ -157,7 +158,8 @@ RUN apk add --no-cache \
         perl \
         python2 \
         python3 \
-        suitesparse
+        suitesparse \
+        wget
 
 # Configure the prompt for interactive usage
 COPY prompt.sh /etc/profile.d/
