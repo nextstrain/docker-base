@@ -105,16 +105,16 @@ ARG CACHE_DATE
 COPY devel/download-repo /devel/
 
 # sacra
-RUN /devel/download-repo https://github.com/nextstrain/sacra /nextstrain/sacra
+RUN /devel/download-repo https://github.com/nextstrain/sacra master /nextstrain/sacra
 
 # fauna
-RUN /devel/download-repo https://github.com/nextstrain/fauna /nextstrain/fauna
+RUN /devel/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
 
 # augur
-RUN /devel/download-repo https://github.com/nextstrain/augur /nextstrain/augur
+RUN /devel/download-repo https://github.com/nextstrain/augur release /nextstrain/augur
 
 # auspice
-RUN /devel/download-repo https://github.com/nextstrain/auspice /nextstrain/auspice
+RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
 
 
 # Install Python 2 deps
@@ -122,7 +122,7 @@ RUN pip2 install --requirement=/nextstrain/sacra/requirements.txt
 RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
 
 # Install Python 3 deps
-RUN pip3 install --process-dependency-links /nextstrain/augur
+RUN pip3 install /nextstrain/augur
 
 # …but remove global augur install.  We'll later install a tiny wrapper in
 # /usr/bin/augur that runs out of /nextstrain/augur, which makes replacing the
@@ -130,7 +130,7 @@ RUN pip3 install --process-dependency-links /nextstrain/augur
 #
 # Note that we only have to install augur (above) and then uninstall it because
 # there's not an --only-deps option to pip that we can use in the previous RUN.
-RUN pip3 uninstall --yes --verbose augur
+RUN pip3 uninstall --yes --verbose nextstrain-augur
 
 # Install Node deps and build auspice.  A fresh install is only ~40 seconds, so
 # we're not worrying about caching these as we did the Python deps.  Building
