@@ -130,7 +130,7 @@ RUN pip3 install /nextstrain/augur
 #
 # Note that we only have to install augur (above) and then uninstall it because
 # there's not an --only-deps option to pip that we can use in the previous RUN.
-RUN pip3 uninstall --yes --verbose augur
+RUN pip3 uninstall --yes --verbose nextstrain-augur
 
 # Install Node deps and build auspice.  A fresh install is only ~40 seconds, so
 # we're not worrying about caching these as we did the Python deps.  Building
