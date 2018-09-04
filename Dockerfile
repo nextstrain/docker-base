@@ -105,16 +105,16 @@ ARG CACHE_DATE
 COPY devel/download-repo /devel/
 
 # sacra
-RUN /devel/download-repo https://github.com/nextstrain/sacra /nextstrain/sacra
+RUN /devel/download-repo https://github.com/nextstrain/sacra master /nextstrain/sacra
 
 # fauna
-RUN /devel/download-repo https://github.com/nextstrain/fauna /nextstrain/fauna
+RUN /devel/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
 
 # augur
-RUN /devel/download-repo https://github.com/nextstrain/augur /nextstrain/augur
+RUN /devel/download-repo https://github.com/nextstrain/augur release /nextstrain/augur
 
 # auspice
-RUN /devel/download-repo https://github.com/nextstrain/auspice /nextstrain/auspice
+RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
 
 
 # Install Python 2 deps
