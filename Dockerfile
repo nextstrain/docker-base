@@ -122,7 +122,7 @@ RUN pip2 install --requirement=/nextstrain/sacra/requirements.txt
 RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
 
 # Install Python 3 deps
-RUN pip3 install --process-dependency-links /nextstrain/augur
+RUN pip3 install /nextstrain/augur
 
 # …but remove global augur install.  We'll later install a tiny wrapper in
 # /usr/bin/augur that runs out of /nextstrain/augur, which makes replacing the
