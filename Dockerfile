@@ -216,9 +216,9 @@ RUN chmod a+rx /usr/local/bin/augur
 COPY auspice-wrapper /usr/local/bin/auspice
 RUN chmod a+rx /usr/local/bin/auspice
 
-# Add our entrypoint
-COPY entrypoint /sbin/entrypoint
-RUN chmod a+rx /sbin/entrypoint
+# Add our entrypoints
+COPY entrypoint entrypoint-aws-batch /sbin/
+RUN chmod a+rx /sbin/entrypoint*
 
 # The host should bind mount the pathogen build dir into /nextstrain/build.
 WORKDIR /nextstrain/build

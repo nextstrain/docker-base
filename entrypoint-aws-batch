@@ -1,0 +1,57 @@
+#!/bin/bash
+set -euo pipefail
+
+# Show what we're running for the benefit of the logs.
+set -x
+
+# Download the working dir.
+case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
+    s3://*.zip)
+        aws s3 cp --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" "$PWD.zip"
+        unzip "$PWD.zip"
+        ;;
+    s3://*)
+        # Note that this doesn't preserve file permissions/modes.
+        aws s3 sync --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" .
+        ;;
+    *)
+        echo "No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
+        exit 1
+        ;;
+esac
+
+# Run the passed command, with the effect of "set -e" temporarily disabled,
+# saving the exit status for later.
+"$@" && exited=0 || exited=$?
+
+# Upload the new workdir state with results.
+#
+# XXX TODO: In the future this may want to be separate from the initial workdir
+# state instead of overwriting it.  That would let us hash the local workdir
+# before uploading and re-use previously uploaded initial workdirs.
+#   -trs, 13 Sept 2018
+case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
+    s3://*.zip)
+        succeed-when-nothing-to-update() {
+            local zipstatus="$1"
+            if [[ $1 -eq 12 ]]; then
+                return 0
+            else
+                return $1
+            fi
+        }
+        zip -u "$PWD.zip" -r . --exclude ".snakemake/*"     || succeed-when-nothing-to-update $?
+        zip -u "$PWD.zip" -r . --include ".snakemake/log/*" || succeed-when-nothing-to-update $?
+        aws s3 cp --no-progress "$PWD.zip" "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL"
+        ;;
+    s3://*)
+        aws s3 sync --no-progress . "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" --exclude ".snakemake/*" --include ".snakemake/log/*"
+        ;;
+    *)
+        echo "No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
+        exit 1
+        ;;
+esac
+
+# Exit with the same status as the passed command.
+exit $exited
