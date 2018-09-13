@@ -160,6 +160,7 @@ RUN apk add --no-cache \
         python2 \
         python3 \
         suitesparse \
+        ruby \
         tar \
         wget \
         zip unzip
