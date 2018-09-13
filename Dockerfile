@@ -152,6 +152,7 @@ RUN apk add --no-cache \
         bash \
         freetype \
         gmp \
+        gzip \
         lapack \
         libpng \
         nodejs \
@@ -159,7 +160,9 @@ RUN apk add --no-cache \
         python2 \
         python3 \
         suitesparse \
-        wget
+        tar \
+        wget \
+        zip unzip
 
 # Configure the prompt for interactive usage
 COPY prompt.sh /etc/profile.d/
