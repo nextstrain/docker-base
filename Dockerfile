@@ -94,6 +94,9 @@ RUN pip3 install snakemake==5.1.5
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir
 
+# Install tooling for our AWS Batch builds, which use `aws s3`.
+RUN pip3 install awscli
+
 
 # Add Nextstrain components
 
@@ -199,6 +202,7 @@ COPY --from=builder /usr/lib/python3.6/site-packages/ /usr/lib/python3.6/site-pa
 #   -trs, 15 June 2018
 COPY --from=builder \
     /usr/bin/snakemake \
+    /usr/bin/aws \
     /usr/bin/
 
 # Add Nextstrain components
@@ -212,9 +216,9 @@ RUN chmod a+rx /usr/local/bin/augur
 COPY auspice-wrapper /usr/local/bin/auspice
 RUN chmod a+rx /usr/local/bin/auspice
 
-# Add our entrypoint
-COPY entrypoint /sbin/entrypoint
-RUN chmod a+rx /sbin/entrypoint
+# Add our entrypoints
+COPY entrypoint entrypoint-aws-batch /sbin/
+RUN chmod a+rx /sbin/entrypoint*
 
 # The host should bind mount the pathogen build dir into /nextstrain/build.
 WORKDIR /nextstrain/build
