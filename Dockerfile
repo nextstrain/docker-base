@@ -124,16 +124,12 @@ RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstra
 RUN pip2 install --requirement=/nextstrain/sacra/requirements.txt
 RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
 
-# Install Python 3 deps
-RUN pip3 install /nextstrain/augur
-
-# …but remove global augur install.  We'll later install a tiny wrapper in
-# /usr/bin/augur that runs out of /nextstrain/augur, which makes replacing the
-# augur version in development as easy as --volume .../augur:/nextstrain/augur.
+# Install Python 3 deps.
 #
-# Note that we only have to install augur (above) and then uninstall it because
-# there's not an --only-deps option to pip that we can use in the previous RUN.
-RUN pip3 uninstall --yes --verbose nextstrain-augur
+# Augur is an editable install so we can overlay the augur version in the image
+# with --volume=.../augur:/nextstrain/augur and still have it globally
+# accessible and importable.
+RUN pip3 install --editable /nextstrain/augur
 
 # Install Node deps and build auspice.  A fresh install is only ~40 seconds, so
 # we're not worrying about caching these as we did the Python deps.  Building
@@ -201,16 +197,13 @@ COPY --from=builder /usr/lib/python3.6/site-packages/ /usr/lib/python3.6/site-pa
 # troublesome or excessive.
 #   -trs, 15 June 2018
 COPY --from=builder \
-    /usr/bin/snakemake \
+    /usr/bin/augur \
     /usr/bin/aws \
+    /usr/bin/snakemake \
     /usr/bin/
 
 # Add Nextstrain components
 COPY --from=builder /nextstrain /nextstrain
-
-# Add tiny augur wrapper to run augur from /nextstrain/augur
-COPY augur-wrapper /usr/local/bin/augur
-RUN chmod a+rx /usr/local/bin/augur
 
 # Add tiny auspice wrapper to run auspice's local dev server from /nextstrain/auspice
 COPY auspice-wrapper /usr/local/bin/auspice
