@@ -85,6 +85,7 @@ RUN CVXOPT_BLAS_LIB=openblas \
 RUN pip3 install bcbio-gff==0.6.4
 RUN pip3 install biopython==1.73
 RUN pip3 install boto==2.38
+RUN pip3 install GitPython==2.1.11
 RUN pip3 install ipdb==0.10.1
 RUN pip3 install jsonschema==3.0.0a3
 RUN pip3 install matplotlib==2.2.2
