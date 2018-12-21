@@ -97,6 +97,9 @@ RUN pip3 install snakemake==5.4.0
 RUN pip3 install unidecode==1.0.22
 RUN pip3 install xlrd==1.0.0
 
+# Install envdir, which is used by pathogen builds
+RUN pip3 install envdir
+
 # Install tooling for our AWS Batch builds, which use `aws s3`.
 RUN pip3 install awscli
 
@@ -128,6 +131,7 @@ RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
 
 # Install Python 3 deps
 RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
+
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
