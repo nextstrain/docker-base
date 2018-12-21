@@ -61,11 +61,11 @@ RUN ./configure --prefix=$PWD/built && make && make install
 # These may be upgraded by sacra/requirements.txt or fauna/requirements.txt
 # but having them here enables caching
 
-RUN pip2 install biopython==1.69
+RUN pip2 install biopython==1.73
 RUN pip2 install boto==2.38
-RUN pip2 install pandas==0.17.1
+RUN pip2 install pandas==0.23.4
+RUN pip2 install requests==2.20.0
 RUN pip2 install rethinkdb==2.3.0.post6
-RUN pip2 install requests==2.11.1
 RUN pip2 install unidecode==1.0.22
 RUN pip2 install xlrd==1.0.0
 
@@ -83,20 +83,21 @@ RUN CVXOPT_BLAS_LIB=openblas \
       --global-option="-I/usr/include/suitesparse" \
       cvxopt==1.1.9
 RUN pip3 install bcbio-gff==0.6.4
-RUN pip3 install biopython==1.69
+RUN pip3 install biopython==1.73
 RUN pip3 install boto==2.38
 RUN pip3 install ipdb==0.10.1
+RUN pip3 install jsonschema==3.0.0a3
 RUN pip3 install matplotlib==2.2.2
-RUN pip3 install pandas==0.17.1
+RUN pip3 install pandas==0.23.4
+RUN pip3 install requests==2.20.0
+RUN pip3 install rethinkdb==2.3.0.post6
 RUN pip3 install seaborn==0.6.0
-RUN pip3 install snakemake==5.1.5
-
-# Install envdir, which is used by pathogen builds
-RUN pip3 install envdir
+RUN pip3 install snakemake==5.4.0
+RUN pip3 install unidecode==1.0.22
+RUN pip3 install xlrd==1.0.0
 
 # Install tooling for our AWS Batch builds, which use `aws s3`.
 RUN pip3 install awscli
-
 
 # Add Nextstrain components
 
@@ -124,8 +125,8 @@ RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstra
 RUN pip2 install --requirement=/nextstrain/sacra/requirements.txt
 RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
 
-# Install Python 3 deps.
-#
+# Install Python 3 deps
+RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
