@@ -85,7 +85,6 @@ RUN CVXOPT_BLAS_LIB=openblas \
 RUN pip3 install bcbio-gff==0.6.4
 RUN pip3 install biopython==1.73
 RUN pip3 install boto==2.38
-RUN pip3 install GitPython==2.1.11
 RUN pip3 install ipdb==0.10.1
 RUN pip3 install jsonschema==3.0.0a3
 RUN pip3 install matplotlib==2.2.2
@@ -93,7 +92,7 @@ RUN pip3 install pandas==0.23.4
 RUN pip3 install requests==2.20.0
 RUN pip3 install rethinkdb==2.3.0.post6
 RUN pip3 install seaborn==0.6.0
-RUN pip3 install snakemake==5.4.0
+RUN pip3 install snakemake==5.1.5
 RUN pip3 install unidecode==1.0.22
 RUN pip3 install xlrd==1.0.0
 
