@@ -136,11 +136,13 @@ RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
 # accessible and importable.
 RUN pip3 install --editable /nextstrain/augur
 
-# Install Node deps and build auspice.  A fresh install is only ~40 seconds, so
-# we're not worrying about caching these as we did the Python deps.  Building
-# auspice means we can run it without hot-reloading, which is time-consuming
-# and generally unnecessary in the container image.
-RUN cd /nextstrain/auspice && npm install && npm run build
+# Install Node deps, build Auspice, and link it into the global search path.  A
+# fresh install is only ~40 seconds, so we're not worrying about caching these
+# as we did the Python deps.  Building auspice means we can run it without
+# hot-reloading, which is time-consuming and generally unnecessary in the
+# container image.  Linking is equivalent to an editable Python install and
+# used for the same reasons described above.
+RUN cd /nextstrain/auspice && npm install && npm run build && npm link
 
 
 # ———————————————————————————————————————————————————————————————————— #
@@ -207,12 +209,19 @@ COPY --from=builder \
     /usr/bin/snakemake \
     /usr/bin/
 
+# Add installed Node libs
+COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
+
+# Add globally linked Auspice script.
+#
+# This symlink is present in the "builder" image, but using COPY results in the
+# _contents_ of the target being copied instead of a symlink being created.
+# The symlink is required so that Auspice's locally-installed deps are
+# correctly discovered by node.
+RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/bin/auspice
+
 # Add Nextstrain components
 COPY --from=builder /nextstrain /nextstrain
-
-# Add tiny auspice wrapper to run auspice's local dev server from /nextstrain/auspice
-COPY auspice-wrapper /usr/local/bin/auspice
-RUN chmod a+rx /usr/local/bin/auspice
 
 # Add our entrypoints
 COPY entrypoint entrypoint-aws-batch /sbin/
