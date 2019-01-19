@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Run a small set of integration tests against the image using the
+# Nextstrain CLI and the Zika tutorial.
+#
+# The "latest" image available locally is used by default (with the
+# expectation that it was just built), but you can optionally
+# specify another tag as the sole argument.
+#
+set -euo pipefail
+
+export NEXTSTRAIN_DOCKER_IMAGE="nextstrain/base:${1:-latest}"
+zika="$(mktemp -dt)"
+
+set -mx
+git clone https://github.com/nextstrain/zika-tutorial "$zika"
+
+# Record version for the logs.
+nextstrain version
+
+# Test building using the image.
+nextstrain build "$zika"
+
+# Test that we can at least launch the viewer, if not that it works
+# per se.  First, launch it in the background.
+nextstrain view "$zika"/auspice &
+
+# Then immediately launch a coprocess to wait a bit (5s) and then stop the
+# container, which will stop the `nextstrain view` job.
+coproc (
+    # This isn't totally safe from all edge cases, such as when there's more
+    # than one container running with the given image.  But given that this is
+    # primarily intended to run on controlled testing infrastructure (Travis
+    # CI), it's not such a big deal.  I couldn't get a proper SIGINT (^C) to
+    # work correctly, and decided to move on.
+    #   -trs, 18 Jan 2018
+    sleep 5
+
+    container=$(docker ps --quiet --filter ancestor="$NEXTSTRAIN_DOCKER_IMAGE")
+
+    if [[ -n $container ]]; then
+        docker stop $container
+    fi
+)
+
+# While the coprocess is sleeping, return our background job to the foreground
+# so output is sent to the terminal and we can capture its exit status.
+fg %1 && exited=$? || exited=$?
+
+# Wait for the coproc, if `nextstrain view` failed quickly.
+wait
+
+# Check how the `nextstrain view` job exited.  143 is 128 + 15 = exited via
+# SIGTERM which is expected given the above.  Everything else is suspect.
+if [[ $exited -ne 143 ]]; then
+    echo "\`nextstrain view ...\` exited $exited early (not via our SIGTERM)" >&2
+    exit $(( $exited - 128 ))
+fi
+
+# Test that we can inspect versions inside the image.
+nextstrain version --verbose

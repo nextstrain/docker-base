@@ -3,14 +3,19 @@ services:
 
 sudo: required
 
+language: python
+python: 3.6
+
 before_install:
   - export CACHE_DATE="$(date --utc +%Y%m%dT%H%M%SZ)"
 
 install:
   - ./devel/pull
+  - pip3 install --upgrade nextstrain-cli
 
 script:
   - ./devel/build
+  - ./devel/test
 
 after_success:
   - ./devel/push-from-travis
