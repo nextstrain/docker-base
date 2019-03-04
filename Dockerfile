@@ -13,6 +13,8 @@ SHELL ["/bin/bash", "-c"]
 
 # Add system deps for building
 RUN apk add --no-cache \
+        autoconf \
+        automake \
         build-base \
         ca-certificates \
         curl \
