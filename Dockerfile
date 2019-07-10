@@ -94,7 +94,7 @@ RUN pip3 install pandas==0.23.4
 RUN pip3 install requests==2.20.0
 RUN pip3 install rethinkdb==2.3.0.post6
 RUN pip3 install seaborn==0.6.0
-RUN pip3 install snakemake==5.1.5
+RUN pip3 install snakemake==5.5.2
 RUN pip3 install unidecode==1.0.22
 RUN pip3 install xlrd==1.0.0
 
