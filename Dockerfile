@@ -95,7 +95,7 @@ RUN pip3 install phylo-treetime==0.6.3
 RUN pip3 install requests==2.20.0
 RUN pip3 install rethinkdb==2.3.0.post6
 RUN pip3 install seaborn==0.9.0
-RUN pip3 install snakemake==5.5.4
+RUN pip3 install snakemake==5.8.1
 RUN pip3 install unidecode==1.0.22
 RUN pip3 install xlrd==1.0.0
 
