@@ -22,6 +22,7 @@ RUN apk add --no-cache \
         git \
         gmp-dev \
         libpng-dev \
+        linux-headers \
         nodejs \
         nodejs-npm \
         perl \
