@@ -14,6 +14,11 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
         # Note that this doesn't preserve file permissions/modes.
         aws s3 sync --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" .
         ;;
+    dat://*)
+        dat clone "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" .
+        dat keys import <<<"$NEXTSTRAIN_AWS_BATCH_WORKDIR_SECRET_KEY"
+        dat sync &
+        ;;
     *)
         echo "No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
         exit 1
@@ -46,6 +51,9 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
         ;;
     s3://*)
         aws s3 sync --no-progress . "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" --exclude ".snakemake/*" --include ".snakemake/log/*"
+        ;;
+    dat://*)
+        wait %dat
         ;;
     *)
         echo "No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2

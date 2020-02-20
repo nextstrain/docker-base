@@ -102,8 +102,9 @@ RUN pip3 install xlrd==1.0.0
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir
 
-# Install tooling for our AWS Batch builds, which use `aws s3`.
+# Install tooling for our AWS Batch builds, which use `aws s3` and `dat`.
 RUN pip3 install awscli
+RUN npm install --global dat
 
 # Add Nextstrain components
 
@@ -215,12 +216,13 @@ COPY --from=builder \
 # Add installed Node libs
 COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
 
-# Add globally linked Auspice script.
+# Add globally linked Node scripts.
 #
-# This symlink is present in the "builder" image, but using COPY results in the
-# _contents_ of the target being copied instead of a symlink being created.
-# The symlink is required so that Auspice's locally-installed deps are
-# correctly discovered by node.
+# These symlinks are present in the "builder" image, but using COPY results in
+# the _contents_ of the target being copied instead of a symlink being
+# created.  Symlinks are is required so that deps are correctly discovered by
+# node.
+RUN ln -sv /usr/lib/node_modules/dat/bin/cli.js /usr/bin/dat
 RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/bin/auspice
 
 # Add Nextstrain components

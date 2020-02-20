@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# Downloads the latest images, extracts their caching keys, and provides them
+# into the environment so local images may be built using downloaded cached
+# layers.
+#
+# This is necessary because usually local builds only use other locally built
+# layers, so you must pay the cost of a full build at the beginning.
+#
+set -euo pipefail
+
+main() {
+    pushd "$(dirname "$0")/.." >/dev/null
+        pull-nextstrain-images
+        pull-base-image
+        export-build-args
+    popd >/dev/null
+
+    log "Running your command now…"
+    exec "$@"
+}
+
+pull-nextstrain-images() {
+    log "Pulling latest Nextstrain images"
+    ./devel/pull latest
+}
+
+pull-base-image() {
+    local image="$(base-image)"
+
+    log "Pulling latest $image base image"
+    docker image pull "$image"
+
+    if ! has-layer nextstrain/base:latest "$(final-layer "$image")"; then
+        die "nextstrain/base:latest is built with a version of $image that I can't find."
+    fi
+}
+
+export-build-args() {
+    build_args="$(build-args)"
+    log "Exporting build args $build_args"
+    export $build_args
+}
+
+build-args() {
+    list-values nextstrain/base-builder:latest .ContainerConfig.Cmd \
+        | awk '/^CACHE_DATE=(.*)/ { print }'
+}
+
+base-image() {
+    awk '/^FROM/ { print $2; exit }' Dockerfile
+}
+
+final-layer() {
+    local image="$1"
+    local layer_count=$(inspect "$image" "{{len .RootFS.Layers}}")
+    inspect "$image" "{{index .RootFS.Layers $(($layer_count - 1))}}"
+}
+
+has-layer() {
+    local image="$1"
+    local layer="$2"
+    list-layers "$image" | grep -qF "$layer" 2>/dev/null
+}
+
+list-layers() {
+    list-values "$1" .RootFS.Layers
+}
+
+list-values() {
+    local image="$1"
+    local field="$2"
+    inspect "$image" "{{range $field}}{{.}}"$'\n'"{{end}}"
+}
+
+inspect() {
+    local image="$1"
+    local format="$2"
+    docker image inspect "$image" --format "$format"
+}
+
+log() {
+    echo "[1m==> [94m$*[0m" >&2
+}
+
+die() {
+    echo "[1m==> [91m$*[0m" >&2
+    exit 1
+}
+
+main "$@"
