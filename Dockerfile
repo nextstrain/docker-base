@@ -106,6 +106,9 @@ RUN pip3 install envdir
 # Install tooling for our AWS Batch builds, which use `aws s3`.
 RUN pip3 install awscli
 
+# Install our own CLI so builds can do things like `nextstrain deploy`
+RUN pip3 install nextstrain-cli
+
 # Add Nextstrain components
 
 # Allow caching to be avoided from here on out by calling
@@ -210,6 +213,7 @@ COPY --from=builder /usr/lib/python3.6/site-packages/ /usr/lib/python3.6/site-pa
 COPY --from=builder \
     /usr/bin/augur \
     /usr/bin/aws \
+    /usr/bin/nextstrain \
     /usr/bin/snakemake \
     /usr/bin/
 
