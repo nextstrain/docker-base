@@ -34,7 +34,7 @@ RUN apk add --no-cache \
 
 # mafft
 WORKDIR /build/mafft
-RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.402-linux.tgz \
+RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.450-linux.tgz \
   | tar xzvpf - --strip-components=2 mafft-linux64/mafftdir/
 
 # RAxML
