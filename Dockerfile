@@ -21,6 +21,7 @@ RUN apk add --no-cache \
         freetype-dev \
         git \
         gmp-dev \
+        graphviz-dev \
         libpng-dev \
         linux-headers \
         nodejs \
@@ -96,7 +97,7 @@ RUN pip3 install phylo-treetime==0.6.4
 RUN pip3 install requests==2.20.0
 RUN pip3 install rethinkdb==2.3.0.post6
 RUN pip3 install seaborn==0.9.0
-RUN pip3 install snakemake==5.8.1
+RUN pip3 install snakemake[reports]==5.8.1
 RUN pip3 install unidecode==1.0.22
 RUN pip3 install xlrd==1.0.0
 
@@ -165,6 +166,7 @@ RUN apk add --no-cache \
         bash \
         freetype \
         gmp \
+        graphviz \
         gzip \
         lapack \
         libpng \
