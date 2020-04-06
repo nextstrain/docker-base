@@ -92,6 +92,8 @@ RUN pip3 install ipdb==0.10.1
 RUN pip3 install jsonschema==3.0.1
 RUN pip3 install matplotlib==2.2.2
 RUN pip3 install pandas==0.23.4
+RUN pip3 install numpy==1.18.2
+RUN pip3 install scipy==1.3.3
 RUN pip3 install phylo-treetime==0.7.4
 RUN pip3 install requests==2.20.0
 RUN pip3 install rethinkdb==2.3.0.post6
