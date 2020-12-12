@@ -9,9 +9,9 @@ use an image derived from this base layer.  This would be desirable for
 pathogen builds requiring custom external software, like Python modules or
 tree-builders.
 
-The image includes the standard Nextstrain components sacra, fauna, augur
-(modular), and auspice, as well as other bioinformatics tools like mafft,
-RAxML, FastTree, IQ-TREE, and TreeTime.
+The image includes the standard Nextstrain components fauna, augur, and auspice,
+as well as other bioinformatics tools like MAFFT, RAxML, FastTree, IQ-TREE, and
+TreeTime.
 
 This image is best interacted with using the [nextstrain command-line
 tool][nextstrain-cli].

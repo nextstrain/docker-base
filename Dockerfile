@@ -61,7 +61,7 @@ RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.15/vc
 RUN ./configure --prefix=$PWD/built && make && make install
 
 # Install Python 2 dependencies
-# These may be upgraded by sacra/requirements.txt or fauna/requirements.txt
+# These may be upgraded by fauna/requirements.txt
 # but having them here enables caching
 
 RUN pip2 install biopython==1.73
@@ -120,9 +120,6 @@ ARG CACHE_DATE
 # Add download helper
 COPY devel/download-repo /devel/
 
-# sacra
-RUN /devel/download-repo https://github.com/nextstrain/sacra master /nextstrain/sacra
-
 # fauna
 RUN /devel/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
 
@@ -132,9 +129,7 @@ RUN /devel/download-repo https://github.com/nextstrain/augur release /nextstrain
 # auspice
 RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
 
-
 # Install Python 2 deps
-RUN pip2 install --requirement=/nextstrain/sacra/requirements.txt
 RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
 
 # Install Python 3 deps
