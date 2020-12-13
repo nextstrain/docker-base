@@ -5,7 +5,7 @@
 # image with tools only needed during the image build.
 
 # First build the temporary image.
-FROM alpine:3.7 AS builder
+FROM alpine:3.9.6 AS builder
 
 # Execute subsequent RUN statements with bash for handy modern shell features.
 RUN apk add --no-cache bash
@@ -51,12 +51,13 @@ RUN make FastTreeDblMP
 
 # IQ-TREE
 WORKDIR /build/IQ-TREE
-RUN curl -fsSL https://github.com/Cibiv/IQ-TREE/releases/download/v1.6.6/iqtree-1.6.6-Linux.tar.gz \
+RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
   | tar xzvpf - --strip-components=1
+RUN mv bin/iqtree2 bin/iqtree
 
 # vcftools
 WORKDIR /build/vcftools
-RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.15/vcftools-0.1.15.tar.gz \
+RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz \
   | tar xzvpf - --strip-components=2
 RUN ./configure --prefix=$PWD/built && make && make install
 
@@ -75,6 +76,7 @@ RUN pip2 install xlrd==1.0.0
 # Install Python 3 dependencies
 # These may be upgraded by augur/setup.py,
 # but having them here enables caching
+# Be sure to install numpy ahead of pandas, pandas requires numpy <1.19
 
 # cvxopt install is particularly fussy.
 # It is separated out from the rest of the installs to ensures that pip wheels
@@ -85,15 +87,15 @@ RUN CVXOPT_BLAS_LIB=openblas \
     pip3 install --global-option=build_ext \
       --global-option="-I/usr/include/suitesparse" \
       cvxopt==1.1.9
+RUN pip3 install numpy==1.18.5
+RUN pip3 install scipy==1.3.3
+RUN pip3 install pandas==0.23.4
 RUN pip3 install bcbio-gff==0.6.6
 RUN pip3 install biopython==1.74
 RUN pip3 install boto==2.38
 RUN pip3 install ipdb==0.10.1
 RUN pip3 install jsonschema==3.0.1
 RUN pip3 install matplotlib==2.2.2
-RUN pip3 install pandas==0.23.4
-RUN pip3 install numpy==1.18.2
-RUN pip3 install scipy==1.3.3
 RUN pip3 install phylo-treetime==0.7.4
 RUN pip3 install requests==2.20.0
 RUN pip3 install rethinkdb==2.3.0.post6
@@ -153,7 +155,7 @@ RUN cd /nextstrain/auspice && npm install && npm run build && npm link
 
 
 # Now build the final image.
-FROM alpine:3.7
+FROM alpine:3.9.6
 
 # Add system runtime deps
 RUN apk add --no-cache \
