@@ -26,9 +26,9 @@ RUN apk add --no-cache \
         nodejs \
         nodejs-npm \
         perl \
-        python{2,3}-dev \
-        py2-{pip,setuptools} \
-        suitesparse-dev
+        python3-dev \
+        suitesparse-dev \
+        xz
 
 # Downloading dependencies, these should be pinned to specific versions
 
@@ -61,22 +61,10 @@ RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vc
   | tar xzvpf - --strip-components=2
 RUN ./configure --prefix=$PWD/built && make && make install
 
-# Install Python 2 dependencies
-# These may be upgraded by fauna/requirements.txt
-# but having them here enables caching
-
-RUN pip2 install biopython==1.73
-RUN pip2 install boto==2.38
-RUN pip2 install pandas==0.23.4
-RUN pip2 install requests==2.20.0
-RUN pip2 install rethinkdb==2.3.0.post6
-RUN pip2 install unidecode==1.0.22
-RUN pip2 install xlrd==1.0.0
-
 # Install Python 3 dependencies
 # These may be upgraded by augur/setup.py,
 # but having them here enables caching
-# Be sure to install numpy ahead of pandas, pandas requires numpy <1.19
+# Be sure to install numpy ahead of pandas
 
 # cvxopt install is particularly fussy.
 # It is separated out from the rest of the installs to ensures that pip wheels
@@ -87,31 +75,31 @@ RUN CVXOPT_BLAS_LIB=openblas \
     pip3 install --global-option=build_ext \
       --global-option="-I/usr/include/suitesparse" \
       cvxopt==1.1.9
-RUN pip3 install numpy==1.18.5
+RUN pip3 install numpy==1.19.4
 RUN pip3 install scipy==1.3.3
-RUN pip3 install pandas==0.23.4
+RUN pip3 install pandas==1.1.5
 RUN pip3 install bcbio-gff==0.6.6
-RUN pip3 install biopython==1.74
-RUN pip3 install boto==2.38
+RUN pip3 install biopython==1.76
+RUN pip3 install boto==2.49.0
 RUN pip3 install ipdb==0.10.1
 RUN pip3 install jsonschema==3.0.1
 RUN pip3 install matplotlib==2.2.2
-RUN pip3 install phylo-treetime==0.7.4
-RUN pip3 install requests==2.20.0
-RUN pip3 install rethinkdb==2.3.0.post6
+RUN pip3 install phylo-treetime==0.8.0
+RUN pip3 install requests==2.22.0
+RUN pip3 install rethinkdb==2.4.8
 RUN pip3 install seaborn==0.9.0
 RUN pip3 install snakemake==5.10.0
-RUN pip3 install unidecode==1.0.22
-RUN pip3 install xlrd==1.0.0
+RUN pip3 install unidecode==1.1.1
+RUN pip3 install xlrd==1.2.0
 
 # Install envdir, which is used by pathogen builds
-RUN pip3 install envdir
+RUN pip3 install envdir==1.0.1
 
 # Install tooling for our AWS Batch builds, which use `aws s3`.
-RUN pip3 install awscli
+RUN pip3 install awscli==1.18.195
 
 # Install our own CLI so builds can do things like `nextstrain deploy`
-RUN pip3 install nextstrain-cli
+RUN pip3 install nextstrain-cli==2.0.0.post1
 
 # Add Nextstrain components
 
@@ -122,19 +110,16 @@ ARG CACHE_DATE
 # Add download helper
 COPY devel/download-repo /devel/
 
-# fauna
+# Fauna
 RUN /devel/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
 
-# augur
+# Augur
 RUN /devel/download-repo https://github.com/nextstrain/augur release /nextstrain/augur
 
-# auspice
+# Auspice
 RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
 
-# Install Python 2 deps
-RUN pip2 install --requirement=/nextstrain/fauna/requirements.txt
-
-# Install Python 3 deps
+# Install Fauna deps
 RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
 
 # Augur is an editable install so we can overlay the augur version in the image
@@ -175,6 +160,7 @@ RUN apk add --no-cache \
         ruby \
         tar \
         wget \
+        xz \
         zip unzip
 
 # Configure the prompt for interactive usage
@@ -197,7 +183,6 @@ COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 RUN chmod a+rX /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
-COPY --from=builder /usr/lib/python2.7/site-packages/ /usr/lib/python2.7/site-packages/
 COPY --from=builder /usr/lib/python3.6/site-packages/ /usr/lib/python3.6/site-packages/
 
 # Add installed Python scripts that we need.
