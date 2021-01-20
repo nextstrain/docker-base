@@ -144,6 +144,7 @@ FROM alpine:3.9.6
 
 # Add system runtime deps
 RUN apk add --no-cache \
+        bzip2 \
         ca-certificates \
         curl \
         bash \
