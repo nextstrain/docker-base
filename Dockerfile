@@ -198,6 +198,7 @@ COPY --from=builder /usr/lib/python3.6/site-packages/ /usr/lib/python3.6/site-pa
 COPY --from=builder \
     /usr/bin/augur \
     /usr/bin/aws \
+    /usr/bin/envdir \
     /usr/bin/nextstrain \
     /usr/bin/snakemake \
     /usr/bin/
