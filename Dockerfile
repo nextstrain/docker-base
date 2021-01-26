@@ -84,7 +84,7 @@ RUN pip3 install boto==2.49.0
 RUN pip3 install ipdb==0.10.1
 RUN pip3 install jsonschema==3.0.1
 RUN pip3 install matplotlib==2.2.2
-RUN pip3 install phylo-treetime==0.8.0
+RUN pip3 install phylo-treetime==0.8.1
 RUN pip3 install requests==2.22.0
 RUN pip3 install rethinkdb==2.4.8
 RUN pip3 install seaborn==0.9.0
