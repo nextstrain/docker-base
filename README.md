@@ -57,12 +57,10 @@ with other tags, you may provide those tags in addition to or instead of
 
 ### Best practices
 
-The smaller the image size, the better.  To this end we build upon an [Alpine
-Linux][] image (instead of Ubuntu) and use a [multi-stage build][] where only
-_artifacts_ are included in the final image without any of the software
-required only for compiling, installing, building, etc.  The [Alpine Linux
-package index][] is useful for finding what's installable through its package
-manager `apk`.
+The smaller the image size, the better.  To this end we build upon a ["slim"
+Python image][] and use a [multi-stage build][] where only _artifacts_ are
+included in the final image without any of the software required only for
+compiling, installing, building, etc.
 
 Try to follow [Docker best practices][] for images, although not all apply to our
 use case, which is somewhat atypical.
@@ -81,8 +79,7 @@ this repo's `.travis.yml`.
 
 
 [`nextstrain/base`]: https://hub.docker.com/r/nextstrain/base/
-[Alpine Linux]: https://alpinelinux.org
-[Alpine Linux package index]: https://pkgs.alpinelinux.org/packages?branch=v3.7&repo=main&arch=x86_64
+["slim" Python image]: https://hub.docker.com/_/python
 [multi-stage build]: https://docs.docker.com/develop/develop-images/multistage-build/
 [Docker best practices]: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 [Dockerfile reference documentation]: https://docs.docker.com/engine/reference/builder/
