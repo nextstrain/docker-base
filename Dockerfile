@@ -5,30 +5,24 @@
 # image with tools only needed during the image build.
 
 # First build the temporary image.
-FROM alpine:3.9.6 AS builder
+FROM python:3.7-slim-buster AS builder
 
 # Execute subsequent RUN statements with bash for handy modern shell features.
-RUN apk add --no-cache bash
 SHELL ["/bin/bash", "-c"]
 
 # Add system deps for building
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
-        build-base \
+        build-essential \
         ca-certificates \
         curl \
-        freetype-dev \
         git \
-        gmp-dev \
+        libgmp-dev \
         libpng-dev \
-        linux-headers \
         nodejs \
-        nodejs-npm \
-        perl \
-        python3-dev \
-        suitesparse-dev \
-        xz
+        npm \
+        pkg-config
 
 # Downloading dependencies, these should be pinned to specific versions
 
@@ -61,37 +55,6 @@ RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vc
   | tar xzvpf - --strip-components=2
 RUN ./configure --prefix=$PWD/built && make && make install
 
-# Install Python 3 dependencies
-# These may be upgraded by augur/setup.py,
-# but having them here enables caching
-# Be sure to install numpy ahead of pandas
-
-# cvxopt install is particularly fussy.
-# It is separated out from the rest of the installs to ensures that pip wheels
-# can be used for as much as possible, since using --global-option disables use
-# of wheels.
-RUN CVXOPT_BLAS_LIB=openblas \
-  CVXOPT_LAPACK_LIB=openblas \
-    pip3 install --global-option=build_ext \
-      --global-option="-I/usr/include/suitesparse" \
-      cvxopt==1.1.9
-RUN pip3 install numpy==1.19.4
-RUN pip3 install scipy==1.3.3
-RUN pip3 install pandas==1.1.5
-RUN pip3 install bcbio-gff==0.6.6
-RUN pip3 install biopython==1.76
-RUN pip3 install boto==2.49.0
-RUN pip3 install ipdb==0.10.1
-RUN pip3 install jsonschema==3.0.1
-RUN pip3 install matplotlib==2.2.2
-RUN pip3 install phylo-treetime==0.8.1
-RUN pip3 install requests==2.22.0
-RUN pip3 install rethinkdb==2.4.8
-RUN pip3 install seaborn==0.9.0
-RUN pip3 install snakemake==5.10.0
-RUN pip3 install unidecode==1.1.1
-RUN pip3 install xlrd==1.2.0
-
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
 
@@ -100,6 +63,9 @@ RUN pip3 install awscli==1.18.195
 
 # Install our own CLI so builds can do things like `nextstrain deploy`
 RUN pip3 install nextstrain-cli==2.0.0.post1
+
+# Install Snakemake
+RUN pip3 install snakemake==5.10.0
 
 # Add Nextstrain components
 
@@ -127,41 +93,37 @@ RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
 # accessible and importable.
 RUN pip3 install --editable /nextstrain/augur
 
+# Install additional "full" dependencies for augur.
+# TODO: these versions should be updated in augur's setup.py to work with the
+# pip install nextstrain-augur[full] approach.
+RUN pip3 install cvxopt==1.2.4
+RUN pip3 install matplotlib==2.2.2
+RUN pip3 install seaborn==0.9.0
+
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
 # as we did the Python deps.  Building auspice means we can run it without
 # hot-reloading, which is time-consuming and generally unnecessary in the
 # container image.  Linking is equivalent to an editable Python install and
 # used for the same reasons described above.
-RUN cd /nextstrain/auspice && npm install && npm run build && npm link
-
+RUN cd /nextstrain/auspice && npm update && npm install && npm run build && npm link
 
 # ———————————————————————————————————————————————————————————————————— #
 
-
 # Now build the final image.
-FROM alpine:3.9.6
+FROM python:3.7-slim-buster
 
 # Add system runtime deps
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         bzip2 \
         ca-certificates \
         curl \
-        bash \
-        freetype \
-        gmp \
         gzip \
-        lapack \
-        libpng \
         nodejs \
         perl \
-        python2 \
-        python3 \
-        suitesparse \
         ruby \
-        tar \
         wget \
-        xz \
+        xz-utils \
         zip unzip
 
 # Configure the prompt for interactive usage
@@ -189,7 +151,7 @@ RUN curl -fsSL https://github.com/neherlab/nextalign/releases/latest/download/ne
 RUN chmod a+rX /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
-COPY --from=builder /usr/lib/python3.6/site-packages/ /usr/lib/python3.6/site-packages/
+COPY --from=builder /usr/local/lib/python3.7/site-packages/ /usr/local/lib/python3.7/site-packages/
 
 # Add installed Python scripts that we need.
 #
@@ -201,15 +163,15 @@ COPY --from=builder /usr/lib/python3.6/site-packages/ /usr/lib/python3.6/site-pa
 # troublesome or excessive.
 #   -trs, 15 June 2018
 COPY --from=builder \
-    /usr/bin/augur \
-    /usr/bin/aws \
-    /usr/bin/envdir \
-    /usr/bin/nextstrain \
-    /usr/bin/snakemake \
-    /usr/bin/
+    /usr/local/bin/augur \
+    /usr/local/bin/aws \
+    /usr/local/bin/envdir \
+    /usr/local/bin/nextstrain \
+    /usr/local/bin/snakemake \
+    /usr/local/bin/
 
 # Add installed Node libs
-COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
+COPY --from=builder /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
 
 # Add globally linked Auspice script.
 #
@@ -217,7 +179,7 @@ COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
 # _contents_ of the target being copied instead of a symlink being created.
 # The symlink is required so that Auspice's locally-installed deps are
 # correctly discovered by node.
-RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/bin/auspice
+RUN ln -sv /usr/local/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
 
 # Add Nextstrain components
 COPY --from=builder /nextstrain /nextstrain
