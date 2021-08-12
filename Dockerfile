@@ -100,6 +100,15 @@ RUN pip3 install cvxopt==1.2.4
 RUN pip3 install matplotlib==2.2.2
 RUN pip3 install seaborn==0.9.0
 
+# Install pathogen-specific workflow dependencies. Since we only maintain a
+# single Docker image to support all pathogen workflows, some pathogen-specific
+# functionality must live in this Dockerfile. The following dependencies may be
+# used by multiple pathogen workflows, but they have been commented according to
+# the original pathogen that added these dependencies.
+
+# ncov
+RUN pip3 install epiweeks==2.1.2
+
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
 # as we did the Python deps.  Building auspice means we can run it without
