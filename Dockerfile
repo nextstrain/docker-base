@@ -91,14 +91,7 @@ RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
-RUN pip3 install --editable /nextstrain/augur
-
-# Install additional "full" dependencies for augur.
-# TODO: these versions should be updated in augur's setup.py to work with the
-# pip install nextstrain-augur[full] approach.
-RUN pip3 install cvxopt==1.2.4
-RUN pip3 install matplotlib==2.2.2
-RUN pip3 install seaborn==0.9.0
+RUN pip3 install --editable "/nextstrain/augur[full]"
 
 # Install pathogen-specific workflow dependencies. Since we only maintain a
 # single Docker image to support all pathogen workflows, some pathogen-specific
