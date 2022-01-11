@@ -127,6 +127,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bzip2 \
         ca-certificates \
         curl \
+        git \
         gzip \
         nodejs \
         perl \
@@ -150,6 +151,15 @@ COPY --from=builder \
 
 COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
 COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
+
+# Add Pangolin and PangoLEARN + deps
+RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
+        -o /usr/local/bin/gofasta \
+  && chmod a+rx /usr/local/bin/gofasta
+RUN cd /usr/local/bin && curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
+  | tar xjvpf - --strip-components=1 minimap2-2.24_x64-linux/minimap2
+RUN pip install git+https://github.com/cov-lineages/pangolin.git@v2.3.8
+RUN pip install git+https://github.com/cov-lineages/pangoLEARN.git@2021-04-01
 
 # Add Nextalign
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64 \
