@@ -109,6 +109,16 @@ RUN pip3 install seaborn==0.9.0
 # ncov
 RUN pip3 install epiweeks==2.1.2
 
+# Add Pangolin and PangoLEARN + deps
+RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
+        -o /usr/local/bin/gofasta \
+  && chmod a+rx /usr/local/bin/gofasta
+RUN cd /usr/local/bin && curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
+  | tar xjvpf - --strip-components=1 minimap2-2.24_x64-linux/minimap2
+RUN pip install git+https://github.com/cov-lineages/pangolin.git@v2.3.8
+RUN pip install git+https://github.com/cov-lineages/pangoLEARN.git@2021-04-01
+
+
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
 # as we did the Python deps.  Building auspice means we can run it without
@@ -127,7 +137,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bzip2 \
         ca-certificates \
         curl \
-        git \
         gzip \
         nodejs \
         perl \
@@ -152,15 +161,6 @@ COPY --from=builder \
 COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
 COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 
-# Add Pangolin and PangoLEARN + deps
-RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
-        -o /usr/local/bin/gofasta \
-  && chmod a+rx /usr/local/bin/gofasta
-RUN cd /usr/local/bin && curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
-  | tar xjvpf - --strip-components=1 minimap2-2.24_x64-linux/minimap2
-RUN pip install git+https://github.com/cov-lineages/pangolin.git@v2.3.8
-RUN pip install git+https://github.com/cov-lineages/pangoLEARN.git@2021-04-01
-
 # Add Nextalign
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64 \
         -o /usr/local/bin/nextalign \
@@ -182,10 +182,15 @@ COPY --from=builder /usr/local/lib/python3.7/site-packages/ /usr/local/lib/pytho
 # troublesome or excessive.
 #   -trs, 15 June 2018
 COPY --from=builder \
+    /usr/local/bin/*.py \
     /usr/local/bin/augur \
     /usr/local/bin/aws \
     /usr/local/bin/envdir \
+    /usr/local/bin/gofasta \
+    /usr/local/bin/minimap2 \
     /usr/local/bin/nextstrain \
+    /usr/local/bin/pangolin \
+    /usr/local/bin/pangolearn.smk \
     /usr/local/bin/snakemake \
     /usr/local/bin/
 
