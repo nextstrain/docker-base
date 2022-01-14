@@ -148,7 +148,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         xz-utils \
         zip unzip
 
-
 # Configure the prompt for interactive usage
 COPY prompt.sh /etc/profile.d/
 
