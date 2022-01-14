@@ -132,45 +132,6 @@ RUN cd /nextstrain/auspice && npm update && npm install && npm run build && npm 
 
 # ———————————————————————————————————————————————————————————————————— #
 
-# UShER is a pangolin 3+ dependency.
-FROM python:3.7-slim-buster as usher
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -yq --no-install-recommends \
-    automake \
-    build-essential \
-    cmake \
-    curl \
-    ca-certificates \
-    libboost-date-time-dev \
-    libboost-filesystem-dev \
-    libboost-iostreams-dev \
-    libboost-program-options-dev \
-    libmpich-dev \
-    libprotoc-dev \
-    libprotoc-dev protobuf-compiler \
-    libtbb-dev \
-    libtool \
-    mafft \
-    mpich \
-    nasm
-
-WORKDIR /usr/local/lib/
-RUN curl -fsSL https://github.com/intel/isa-l/archive/refs/tags/v2.30.0.tar.gz \
-  | tar xzvpf -
-WORKDIR /usr/local/lib/isa-l-2.30.0
-RUN ./autogen.sh && ./configure && make -j 2 && make install
-WORKDIR /usr/local/lib/
-RUN curl  -fsSL https://github.com/oneapi-src/oneTBB/archive/2019_U9.tar.gz \
-  | tar xzvpf -
-RUN curl -fsSL https://github.com/yatisht/usher/archive/refs/tags/v0.5.2.tar.gz \
-  | tar xzvpf -
-WORKDIR /usr/local/lib/usher-0.5.2
-## Checkout latest release
-RUN cmake  -DTBB_DIR=/usr/local/lib/oneTBB-2019_U9 -DCMAKE_PREFIX_PATH=/usr/local/lib/oneTBB-2019_U9/cmake .
-RUN make -j2 VERBOSE=1
-
-# ———————————————————————————————————————————————————————————————————— #
-
 # Now build the final image.
 FROM python:3.7-slim-buster
 
@@ -188,15 +149,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zip unzip
 
 
-# Add UShER runtime deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libboost-date-time1.67.0 \
-    libboost-filesystem1.67.0 \
-    libboost-iostreams1.67.0 \
-    libboost-program-options1.67.0 \
-    libboost-regex1.67.0 \
-    libprotoc17
-
 # Configure the prompt for interactive usage
 COPY prompt.sh /etc/profile.d/
 
@@ -212,10 +164,6 @@ COPY --from=builder \
 
 COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
 COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
-
-# Install UShER
-COPY --from=usher /usr/local/lib/usher-0.5.2/usher /usr/local/bin/usher
-COPY --from=usher /usr/local/lib/usher-0.5.2/tbb_cmake_build/tbb_cmake_build_subdir_release/ /usr/local/lib/usher-0.5.2/tbb_cmake_build/tbb_cmake_build_subdir_release/
 
 # Add Nextalign
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64 \
@@ -247,6 +195,7 @@ COPY --from=builder \
     /usr/local/bin/nextstrain \
     /usr/local/bin/pangolin \
     /usr/local/bin/pangolearn.smk \
+    /usr/local/bin/scorpio \
     /usr/local/bin/snakemake \
     /usr/local/bin/
 
