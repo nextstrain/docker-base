@@ -185,7 +185,6 @@ COPY --from=builder /usr/local/lib/python3.7/site-packages/ /usr/local/lib/pytho
 # troublesome or excessive.
 #   -trs, 15 June 2018
 COPY --from=builder \
-    /usr/local/bin/*.py \
     /usr/local/bin/augur \
     /usr/local/bin/aws \
     /usr/local/bin/envdir \
