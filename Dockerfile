@@ -102,6 +102,19 @@ RUN pip3 install --editable "/nextstrain/augur[full]"
 # ncov
 RUN pip3 install epiweeks==2.1.2
 
+# Add Pangolin and PangoLEARN + deps
+RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
+        -o /usr/local/bin/gofasta \
+  && chmod a+rx /usr/local/bin/gofasta
+RUN cd /usr/local/bin && curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
+  | tar xjvpf - --strip-components=1 minimap2-2.24_x64-linux/minimap2
+RUN pip install pysam
+RUN pip install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
+RUN pip install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
+RUN pip install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
+RUN pip install git+https://github.com/cov-lineages/constellations.git@v0.1.1
+RUN pip install git+https://github.com/cov-lineages/pango-designation.git@v1.2.123
+
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
 # as we did the Python deps.  Building auspice means we can run it without
@@ -168,7 +181,12 @@ COPY --from=builder \
     /usr/local/bin/augur \
     /usr/local/bin/aws \
     /usr/local/bin/envdir \
+    /usr/local/bin/gofasta \
+    /usr/local/bin/minimap2 \
     /usr/local/bin/nextstrain \
+    /usr/local/bin/pangolin \
+    /usr/local/bin/pangolearn.smk \
+    /usr/local/bin/scorpio \
     /usr/local/bin/snakemake \
     /usr/local/bin/
 
