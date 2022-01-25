@@ -21,6 +21,11 @@ tool][nextstrain-cli].
 
 ## Developing
 
+### Rebuilding an image and pushing to Docker Hub
+
+To rebuild the image with the latest versions of its software and push to Docker Hub, go to [the Travis CI interface for this repository](https://app.travis-ci.com/github/nextstrain/docker-base) and select the "Trigger build" option under "More options...".
+This is most helpful when you want the image to contain the latest version of a tool whose release does not automatically trigger a new build of the image and you do not need to modify the `Dockerfile`.
+
 ### Building
 
 To build this image locally, first pull down the latest image from Docker Hub:
