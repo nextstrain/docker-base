@@ -165,7 +165,7 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/
 # Add Nextclade
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-Linux-x86_64 \
         -o /usr/local/bin/nextclade \
- && chmod +x nextclade
+ && chmod +x /usr/local/bin/nextclade
 
 # Ensure all container users can execute these programs
 RUN chmod a+rX /usr/local/bin/* /usr/local/libexec/*
