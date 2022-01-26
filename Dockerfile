@@ -113,7 +113,7 @@ RUN pip install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
 RUN pip install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
 RUN pip install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
 RUN pip install git+https://github.com/cov-lineages/constellations.git@v0.1.1
-RUN pip install git+https://github.com/cov-lineages/pango-designation.git@v1.2.123
+RUN pip install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
 
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
