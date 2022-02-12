@@ -66,6 +66,7 @@ RUN pip3 install nextstrain-cli==2.0.0.post1
 
 # Install Snakemake
 RUN pip3 install snakemake==5.10.0
+RUN pip3 install google-cloud-storage==2.1.0
 
 # Add Nextstrain components
 
