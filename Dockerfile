@@ -64,8 +64,11 @@ RUN pip3 install awscli==1.18.195
 # Install our own CLI so builds can do things like `nextstrain deploy`
 RUN pip3 install nextstrain-cli==2.0.0.post1
 
-# Install Snakemake
+# Install Snakemake and related optional dependencies.
 RUN pip3 install snakemake==5.10.0
+# Google Cloud Storage package is required for Snakemake to fetch remote files
+# from Google Storage URIs.
+RUN pip3 install google-cloud-storage==2.1.0
 
 # Add Nextstrain components
 
