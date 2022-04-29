@@ -23,7 +23,7 @@ tool][nextstrain-cli].
 
 ### Rebuilding an image and pushing to Docker Hub
 
-To rebuild the image with the latest versions of its software and push to Docker Hub, go to [the Travis CI interface for this repository](https://app.travis-ci.com/github/nextstrain/docker-base) and select the "Trigger build" option under "More options...".
+To rebuild the image with the latest versions of its software and push to Docker Hub, go to [the GitHub Actions workflow](https://github.com/nextstrain/docker-base/actions/workflows/ci.yml), select **Run workflow**, and confirm.
 This is most helpful when you want the image to contain the latest version of a tool whose release does not automatically trigger a new build of the image and you do not need to modify the `Dockerfile`.
 
 ### Building
@@ -75,12 +75,11 @@ details of each Dockerfile command (`COPY`, `ADD`, etc).
 
 ### Continuous integration
 
-Every push to this repository triggers a new build of the image on [Travis
-CI][].  This helps ensure the image builds successfully with the new commits.
+Every push to this repository triggers a new build of the image [a GitHub Actions workflow][].  This helps ensure the image builds successfully with the new commits.
 
 Images built from the `master` branch are additionally pushed to the [Docker
-registry][`nextstrain/base`].  The build instructions used by Travis are in
-this repo's `.travis.yml`.
+registry][`nextstrain/base`].  The build instructions used by the workflow are in
+this repo's `.github/workflows/ci.yml`.
 
 
 [`nextstrain/base`]: https://hub.docker.com/r/nextstrain/base/
@@ -88,4 +87,4 @@ this repo's `.travis.yml`.
 [multi-stage build]: https://docs.docker.com/develop/develop-images/multistage-build/
 [Docker best practices]: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 [Dockerfile reference documentation]: https://docs.docker.com/engine/reference/builder/
-[Travis CI]: https://travis-ci.com/nextstrain/docker-base/
+[GitHub Actions]: https://github.com/nextstrain/docker-base/actions/workflows/ci.yml
