@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         git \
+        jq \
         libgmp-dev \
         libpng-dev \
         nodejs \
@@ -76,14 +77,14 @@ RUN pip3 install google-cloud-storage==2.1.0
 # docker build --build-arg CACHE_DATE="$(date)"
 ARG CACHE_DATE
 
-# Add download helper
-COPY devel/download-repo /devel/
+# Add helpers for build
+COPY devel/download-repo devel/latest-augur-release-tag /devel/
 
 # Fauna
 RUN /devel/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
 
 # Augur
-RUN /devel/download-repo https://github.com/nextstrain/augur release /nextstrain/augur
+RUN /devel/download-repo https://github.com/nextstrain/augur "$(/devel/latest-augur-release-tag)" /nextstrain/augur
 
 # Auspice
 RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
