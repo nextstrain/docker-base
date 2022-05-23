@@ -162,12 +162,12 @@ COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
 COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 
 # Add Nextalign
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64 \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.0.0-beta.1/nextalign-x86_64-unknown-linux-gnu \
         -o /usr/local/bin/nextalign \
  && chmod a+rx /usr/local/bin/nextalign
 
 # Add Nextclade
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-Linux-x86_64 \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.0.0-beta.1/nextclade-x86_64-unknown-linux-gnu \
         -o /usr/local/bin/nextclade \
  && chmod +x /usr/local/bin/nextclade
 
