@@ -5,24 +5,98 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set CACHE_DATE
-      run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" >> $GITHUB_ENV
-    - run: ./devel/pull
-    - run: ./devel/build
-    - if: ${{ github.event_name != 'pull_request' }}
+
+    - uses: docker/setup-buildx-action@v1
+      id: builder-image-builder
+
+    - uses: docker/setup-buildx-action@v1
+      id: base-image-builder
+
+    - name: Show builder-image-builder name
+      run: echo ${{ steps.builder-image-builder.outputs.name }}
+
+    - name: Show base-image-builder name
+      run: echo ${{ steps.base-image-builder.outputs.name }}
+
+    # Set CACHE_DATE in your environment to force layers after our custom cache
+    # point to be re-built. See the ARG CACHE_DATE line in the Dockerfile for more
+    # information.
+    - name: Set CACHE_DATE and GIT_REVISION env vars
+      run: |
+        echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" >> $GITHUB_ENV
+        echo "GIT_REVISION=$(git describe --tags --abbrev=40 --always --dirty || true)" >> $GITHUB_ENV
+
+    # Use toJSON to store boolean values in a string
+    # and fromJSON to retrieve as boolean later on.
+    - name: Set common variables
+      run: |
+        echo "BASE_IMAGE_NAME=nextstrain/base" >> $GITHUB_ENV
+        echo "BUILDER_IMAGE_NAME=nextstrain/base-builder" >> $GITHUB_ENV
+        echo "TAG_AND_PUSH=${{ toJSON(github.event_name != 'pull_request') }}" >> $GITHUB_ENV
+        echo "ON_DEFAULT_BRANCH=${{ toJSON(github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch) }}" >> $GITHUB_ENV
+
+    - if: ${{ fromJSON(env.TAG_AND_PUSH) && fromJSON(env.ON_DEFAULT_BRANCH) }}
+      name: Set tag name (default branch)
+      run: echo "TAG_NAME=build-$CACHE_DATE" >> $GITHUB_ENV
+
+    # From `man docker-image-tag`: The tag name must be valid ASCII and may
+    # contain lowercase and uppercase letters, digits, underscores, periods
+    # and hyphens.
+    # TODO: parameterize this as workflow input
+    - if: ${{ fromJSON(env.TAG_AND_PUSH) && !fromJSON(env.ON_DEFAULT_BRANCH) }}
+      name: Set tag name (non-default branch)
+      run: echo "TAG_NAME=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" >> $GITHUB_ENV
+
+    - if: ${{ fromJSON(env.TAG_AND_PUSH) }}
+      name: Set tags to push
+      run: |
+        maybe_base_image_latest_tag=${{ fromJSON(env.ON_DEFAULT_BRANCH) && ',$BASE_IMAGE_NAME:latest' || '' }}
+        echo "BASE_IMAGE_TAGS=$BASE_IMAGE_NAME:$TAG_NAME$maybe_base_image_latest_tag" >> $GITHUB_ENV
+        maybe_builder_image_latest_tag=${{ fromJSON(env.ON_DEFAULT_BRANCH) && ',$BUILDER_IMAGE_NAME:latest' || '' }}
+        echo "BUILDER_IMAGE_TAGS=$BUILDER_IMAGE_NAME:$TAG_NAME$maybe_builder_image_latest_tag" >> $GITHUB_ENV
+
+    - if: ${{ fromJSON(env.TAG_AND_PUSH) }}
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_LOGIN }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
-      run: |
-        ./devel/tag build-$CACHE_DATE
-        ./devel/push latest build-$CACHE_DATE
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name != github.event.repository.default_branch }}
-      # From `man docker-image-tag`: The tag name must be valid ASCII and may
-      # contain lowercase and uppercase letters, digits, underscores, periods
-      # and hyphens.
-      run: |
-        tag=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}
-        ./devel/tag $tag
-        ./devel/push $tag
+
+    # The nextstrain/base Dockerfile is a multi-stage with both a "builder" target
+    # and a main target.  To enable proper caching via --cache-from we need both
+    # these images available to pull layers from.  This means pulling both in at
+    # the start and pushing both up at the end.
+
+    # Calling `docker run nextstrain/base` will still only pull down the small base
+    # image rather than pulling down the larger nextstrain/base-builder image.
+    - name: Build${{ fromJSON(env.TAG_AND_PUSH) && '/tag/push' || '' }} ${{ env.BUILDER_IMAGE_NAME }}
+      uses: docker/build-push-action@v2
+      with:
+        target: builder
+        builder: ${{ steps.builder-image-builder.outputs.name }}
+        platforms: linux/amd64
+        context: .
+        pull: true
+        push: ${{ fromJSON(env.TAG_AND_PUSH) }}
+        tags: ${{ fromJSON(env.TAG_AND_PUSH) && env.BUILDER_IMAGE_TAGS || null }}
+        cache-from: |
+          type=registry,ref=${{ env.BUILDER_IMAGE_NAME }}
+          type=registry,ref=${{ env.BASE_IMAGE_NAME }}
+        build-args: |
+          CACHE_DATE
+          GIT_REVISION
+
+    - name: Build${{ fromJSON(env.TAG_AND_PUSH) && '/tag/push' || '' }} ${{ env.BASE_IMAGE_NAME }}
+      uses: docker/build-push-action@v2
+      with:
+        builder: ${{ steps.base-image-builder.outputs.name }}
+        platforms: linux/amd64
+        context: .
+        pull: true
+        push: ${{ fromJSON(env.TAG_AND_PUSH) }}
+        tags: ${{ fromJSON(env.TAG_AND_PUSH) && env.BASE_IMAGE_TAGS || null }}
+        cache-from: |
+          type=registry,ref=${{ env.BUILDER_IMAGE_NAME }}
+          type=registry,ref=${{ env.BASE_IMAGE_NAME }}
+        build-args: |
+          CACHE_DATE
+          GIT_REVISION
