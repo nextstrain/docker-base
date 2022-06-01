@@ -46,7 +46,7 @@ RUN make FastTreeDblMP
 
 # IQ-TREE
 WORKDIR /build/IQ-TREE
-RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
+RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.2.0/iqtree-2.2.0-Linux.tar.gz \
   | tar xzvpf - --strip-components=1
 RUN mv bin/iqtree2 bin/iqtree
 
