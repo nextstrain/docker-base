@@ -1,5 +1,5 @@
 name: CI
-on: [push, pull_request, workflow_dispatch]
+on: [push, workflow_dispatch]
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -9,16 +9,16 @@ jobs:
       run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" >> $GITHUB_ENV
     - run: ./devel/pull
     - run: ./devel/build
-    - if: ${{ github.event_name != 'pull_request' }}
+    - if: ${{ github.repository == 'nextstrain/docker-base' }}
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_LOGIN }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
+    - if: ${{ github.repository == 'nextstrain/docker-base' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
       run: |
         ./devel/tag build-$CACHE_DATE
         ./devel/push latest build-$CACHE_DATE
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name != github.event.repository.default_branch }}
+    - if: ${{ github.repository == 'nextstrain/docker-base' && github.ref_type == 'branch' && github.ref_name != github.event.repository.default_branch }}
       # From `man docker-image-tag`: The tag name must be valid ASCII and may
       # contain lowercase and uppercase letters, digits, underscores, periods
       # and hyphens.
