@@ -161,15 +161,38 @@ COPY --from=builder \
 COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
 COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 
-# Add Nextalign
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64 \
-        -o /usr/local/bin/nextalign \
- && chmod a+rx /usr/local/bin/nextalign
+# XXX TODO: This image's glibc is older than the glibc linked into
+# nextalign/nextclade v2 currently, so we have to use the -musl version
+# instead of the -gnu version.¹  However, we should switch back to the -gnu
+# version once that issue is resolved by linking nextalign/nextclade to an
+# older glibc and/or upgrading the base OS image we use here.
+#   -trs, 17 June 2022
+#
+# ¹ https://bedfordlab.slack.com/archives/C01LCTT7JNN/p1655473285125699
 
-# Add Nextclade
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-Linux-x86_64 \
-        -o /usr/local/bin/nextclade \
- && chmod +x /usr/local/bin/nextclade
+# Add Nextalign v2
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.0.0-beta.2/nextalign-x86_64-unknown-linux-musl \
+      --output /usr/local/bin/nextalign2 \
+ && chmod a+rx /usr/local/bin/nextalign2
+
+# Add Nextclade v2
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.0.0-beta.2/nextclade-x86_64-unknown-linux-musl \
+      --output /usr/local/bin/nextclade2 \
+ && chmod a+rx /usr/local/bin/nextclade2
+
+# Add Nextalign v1
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64 \
+      --output /usr/local/bin/nextalign1 \
+ && chmod a+rx /usr/local/bin/nextalign1
+
+# Add Nextclade v1
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64 \
+      --output /usr/local/bin/nextclade1 \
+ && chmod a+rx /usr/local/bin/nextclade1
+
+# Set default Nextclade and Nextalign version to 1 (for now)
+RUN ln -sv nextclade1 /usr/local/bin/nextclade \
+ && ln -sv nextalign1 /usr/local/bin/nextalign
 
 # Add tsv-utils
 RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz \
