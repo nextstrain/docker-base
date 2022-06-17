@@ -30,30 +30,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # mafft
 WORKDIR /build/mafft
 RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
-  | tar xzvpf - --strip-components=2 mafft-linux64/mafftdir/
+  | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/
 
 # RAxML
 WORKDIR /build/RAxML
 RUN curl -fsSL https://api.github.com/repos/stamatak/standard-RAxML/tarball/v8.2.12 \
-  | tar xzvpf - --strip-components=1
+  | tar xzvpf - --no-same-owner --strip-components=1
 RUN make -f Makefile.AVX.PTHREADS.gcc   # AVX should be widely-supported enough
 
 # FastTree
 WORKDIR /build/FastTree
 RUN curl -fsSL https://api.github.com/repos/tsibley/FastTree/tarball/50c5b098ea085b46de30bfc29da5e3f113353e6f \
-  | tar xzvpf - --strip-components=1
+  | tar xzvpf - --no-same-owner --strip-components=1
 RUN make FastTreeDblMP
 
 # IQ-TREE
 WORKDIR /build/IQ-TREE
 RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
-  | tar xzvpf - --strip-components=1
+  | tar xzvpf - --no-same-owner --strip-components=1
 RUN mv bin/iqtree2 bin/iqtree
 
 # vcftools
 WORKDIR /build/vcftools
 RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz \
-  | tar xzvpf - --strip-components=2
+  | tar xzvpf - --no-same-owner --strip-components=2
 RUN ./configure --prefix=$PWD/built && make && make install
 
 # Install envdir, which is used by pathogen builds
@@ -111,7 +111,7 @@ RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0
         -o /usr/local/bin/gofasta \
   && chmod a+rx /usr/local/bin/gofasta
 RUN cd /usr/local/bin && curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
-  | tar xjvpf - --strip-components=1 minimap2-2.24_x64-linux/minimap2
+  | tar xjvpf - --no-same-owner --strip-components=1 minimap2-2.24_x64-linux/minimap2
 RUN pip install pysam
 RUN pip install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
 RUN pip install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
