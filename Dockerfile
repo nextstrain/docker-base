@@ -171,6 +171,17 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/
         -o /usr/local/bin/nextclade \
  && chmod +x /usr/local/bin/nextclade
 
+# Add tsv-utils
+RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz \
+ && tar -x --no-same-owner -v -C /usr/local/bin -z --strip-components 2 --wildcards -f tsv-utils.tar.gz "*/bin/*" \
+ && rm -f tsv-utils.tar.gz
+
+# Add csvtk
+RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_linux_amd64.tar.gz | tar xz --no-same-owner -C /usr/local/bin
+
+# Add seqkit
+RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_linux_amd64.tar.gz | tar xz --no-same-owner -C /usr/local/bin
+
 # Ensure all container users can execute these programs
 RUN chmod a+rX /usr/local/bin/* /usr/local/libexec/*
 
