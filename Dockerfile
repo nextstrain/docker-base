@@ -161,15 +161,6 @@ COPY --from=builder \
 COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
 COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 
-# XXX TODO: This image's glibc is older than the glibc linked into
-# nextalign/nextclade v2 currently, so we have to use the -musl version
-# instead of the -gnu version.¹  However, we should switch back to the -gnu
-# version once that issue is resolved by linking nextalign/nextclade to an
-# older glibc and/or upgrading the base OS image we use here.
-#   -trs, 17 June 2022
-#
-# ¹ https://bedfordlab.slack.com/archives/C01LCTT7JNN/p1655473285125699
-
 # Add Nextalign v2
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.0.0-beta.7/nextalign-x86_64-unknown-linux-gnu \
       --output /usr/local/bin/nextalign2 \
