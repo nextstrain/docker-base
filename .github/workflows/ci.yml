@@ -28,6 +28,14 @@ jobs:
     - if: ${{ github.event_name != 'pull_request' }}
       run: ./devel/tag $TAG
 
+    - if: ${{ github.event_name != 'pull_request' }}
+      uses: nextstrain/.github/actions/setup-nextstrain-cli@master
+    - if: ${{ github.event_name != 'pull_request' }}
+      name: Run zika-tutorial
+      run: |
+        git clone https://github.com/nextstrain/zika-tutorial
+        nextstrain build --image nextstrain/base:$TAG zika-tutorial -F
+
     - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
       name: Push $TAG + latest (default branch)
       run: ./devel/push latest $TAG
