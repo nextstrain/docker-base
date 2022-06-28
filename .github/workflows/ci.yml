@@ -6,7 +6,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set CACHE_DATE
-      run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" >> $GITHUB_ENV
+      run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
     - run: ./devel/pull
     - run: ./devel/build
     - if: ${{ github.event_name != 'pull_request' }}
