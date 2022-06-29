@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set CACHE_DATE
+    - name: Set $CACHE_DATE
       run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
     - run: ./devel/pull
     - run: ./devel/build
