@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set $CACHE_DATE
-      run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
+    - name: Set CACHE_DATE
+      run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" >> $GITHUB_ENV
     - run: ./devel/pull
     - run: ./devel/build
     - if: ${{ github.event_name != 'pull_request' }}
@@ -14,31 +14,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_LOGIN }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-
     - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
-      name: Set $TAG (default branch)
-      run: echo "TAG=build-$CACHE_DATE" | tee -a $GITHUB_ENV
+      run: |
+        ./devel/tag build-$CACHE_DATE
+        ./devel/push latest build-$CACHE_DATE
     - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name != github.event.repository.default_branch }}
-      name: Set $TAG (non-default branch)
       # From `man docker-image-tag`: The tag name must be valid ASCII and may
       # contain lowercase and uppercase letters, digits, underscores, periods
       # and hyphens.
-      run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a $GITHUB_ENV
-
-    - if: ${{ github.event_name != 'pull_request' }}
-      run: ./devel/tag $TAG
-
-    - if: ${{ github.event_name != 'pull_request' }}
-      uses: nextstrain/.github/actions/setup-nextstrain-cli@master
-    - if: ${{ github.event_name != 'pull_request' }}
-      name: Run zika-tutorial
       run: |
-        git clone https://github.com/nextstrain/zika-tutorial
-        nextstrain build --image nextstrain/base:$TAG zika-tutorial -F
-
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
-      name: Push $TAG + latest (default branch)
-      run: ./devel/push latest $TAG
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name != github.event.repository.default_branch }}
-      name: Push $TAG (non-default branch)
-      run: ./devel/push $TAG
+        tag=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}
+        ./devel/tag $tag
+        ./devel/push $tag
