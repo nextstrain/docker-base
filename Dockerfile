@@ -162,12 +162,12 @@ COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
 COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 
 # Add Nextalign v2
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.0.0/nextalign-x86_64-unknown-linux-gnu \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.2.0/nextalign-x86_64-unknown-linux-gnu \
       --output /usr/local/bin/nextalign2 \
  && chmod a+rx /usr/local/bin/nextalign2
 
 # Add Nextclade v2
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.0.0/nextclade-x86_64-unknown-linux-gnu \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.2.0/nextclade-x86_64-unknown-linux-gnu \
       --output /usr/local/bin/nextclade2 \
  && chmod a+rx /usr/local/bin/nextclade2
 
@@ -181,9 +181,9 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/1.11.0/
       --output /usr/local/bin/nextclade1 \
  && chmod a+rx /usr/local/bin/nextclade1
 
-# Set default Nextclade and Nextalign version to 1 (for now)
-RUN ln -sv nextclade1 /usr/local/bin/nextclade \
- && ln -sv nextalign1 /usr/local/bin/nextalign
+# Set default Nextclade and Nextalign version to 2
+RUN ln -sv nextclade2 /usr/local/bin/nextclade \
+ && ln -sv nextalign2 /usr/local/bin/nextalign
 
 # Add tsv-utils
 RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz \
