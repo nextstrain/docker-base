@@ -143,7 +143,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ruby \
         wget \
         xz-utils \
-        zip unzip
+        zip unzip \
+        zstd
 
 # Configure the prompt for interactive usage
 COPY prompt.sh /etc/profile.d/
