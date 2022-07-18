@@ -19,19 +19,37 @@ export GIT_REVISION=$(git describe --tags --abbrev=40 --always --dirty || true)
 # Calling `docker run nextstrain/base` will still only pull down the small base
 # image rather than pulling down the larger nextstrain/base-builder image.
 
-docker build \
+platform=linux/amd64
+
+# `buildx create` is necessary to use a driver that supports multi-platform
+# images.
+builder=nextstrain-builder
+
+if ! docker buildx inspect "$builder" &>/dev/null; then
+    docker buildx create --name "$builder" --driver docker-container
+fi
+
+docker buildx build \
+    --builder "$builder" \
+    --platform $platform \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
     --cache-from nextstrain/base-builder \
     --cache-from nextstrain/base \
+    --cache-to type=inline \
     --tag nextstrain/base-builder \
+    --load \
     --target builder \
     .
 
-docker build \
+docker buildx build \
+    --builder "$builder" \
+    --platform $platform \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
     --cache-from nextstrain/base-builder \
     --cache-from nextstrain/base \
+    --cache-to type=inline \
     --tag nextstrain/base \
+    --load \
     .
