@@ -84,7 +84,7 @@ COPY devel/download-repo devel/latest-augur-release-tag /devel/
 RUN /devel/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
 
 # Augur
-RUN /devel/download-repo https://github.com/nextstrain/augur "$(/devel/latest-augur-release-tag)" /nextstrain/augur
+RUN /devel/download-repo https://github.com/victorlin/augur "filter/sqlite" /nextstrain/augur
 
 # Auspice
 RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
