@@ -12,8 +12,6 @@ jobs:
 
     - run: ./devel/pull
 
-    - run: ./devel/build
-
     - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
       name: Set $TAG (default branch)
       run: echo "TAG=build-$CACHE_DATE" | tee -a $GITHUB_ENV
@@ -23,6 +21,8 @@ jobs:
       # contain lowercase and uppercase letters, digits, underscores, periods
       # and hyphens.
       run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a $GITHUB_ENV
+
+    - run: ./devel/build
 
     - run: ./devel/tag $TAG
 
