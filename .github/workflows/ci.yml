@@ -22,9 +22,9 @@ jobs:
       # and hyphens.
       run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a $GITHUB_ENV
 
-    - run: ./devel/build
+    - run: ./devel/build $TAG
 
-    - run: ./devel/tag $TAG
+    - run: ./devel/tag-latest $TAG
 
     - uses: actions/setup-python@v4
       with:
