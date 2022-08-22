@@ -12,7 +12,10 @@ if [[ $# -eq 0 ]]; then
     set -- latest
 fi
 
+BASE_IMAGE="nextstrain/base"
+BASE_BUILDER_IMAGE="nextstrain/base-builder"
+
 for tag in "$@"; do
-    docker push nextstrain/base-builder:$tag
-    docker push nextstrain/base:$tag
+    docker push $BASE_BUILDER_IMAGE:$tag
+    docker push $BASE_IMAGE:$tag
 done

@@ -29,15 +29,18 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
     docker buildx create --name "$builder" --driver docker-container
 fi
 
+BASE_IMAGE="nextstrain/base"
+BASE_BUILDER_IMAGE="nextstrain/base-builder"
+
 docker buildx build \
     --builder "$builder" \
     --platform $platform \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
-    --cache-from nextstrain/base-builder \
-    --cache-from nextstrain/base \
+    --cache-from $BASE_BUILDER_IMAGE \
+    --cache-from $BASE_IMAGE \
     --cache-to type=inline \
-    --tag nextstrain/base-builder \
+    --tag $BASE_BUILDER_IMAGE \
     --load \
     --target builder \
     .
@@ -47,9 +50,9 @@ docker buildx build \
     --platform $platform \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
-    --cache-from nextstrain/base-builder \
-    --cache-from nextstrain/base \
+    --cache-from $BASE_BUILDER_IMAGE \
+    --cache-from $BASE_IMAGE \
     --cache-to type=inline \
-    --tag nextstrain/base \
+    --tag $BASE_IMAGE \
     --load \
     .
