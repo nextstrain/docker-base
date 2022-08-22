@@ -37,6 +37,9 @@ image with:
 
     ./devel/build
 
+By default, this tags the image with `latest`. If you want to use a custom tag
+name, you can specify it as the first argument to the script.
+
 On each subsequent change during your development iterations, you can run just
 the `./devel/build` command again.
 

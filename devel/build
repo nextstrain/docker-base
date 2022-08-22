@@ -3,11 +3,17 @@
 # Builds the nextstrain/base and nextstrain/base-builder images with useful
 # caching.
 #
+# By default this tags images using "latest", but you can provide a custom tag
+# name.
+#
 # Set CACHE_DATE in your environment to force layers after our custom cache
 # point to be re-built. See the ARG CACHE_DATE line in the Dockerfile for more
 # information.
 #
 set -euo pipefail
+
+# If the tag is not provided, default to "latest".
+tag="${1:-latest}"
 
 export GIT_REVISION=$(git describe --tags --abbrev=40 --always --dirty || true)
 
@@ -40,7 +46,7 @@ docker buildx build \
     --cache-from $BASE_BUILDER_IMAGE \
     --cache-from $BASE_IMAGE \
     --cache-to type=inline \
-    --tag $BASE_BUILDER_IMAGE \
+    --tag $BASE_BUILDER_IMAGE:$tag \
     --load \
     --target builder \
     .
@@ -53,6 +59,6 @@ docker buildx build \
     --cache-from $BASE_BUILDER_IMAGE \
     --cache-from $BASE_IMAGE \
     --cache-to type=inline \
-    --tag $BASE_IMAGE \
+    --tag $BASE_IMAGE:$tag \
     --load \
     .
