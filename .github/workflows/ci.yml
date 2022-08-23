@@ -12,10 +12,10 @@ jobs:
 
     - run: ./devel/pull
 
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
+    - if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch
       name: Set $TAG (default branch)
       run: echo "TAG=build-$CACHE_DATE" | tee -a $GITHUB_ENV
-    - if: ${{ env.TAG == '' }}
+    - if: env.TAG == ''
       name: Set $TAG (PRs, non-default branch)
       # From `man docker-image-tag`: The tag name must be valid ASCII and may
       # contain lowercase and uppercase letters, digits, underscores, periods
@@ -24,13 +24,13 @@ jobs:
 
     - run: ./devel/build $TAG
 
-    - if: ${{ github.event_name != 'pull_request' }}
+    - if: github.event_name != 'pull_request'
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_LOGIN }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - if: ${{ github.event_name != 'pull_request' && startsWith(env.TAG, 'branch-') }}
+    - if: github.event_name != 'pull_request' && startsWith(env.TAG, 'branch-')
       name: Push $TAG (non-default branch)
       run: ./devel/push $TAG
 
@@ -43,7 +43,7 @@ jobs:
         pip install nextstrain-cli
         nextstrain build --image nextstrain/base:$TAG zika-tutorial -F
 
-    - if: ${{ startsWith(env.TAG, 'build-') }}
+    - if: startsWith(env.TAG, 'build-')
       name: Push $TAG + latest (default branch)
       run: |
         ./devel/tag-latest $TAG
