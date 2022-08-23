@@ -18,8 +18,3 @@ for tag in "$@"; do
     docker tag $BASE_BUILDER_IMAGE:{latest,$tag}
     docker tag $BASE_IMAGE:{latest,$tag}
 done
-
-if [[ $(docker image inspect --format "{{.RepoDigests}}" $BASE_IMAGE:$tag) != '[]' || $(docker image inspect --format "{{.RepoDigests}}" $BASE_BUILDER_IMAGE:$tag) != '[]' ]]; then
-    echo "At least one of the tagged images has already been pushed. This can happen if the newly built image is not available in the local registry." >&2
-    exit 1
-fi
