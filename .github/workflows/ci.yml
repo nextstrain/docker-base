@@ -30,7 +30,7 @@ jobs:
         username: ${{ secrets.DOCKER_LOGIN }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name != github.event.repository.default_branch }}
+    - if: ${{ github.event_name != 'pull_request' && startsWith(env.TAG, 'branch-') }}
       name: Push $TAG (non-default branch)
       run: ./devel/push $TAG
 
@@ -43,7 +43,7 @@ jobs:
         pip install nextstrain-cli
         nextstrain build --image nextstrain/base:$TAG zika-tutorial -F
 
-    - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
+    - if: ${{ startsWith(env.TAG, 'build-') }}
       name: Push $TAG + latest (default branch)
       run: |
         ./devel/tag-latest $TAG
