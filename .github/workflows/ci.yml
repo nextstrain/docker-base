@@ -24,8 +24,6 @@ jobs:
 
     - run: ./devel/build $TAG
 
-    - run: ./devel/tag-latest $TAG
-
     - uses: actions/setup-python@v4
       with:
         python-version: ~3
@@ -43,7 +41,9 @@ jobs:
 
     - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
       name: Push $TAG + latest (default branch)
-      run: ./devel/push latest $TAG
+      run: |
+        ./devel/tag-latest $TAG
+        ./devel/push latest $TAG
     - if: ${{ github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name != github.event.repository.default_branch }}
       name: Push $TAG (non-default branch)
       run: ./devel/push $TAG
