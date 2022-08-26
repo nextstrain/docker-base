@@ -53,12 +53,14 @@ RUN mkdir -p /final/bin /final/share /final/libexec
 # 1. Build programs from source
 
 # Build RAxML
-# AVX should be widely-supported enough
+# linux/arm64 does not support -mavx and -msse3 compilation flags which are used in the official repository.
+# Make these changes in a fork for now: https://github.com/nextstrain/standard-RAxML/tree/simde
+# TODO: Use the official repository if this PR is ever merged: https://github.com/stamatak/standard-RAxML/pull/50
 WORKDIR /build/RAxML
-RUN curl -fsSL https://api.github.com/repos/stamatak/standard-RAxML/tarball/v8.2.12 \
+RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/4621552064304a219ff03810f5f0d91e1063b68f \
   | tar xzvpf - --no-same-owner --strip-components=1 \
- && make -f Makefile.AVX.PTHREADS.gcc \
- && cp -p raxmlHPC-PTHREADS-AVX /final/bin
+  && make -f Makefile.AVX.PTHREADS.gcc \
+  && cp -p raxmlHPC-PTHREADS-AVX /final/bin
 
 # Build FastTree
 WORKDIR /build/FastTree
