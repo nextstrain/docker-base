@@ -46,9 +46,15 @@ To build this image locally,
     ./devel/build
     ```
 
-    By default, this tags the image with `latest` and pushes to
+    By default, this builds for a single platform `linux/amd64`, tags the image with `latest`, and pushes to
     `localhost:5000`. See instructions at the top of the script for additional
     options.
+
+    If the target platform is different from the build platform, set up emulation before running `./devel/build`. This can be achieved using [`tonistiigi/binfmt`](https://github.com/tonistiigi/binfmt). For example, to set up emulation for `linux/arm64`, run:
+
+    ```
+    docker run --privileged --rm tonistiigi/binfmt --install arm64
+    ```
 
 On each subsequent change during your development iterations, you can run just
 the `./devel/build` command again.

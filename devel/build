@@ -14,15 +14,17 @@
 set -euo pipefail
 
 # Set default values.
+platform=linux/amd64
 registry=localhost:5000
 tag=latest
 
 # Read command-line arguments.
-while getopts "r:t:" opt; do
+while getopts "p:r:t:" opt; do
     case "$opt" in
+        p) platform="$OPTARG";;
         r) registry="$OPTARG";;
         t) tag="$OPTARG";;
-        *) echo "Usage: $0 [-r <registry>] [-t <tag>]" 1>&2; exit 1;;
+        *) echo "Usage: $0 [-p <platform>] [-r <registry>] [-t <tag>]" 1>&2; exit 1;;
     esac
 done
 
@@ -35,8 +37,6 @@ export GIT_REVISION=$(git describe --tags --abbrev=40 --always --dirty || true)
 #
 # Calling `docker run nextstrain/base` will still only pull down the small base
 # image rather than pulling down the larger nextstrain/base-builder image.
-
-platform=linux/amd64
 
 # `buildx create` is necessary to use a driver that supports multi-platform
 # images.
