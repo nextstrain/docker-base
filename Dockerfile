@@ -245,6 +245,15 @@ COPY --from=builder /nextstrain /nextstrain
 COPY entrypoint entrypoint-aws-batch /sbin/
 RUN chmod a+rx /sbin/entrypoint*
 
+# Setup a non-root user for normal operations
+RUN useradd nextstrain \
+    --system \
+    --user-group \
+    --shell /bin/bash \
+    --home-dir /nextstrain \
+    --no-log-init
+USER nextstrain:nextstrain
+
 # The host should bind mount the pathogen build dir into /nextstrain/build.
 WORKDIR /nextstrain/build
 
