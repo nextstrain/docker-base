@@ -148,8 +148,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zip unzip \
         zstd
 
-# Configure the prompt for interactive usage
-COPY prompt.sh /etc/profile.d/
+# Configure bash for interactive usage
+COPY bashrc /etc/bash.bashrc
 
 # Add custom built programs
 ENV MAFFT_BINARIES=/usr/local/libexec
