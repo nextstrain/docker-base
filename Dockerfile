@@ -245,6 +245,10 @@ COPY --from=builder /nextstrain /nextstrain
 COPY entrypoint entrypoint-aws-batch /sbin/
 RUN chmod a+rx /sbin/entrypoint*
 
+# Make /nextstrain a global HOME, writable by any UID (like /tmp)
+RUN chmod a+rwXt /nextstrain
+ENV HOME=/nextstrain
+
 # Setup a non-root user for normal operations
 RUN useradd nextstrain \
     --system \
