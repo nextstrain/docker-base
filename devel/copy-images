@@ -9,8 +9,6 @@
 # This copies just the tag specified by -t <tag>. If the boolean -l flag is
 # specified, the tag will also be copied to "latest" on the destnation.
 #
-# Errors if any of the tagged images have already been pushed.
-#
 set -euo pipefail
 
 # Set default values.
@@ -37,11 +35,6 @@ fi
 
 BUILDER_IMAGE=nextstrain/base-builder
 FINAL_IMAGE=nextstrain/base
-
-if [[ $(docker image inspect --format "{{.RepoDigests}}" $FINAL_IMAGE:$tag) != '[]' || $(docker image inspect --format "{{.RepoDigests}}" $BUILDER_IMAGE:$tag) != '[]' ]]; then
-    echo "At least one of $BUILDER_IMAGE:$tag and $FINAL_IMAGE:$tag has already been pushed. This can happen if the newly built image is not available in the local registry." >&2
-    exit 1
-fi
 
 
 # Use Skopeo via a Docker container¹ to copy a tagged image between registries.
