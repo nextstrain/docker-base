@@ -33,8 +33,8 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - if: github.event_name != 'pull_request' && startsWith(env.TAG, 'branch-')
-      name: Push $TAG (non-default branch)
-      run: ./devel/push $TAG
+      name: Copy $TAG images to Docker Hub (non-default branch)
+      run: ./devel/copy-images -i localhost:$REGISTRY_PORT -o docker.io -t $TAG
 
     - uses: actions/setup-python@v4
       with:
@@ -46,10 +46,9 @@ jobs:
         nextstrain build --image localhost:$REGISTRY_PORT/nextstrain/base:$TAG zika-tutorial -F
 
     - if: startsWith(env.TAG, 'build-')
-      name: Push $TAG + latest (default branch)
+      name: Copy $TAG + latest images to Docker Hub (default branch)
       run: |
-        ./devel/tag-latest $TAG
-        ./devel/push latest $TAG
+        ./devel/copy-images -i localhost:$REGISTRY_PORT -o docker.io -t $TAG -l
 
     - if: always()
       run: ./devel/stop-localhost-registry

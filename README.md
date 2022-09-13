@@ -66,12 +66,11 @@ during development iterations.
 
 To push images you've built locally to Docker Hub, you can run:
 
-    ./devel/push latest
+    ./devel/copy-images -t <tag>
 
-This will publish your local `nextstrain/base:latest` image.  This is also what
-happens if you run `./devel/push` with no tags specified.  If you have images
-with other tags, you may provide those tags in addition to or instead of
-`latest`.
+This will copy the `nextstrain/base:<tag>` and `nextstrain/base-builder:<tag>`
+images from the local Docker registry to Docker Hub. See instructions at the top
+of the script for more options.
 
 ### Best practices
 
