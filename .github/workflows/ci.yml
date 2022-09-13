@@ -43,7 +43,7 @@ jobs:
       run: |
         git clone https://github.com/nextstrain/zika-tutorial
         pip install nextstrain-cli
-        nextstrain build --image nextstrain/base:$TAG zika-tutorial -F
+        nextstrain build --image localhost:$REGISTRY_PORT/nextstrain/base:$TAG zika-tutorial -F
 
     - if: startsWith(env.TAG, 'build-')
       name: Push $TAG + latest (default branch)
