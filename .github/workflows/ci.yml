@@ -3,6 +3,8 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      REGISTRY_PORT: 5000
     steps:
 
     - uses: actions/checkout@v2
@@ -20,7 +22,9 @@ jobs:
       # and hyphens.
       run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a $GITHUB_ENV
 
-    - run: ./devel/build $TAG
+    - run: ./devel/start-localhost-registry $REGISTRY_PORT
+
+    - run: ./devel/build -r localhost:$REGISTRY_PORT -t $TAG
 
     - if: github.event_name != 'pull_request'
       uses: docker/login-action@v1
@@ -46,3 +50,6 @@ jobs:
       run: |
         ./devel/tag-latest $TAG
         ./devel/push latest $TAG
+
+    - if: always()
+      run: ./devel/stop-localhost-registry
