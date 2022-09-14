@@ -32,6 +32,10 @@ platform=linux/amd64
 builder=nextstrain-builder
 
 if ! docker buildx inspect "$builder" &>/dev/null; then
+    # Using a persistent builder allows for faster local development.
+    # However, if this is changed and it was previously run on your machine,
+    # you may need to remove the builder manually before running the script:
+    #     docker builder rm "nextstrain-builder"
     docker buildx create --name "$builder" --driver docker-container
 fi
 
