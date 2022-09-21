@@ -143,6 +143,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         nodejs \
         perl \
         ruby \
+        util-linux \
         wget \
         xz-utils \
         zip unzip \
