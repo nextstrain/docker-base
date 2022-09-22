@@ -17,6 +17,11 @@ if [[ $# -eq 0 ]]; then
         the source of the \`nextstrain\` command for examples.
     "
 else
-    # Otherwise, exec into whatever command is provided.
-    exec "$@"
+    # Otherwise, exec into whatever command is provided…
+    if [[ "$(id -u):$(id -g)" == 0:0 ]]; then
+        # …switching to nextstrain:nextstrain first if we're root.
+        exec setpriv --reuid nextstrain --regid nextstrain --init-groups "$@"
+    else
+        exec "$@"
+    fi
 fi
