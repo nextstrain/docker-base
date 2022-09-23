@@ -143,7 +143,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         nodejs \
         perl \
         ruby \
-        util-linux \
         wget \
         xz-utils \
         zip unzip \
@@ -250,13 +249,14 @@ RUN chmod a+rx /sbin/entrypoint*
 RUN chmod a+rwXt /nextstrain
 ENV HOME=/nextstrain
 
-# Setup a non-root user for optional use
+# Setup a non-root user for normal operations
 RUN useradd nextstrain \
     --system \
     --user-group \
     --shell /bin/bash \
     --home-dir /nextstrain \
     --no-log-init
+USER nextstrain:nextstrain
 
 # The host should bind mount the pathogen build dir into /nextstrain/build.
 WORKDIR /nextstrain/build
