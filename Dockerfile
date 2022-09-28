@@ -148,6 +148,27 @@ RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-
 
 # 3. Install programs via pip
 
+# Build cvxopt on linux/arm64
+# cvxopt, an Augur dependency, does not have pre-built binaries for linux/arm64.
+#
+# First, add system deps for building¹:
+# - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
+# - libsuitesparse-dev: Contains SuiteSparse.
+#
+# Then, "install" (build) separately since the process requires a special
+# environment variable².
+#
+# ¹ https://cvxopt.org/install/#building-and-installing-from-source
+# ² https://github.com/cvxopt/cvxopt/issues/125#issuecomment-407396491
+RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
+      apt-get update && apt-get install -y --no-install-recommends \
+          libopenblas-dev \
+          libsuitesparse-dev \
+   && CVXOPT_SUITESPARSE_INC_DIR=/usr/include/suitesparse \
+      pip3 install cvxopt \
+      ; \
+    fi
+
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
 
