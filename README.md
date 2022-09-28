@@ -28,14 +28,11 @@ This is most helpful when you want the image to contain the latest version of a 
 
 ### Building
 
-To build this image locally, first pull down the latest image from Docker Hub:
+To build this image locally, run:
 
-    ./devel/pull
-
-This will save you time by taking advantage of layer caching.  Then build the
-image with:
-
-    ./devel/build
+```
+./devel/build
+```
 
 By default, this tags the image with `latest`. If you want to use a custom tag
 name, you can specify it as the first argument to the script.
