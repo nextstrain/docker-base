@@ -47,8 +47,8 @@ docker buildx build \
     --platform $platform \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
-    --cache-from $BASE_BUILDER_IMAGE \
-    --cache-from $BASE_IMAGE \
+    --cache-from $BASE_BUILDER_IMAGE:latest \
+    --cache-from $BASE_IMAGE:latest \
     --cache-to type=inline \
     --tag $BASE_BUILDER_IMAGE:$tag \
     --load \
@@ -60,8 +60,8 @@ docker buildx build \
     --platform $platform \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
-    --cache-from $BASE_BUILDER_IMAGE \
-    --cache-from $BASE_IMAGE \
+    --cache-from $BASE_BUILDER_IMAGE:latest \
+    --cache-from $BASE_IMAGE:latest \
     --cache-to type=inline \
     --tag $BASE_IMAGE:$tag \
     --load \
