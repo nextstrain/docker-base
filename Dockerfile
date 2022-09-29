@@ -38,6 +38,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
  && apt-get update && apt-get install -y nodejs
 
+# Used for platform-specific instructions
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
 # Add dependencies. All should be pinned to specific versions, except
 # Nextstrain-maintained software.
 # This includes pathogen-specific workflow dependencies. Since we only maintain a
