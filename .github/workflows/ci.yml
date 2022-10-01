@@ -10,8 +10,6 @@ jobs:
     - name: Set $CACHE_DATE
       run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
 
-    - run: ./devel/pull
-
     - if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch
       name: Set $TAG (default branch)
       run: echo "TAG=build-$CACHE_DATE" | tee -a $GITHUB_ENV
