@@ -133,7 +133,7 @@ RUN cd /nextstrain/auspice && npm update && npm install && npm run build && npm 
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
-FROM python:3.7-slim-buster
+FROM python:3.7-slim-buster AS final
 
 # Add system runtime deps
 RUN apt-get update && apt-get install -y --no-install-recommends \

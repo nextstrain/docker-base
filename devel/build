@@ -39,18 +39,18 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
     docker buildx create --name "$builder" --driver docker-container
 fi
 
-BASE_IMAGE=nextstrain/base
-BASE_BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
+BUILDER_IMAGE=nextstrain/base-builder
 
 docker buildx build \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
-    --cache-from "$BASE_BUILDER_IMAGE:latest" \
-    --cache-from "$BASE_BUILDER_IMAGE:$tag" \
+    --cache-from "$BUILDER_IMAGE:latest" \
+    --cache-from "$BUILDER_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$BASE_BUILDER_IMAGE:$tag" \
+    --tag "$BUILDER_IMAGE:$tag" \
     --load \
     --target builder \
     .
@@ -60,11 +60,12 @@ docker buildx build \
     --platform "$platform" \
     --build-arg CACHE_DATE \
     --build-arg GIT_REVISION \
-    --cache-from "$BASE_BUILDER_IMAGE:latest" \
-    --cache-from "$BASE_BUILDER_IMAGE:$tag" \
-    --cache-from "$BASE_IMAGE:latest" \
-    --cache-from "$BASE_IMAGE:$tag" \
+    --cache-from "$BUILDER_IMAGE:latest" \
+    --cache-from "$BUILDER_IMAGE:$tag" \
+    --cache-from "$FINAL_IMAGE:latest" \
+    --cache-from "$FINAL_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$BASE_IMAGE:$tag" \
+    --tag "$FINAL_IMAGE:$tag" \
+    --target final \
     --load \
     .
