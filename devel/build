@@ -43,6 +43,7 @@ FINAL_IMAGE=nextstrain/base
 BUILDER_IMAGE=nextstrain/base-builder
 
 docker buildx build \
+    --target builder \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg CACHE_DATE \
@@ -52,10 +53,10 @@ docker buildx build \
     --cache-to type=inline \
     --tag "$BUILDER_IMAGE:$tag" \
     --load \
-    --target builder \
     .
 
 docker buildx build \
+    --target final \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg CACHE_DATE \
@@ -66,6 +67,5 @@ docker buildx build \
     --cache-from "$FINAL_IMAGE:$tag" \
     --cache-to type=inline \
     --tag "$FINAL_IMAGE:$tag" \
-    --target final \
     --load \
     .
