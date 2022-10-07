@@ -235,7 +235,7 @@ COPY --from=builder \
     /usr/local/bin/
 
 # Add installed Node libs
-COPY --from=builder /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
+COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
 
 # Add globally linked Auspice script.
 #
@@ -243,7 +243,7 @@ COPY --from=builder /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
 # _contents_ of the target being copied instead of a symlink being created.
 # The symlink is required so that Auspice's locally-installed deps are
 # correctly discovered by node.
-RUN ln -sv /usr/local/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
+RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
 
 # Add Nextstrain components
 COPY --from=builder /nextstrain /nextstrain
