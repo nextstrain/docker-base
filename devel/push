@@ -14,8 +14,8 @@ if [[ $# -eq 0 ]]; then
     set -- latest
 fi
 
-BASE_IMAGE="nextstrain/base"
-BASE_BUILDER_IMAGE="nextstrain/base-builder"
+BASE_IMAGE=nextstrain/base
+BASE_BUILDER_IMAGE=nextstrain/base-builder
 
 for tag in "$@"; do
     if [[ $(docker image inspect --format "{{.RepoDigests}}" $BASE_IMAGE:$tag) != '[]' || $(docker image inspect --format "{{.RepoDigests}}" $BASE_BUILDER_IMAGE:$tag) != '[]' ]]; then
@@ -25,6 +25,6 @@ for tag in "$@"; do
 done
 
 for tag in "$@"; do
-    docker push $BASE_BUILDER_IMAGE:$tag
-    docker push $BASE_IMAGE:$tag
+    docker push "$BASE_BUILDER_IMAGE:$tag"
+    docker push "$BASE_IMAGE:$tag"
 done
