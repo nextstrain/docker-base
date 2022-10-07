@@ -21,9 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         jq \
         libgmp-dev \
         libpng-dev \
-        nodejs \
-        npm \
         pkg-config
+
+# Install a specific Node.js version
+# https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
+ && apt-get install -y nodejs
 
 # Downloading dependencies, these should be pinned to specific versions
 
@@ -140,13 +143,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gzip \
         jq \
         less \
-        nodejs \
         perl \
         ruby \
         wget \
         xz-utils \
         zip unzip \
         zstd
+
+# Install a specific Node.js version
+# https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
+ && apt-get install -y nodejs
 
 # Configure bash for interactive usage
 COPY bashrc /etc/bash.bashrc
