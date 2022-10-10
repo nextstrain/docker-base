@@ -121,14 +121,10 @@ RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/downl
  && rm -f tsv-utils.tar.gz
 
 # Download csvtk
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
+RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download seqkit
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
+RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download gofasta (for ncov/Pangolin)
 # NOTE: Running this program requires support for emulation on the Docker host
