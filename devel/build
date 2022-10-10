@@ -39,8 +39,8 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
     docker buildx create --name "$builder" --driver docker-container
 fi
 
-FINAL_IMAGE=nextstrain/base
 BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
 
 docker buildx build \
     --target builder \

@@ -14,12 +14,12 @@ if [[ $# -eq 0 ]]; then
     set -- latest
 fi
 
-FINAL_IMAGE=nextstrain/base
 BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
 
 for tag in "$@"; do
-    if [[ $(docker image inspect --format "{{.RepoDigests}}" $FINAL_IMAGE:$tag) != '[]' || $(docker image inspect --format "{{.RepoDigests}}" $BUILDER_IMAGE:$tag) != '[]' ]]; then
-        echo "At least one of $FINAL_IMAGE:$tag and $BUILDER_IMAGE:$tag has already been pushed. This can happen if the newly built image is not available in the local registry." >&2
+    if [[ $(docker image inspect --format "{{.RepoDigests}}" $BUILDER_IMAGE:$tag) != '[]' || $(docker image inspect --format "{{.RepoDigests}}" $FINAL_IMAGE:$tag) != '[]' ]]; then
+        echo "At least one of $BUILDER_IMAGE:$tag and $FINAL_IMAGE:$tag has already been pushed. This can happen if the newly built image is not available in the local registry." >&2
         exit 1
     fi
 done

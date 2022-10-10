@@ -12,8 +12,8 @@ fi
 
 tag="$1"
 
-FINAL_IMAGE=nextstrain/base
 BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
 
 docker tag "$BUILDER_IMAGE":{"$tag",latest}
 docker tag "$FINAL_IMAGE":{"$tag",latest}
