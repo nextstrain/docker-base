@@ -50,35 +50,35 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
     docker buildx create --name "$builder" --driver docker-container --driver-opt network=host
 fi
 
-NATIVE_BUILDER_IMAGE=nextstrain/base-native-builder
-EMULATED_BUILDER_IMAGE=nextstrain/base-emulated-builder
+BUILD_PLATFORM_BUILDER_IMAGE=nextstrain/base-builder-build-platform
+TARGET_PLATFORM_BUILDER_IMAGE=nextstrain/base-builder-target-platform
 FINAL_IMAGE=nextstrain/base
 
 docker buildx build \
-    --target native-builder \
+    --target builder-build-platform \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg CACHE_DATE \
-    --cache-from "$NATIVE_BUILDER_IMAGE:latest" \
-    --cache-from "$NATIVE_BUILDER_IMAGE:$tag" \
-    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:$tag" \
+    --cache-from "$BUILD_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$BUILD_PLATFORM_BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$BUILD_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$BUILD_PLATFORM_BUILDER_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$registry/$NATIVE_BUILDER_IMAGE:$tag" \
+    --tag "$registry/$BUILD_PLATFORM_BUILDER_IMAGE:$tag" \
     --push \
     .
 
 docker buildx build \
-    --target emulated-builder \
+    --target builder-target-platform \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg CACHE_DATE \
-    --cache-from "$EMULATED_BUILDER_IMAGE:latest" \
-    --cache-from "$EMULATED_BUILDER_IMAGE:$tag" \
-    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:$tag" \
+    --cache-from "$TARGET_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$TARGET_PLATFORM_BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$TARGET_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$TARGET_PLATFORM_BUILDER_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$registry/$EMULATED_BUILDER_IMAGE:$tag" \
+    --tag "$registry/$TARGET_PLATFORM_BUILDER_IMAGE:$tag" \
     --push \
     .
 
@@ -87,16 +87,16 @@ docker buildx build \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg GIT_REVISION \
-    --cache-from "$NATIVE_BUILDER_IMAGE:latest" \
-    --cache-from "$NATIVE_BUILDER_IMAGE:$tag" \
-    --cache-from "$EMULATED_BUILDER_IMAGE:latest" \
-    --cache-from "$EMULATED_BUILDER_IMAGE:$tag" \
+    --cache-from "$BUILD_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$BUILD_PLATFORM_BUILDER_IMAGE:$tag" \
+    --cache-from "$TARGET_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$TARGET_PLATFORM_BUILDER_IMAGE:$tag" \
     --cache-from "$FINAL_IMAGE:latest" \
     --cache-from "$FINAL_IMAGE:$tag" \
-    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:$tag" \
-    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$BUILD_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$BUILD_PLATFORM_BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$TARGET_PLATFORM_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$TARGET_PLATFORM_BUILDER_IMAGE:$tag" \
     --cache-from "$registry/$FINAL_IMAGE:latest" \
     --cache-from "$registry/$FINAL_IMAGE:$tag" \
     --cache-to type=inline \

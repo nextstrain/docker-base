@@ -17,8 +17,10 @@ while getopts "r:t:" opt; do
     esac
 done
 
-BUILDER_IMAGE=nextstrain/base-builder
+BUILD_PLATFORM_BUILDER_IMAGE=nextstrain/base-builder-build-platform
+TARGET_PLATFORM_BUILDER_IMAGE=nextstrain/base-builder-target-platform
 FINAL_IMAGE=nextstrain/base
 
-docker pull "$registry/$BUILDER_IMAGE:$tag"
+docker pull "$registry/$BUILD_PLATFORM_BUILDER_IMAGE:$tag"
+docker pull "$registry/$TARGET_PLATFORM_BUILDER_IMAGE:$tag"
 docker pull "$registry/$FINAL_IMAGE:$tag"

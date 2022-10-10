@@ -8,7 +8,11 @@
 
 module.exports = async ({octokit, tag}) => {
   org = 'nextstrain';
-  packages = ['base', 'base-builder'];
+  packages = [
+    'base',
+    'base-builder-build-platform',
+    'base-builder-target-platform',
+  ];
 
   // Try all packages before terminating with any errors.
   let errorEncountered = false;
