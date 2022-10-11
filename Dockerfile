@@ -28,7 +28,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
  && apt-get install -y nodejs
 
-# Downloading dependencies, these should be pinned to specific versions
+# Downloading dependencies, these should be pinned to specific versions.
+# This includes pathogen-specific workflow dependencies. Since we only maintain a
+# single Docker image to support all pathogen workflows, some pathogen-specific
+# functionality must live in this Dockerfile. The following dependencies may be
+# used by multiple pathogen workflows, but they have been commented according to
+# the original pathogen that added these dependencies.
 
 # mafft
 WORKDIR /build/mafft
@@ -100,16 +105,10 @@ RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
 # accessible and importable.
 RUN pip3 install --editable "/nextstrain/augur"
 
-# Install pathogen-specific workflow dependencies. Since we only maintain a
-# single Docker image to support all pathogen workflows, some pathogen-specific
-# functionality must live in this Dockerfile. The following dependencies may be
-# used by multiple pathogen workflows, but they have been commented according to
-# the original pathogen that added these dependencies.
-
-# ncov
+# epiweeks (for ncov)
 RUN pip3 install epiweeks==2.1.2
 
-# Add Pangolin and PangoLEARN + deps
+# Add Pangolin and PangoLEARN + deps (for ncov)
 RUN pip3 install pysam
 RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
 RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
