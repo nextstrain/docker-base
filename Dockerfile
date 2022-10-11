@@ -111,8 +111,7 @@ RUN pip3 install epiweeks==2.1.2
 
 # Add Pangolin and PangoLEARN + deps
 RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
-        -o /usr/local/bin/gofasta \
-  && chmod a+rx /usr/local/bin/gofasta
+        -o /usr/local/bin/gofasta
 RUN cd /usr/local/bin && curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
   | tar xjvpf - --no-same-owner --strip-components=1 minimap2-2.24_x64-linux/minimap2
 RUN pip3 install pysam
@@ -174,23 +173,19 @@ COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
 
 # Add Nextalign v2
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-x86_64-unknown-linux-gnu \
-      --output /usr/local/bin/nextalign2 \
- && chmod a+rx /usr/local/bin/nextalign2
+      --output /usr/local/bin/nextalign2
 
 # Add Nextclade v2
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
-      --output /usr/local/bin/nextclade2 \
- && chmod a+rx /usr/local/bin/nextclade2
+      --output /usr/local/bin/nextclade2
 
 # Add Nextalign v1
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64 \
-      --output /usr/local/bin/nextalign1 \
- && chmod a+rx /usr/local/bin/nextalign1
+      --output /usr/local/bin/nextalign1
 
 # Add Nextclade v1
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64 \
-      --output /usr/local/bin/nextclade1 \
- && chmod a+rx /usr/local/bin/nextclade1
+      --output /usr/local/bin/nextclade1
 
 # Set default Nextclade and Nextalign version to 2
 RUN ln -sv nextclade2 /usr/local/bin/nextclade \
@@ -208,7 +203,7 @@ RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_
 RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_linux_amd64.tar.gz | tar xz --no-same-owner -C /usr/local/bin
 
 # Ensure all container users can execute these programs
-RUN chmod a+rX /usr/local/bin/* /usr/local/libexec/*
+RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
 COPY --from=builder /usr/local/lib/python3.7/site-packages/ /usr/local/lib/python3.7/site-packages/
