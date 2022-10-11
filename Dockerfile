@@ -28,41 +28,87 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
  && apt-get install -y nodejs
 
-# Downloading dependencies, these should be pinned to specific versions.
+# Add dependencies. All should be pinned to specific versions, except
+# Nextstrain-maintained software.
 # This includes pathogen-specific workflow dependencies. Since we only maintain a
 # single Docker image to support all pathogen workflows, some pathogen-specific
 # functionality must live in this Dockerfile. The following dependencies may be
 # used by multiple pathogen workflows, but they have been commented according to
 # the original pathogen that added these dependencies.
 
-# mafft
-WORKDIR /build/mafft
-RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
-  | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/
+# Create directories to be copied in final stage.
+RUN mkdir -p /final/bin /final/share /final/libexec
 
-# RAxML
+
+# 1. Build programs from source
+
+# Build RAxML
+# AVX should be widely-supported enough
 WORKDIR /build/RAxML
 RUN curl -fsSL https://api.github.com/repos/stamatak/standard-RAxML/tarball/v8.2.12 \
-  | tar xzvpf - --no-same-owner --strip-components=1
-RUN make -f Makefile.AVX.PTHREADS.gcc   # AVX should be widely-supported enough
+  | tar xzvpf - --no-same-owner --strip-components=1 \
+ && make -f Makefile.AVX.PTHREADS.gcc \
+ && cp -p raxmlHPC-PTHREADS-AVX /final/bin
 
-# FastTree
+# Build FastTree
 WORKDIR /build/FastTree
 RUN curl -fsSL https://api.github.com/repos/tsibley/FastTree/tarball/50c5b098ea085b46de30bfc29da5e3f113353e6f \
-  | tar xzvpf - --no-same-owner --strip-components=1
-RUN make FastTreeDblMP
+  | tar xzvpf - --no-same-owner --strip-components=1 \
+ && make FastTreeDblMP \
+ && cp -p FastTreeDblMP /final/bin
 
-# IQ-TREE
-WORKDIR /build/IQ-TREE
-RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
-  | tar xzvpf - --no-same-owner --strip-components=1
-RUN mv bin/iqtree2 bin/iqtree
-
-# vcftools
+# Build vcftools
 WORKDIR /build/vcftools
 RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz \
-  | tar xzvpf - --no-same-owner --strip-components=2
-RUN ./configure --prefix=$PWD/built && make && make install
+  | tar xzvpf - --no-same-owner --strip-components=2 \
+ && ./configure --prefix=$PWD/built \
+ && make && make install \
+ && cp -rp built/bin/*    /final/bin \
+ && cp -rp built/share/*  /final/share
+
+
+# 2. Download pre-built programs
+
+# Download MAFFT
+WORKDIR /download/mafft
+RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
+  | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/ \
+ && cp -p bin/*     /final/bin \
+ && cp -p libexec/* /final/libexec
+
+# Download IQ-TREE
+WORKDIR /download/IQ-TREE
+RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
+  | tar xzvpf - --no-same-owner --strip-components=1 \
+ && mv bin/iqtree2 /final/bin/iqtree
+
+# Download Nextalign v1
+RUN curl -fsSL -o /final/bin/nextalign1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64
+
+# Download Nextclade v1
+RUN curl -fsSL -o /final/bin/nextclade1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64
+
+# Download tsv-utils
+RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz \
+ && tar -x --no-same-owner -v -C /final/bin -z --strip-components 2 --wildcards -f tsv-utils.tar.gz "*/bin/*" \
+ && rm -f tsv-utils.tar.gz
+
+# Download csvtk
+RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
+
+# Download seqkit
+RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
+
+# Download gofasta (for ncov/Pangolin)
+RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
+  -o /final/bin/gofasta
+
+# Download minimap2 (for ncov/Pangolin)
+RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
+  | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
+
+
+# 3. Install programs via pip
 
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
@@ -79,21 +125,35 @@ RUN pip3 install snakemake==5.10.0
 # from Google Storage URIs.
 RUN pip3 install google-cloud-storage==2.1.0
 
-# epiweeks (for ncov)
+# Install epiweeks (for ncov)
 RUN pip3 install epiweeks==2.1.2
 
-# Add Pangolin and PangoLEARN + deps (for ncov)
+# Install Pangolin and PangoLEARN + deps (for ncov)
 RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
 RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
 RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
 RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
 RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
 
-# Add Nextstrain components
+
+# 4. Add Nextstrain components
 
 # Allow caching to be avoided from here on out by calling
 # docker build --build-arg CACHE_DATE="$(date)"
 ARG CACHE_DATE
+
+# Nextclade/Nextalign v2 are downloaded directly but using the latest version,
+# so they belong after CACHE_DATE (unlike Nextclade/Nextalign v1).
+
+# Download Nextalign v2
+# Set default Nextalign version to 2
+RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-x86_64-unknown-linux-gnu \
+ && ln -sv nextalign2 /final/bin/nextalign
+
+# Download Nextclade v2
+# Set default Nextclade version to 2
+RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
+ && ln -sv nextclade2 /final/bin/nextclade
 
 # Add helpers for build
 COPY builder-scripts/download-repo builder-scripts/latest-augur-release-tag /builder-scripts/
@@ -155,57 +215,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
 # Configure bash for interactive usage
 COPY bashrc /etc/bash.bashrc
 
-# Add custom built programs
+# Copy binaries
+COPY --from=builder /final/bin/ /usr/local/bin/
+COPY --from=builder /final/share/ /usr/local/share/
+COPY --from=builder /final/libexec/ /usr/local/libexec/
+
+# Set MAFFT_BINARIES explicitly for MAFFT
 ENV MAFFT_BINARIES=/usr/local/libexec
-COPY --from=builder /build/mafft/bin/     /usr/local/bin/
-COPY --from=builder /build/mafft/libexec/ /usr/local/libexec/
-COPY --from=builder \
-    /build/RAxML/raxmlHPC-PTHREADS-AVX \
-    /build/FastTree/FastTreeDblMP \
-    /build/IQ-TREE/bin/iqtree \
-    /usr/local/bin/
-
-COPY --from=builder /build/vcftools/built/bin/    /usr/local/bin/
-COPY --from=builder /build/vcftools/built/share/  /usr/local/share/
-
-# Add Nextalign v2
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-x86_64-unknown-linux-gnu \
-      --output /usr/local/bin/nextalign2
-
-# Add Nextclade v2
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
-      --output /usr/local/bin/nextclade2
-
-# Add Nextalign v1
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64 \
-      --output /usr/local/bin/nextalign1
-
-# Add Nextclade v1
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64 \
-      --output /usr/local/bin/nextclade1
-
-# Set default Nextclade and Nextalign version to 2
-RUN ln -sv nextclade2 /usr/local/bin/nextclade \
- && ln -sv nextalign2 /usr/local/bin/nextalign
-
-# Add tsv-utils
-RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz \
- && tar -x --no-same-owner -v -C /usr/local/bin -z --strip-components 2 --wildcards -f tsv-utils.tar.gz "*/bin/*" \
- && rm -f tsv-utils.tar.gz
-
-# Add csvtk
-RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_linux_amd64.tar.gz | tar xz --no-same-owner -C /usr/local/bin
-
-# Add seqkit
-RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_linux_amd64.tar.gz | tar xz --no-same-owner -C /usr/local/bin
-
-# Add gofasta (for ncov/Pangolin)
-RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
-  -o /usr/local/bin/gofasta
-
-# Add minimap2 (for ncov/Pangolin)
-RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
-  | tar xjvpf - --no-same-owner --strip-components=1 -C /usr/local/bin minimap2-2.24_x64-linux/minimap2
 
 # Ensure all container users can execute these programs
 RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
