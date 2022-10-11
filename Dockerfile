@@ -79,6 +79,16 @@ RUN pip3 install snakemake==5.10.0
 # from Google Storage URIs.
 RUN pip3 install google-cloud-storage==2.1.0
 
+# epiweeks (for ncov)
+RUN pip3 install epiweeks==2.1.2
+
+# Add Pangolin and PangoLEARN + deps (for ncov)
+RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
+RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
+RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
+RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
+RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
+
 # Add Nextstrain components
 
 # Allow caching to be avoided from here on out by calling
@@ -105,16 +115,8 @@ RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
 # accessible and importable.
 RUN pip3 install --editable "/nextstrain/augur"
 
-# epiweeks (for ncov)
-RUN pip3 install epiweeks==2.1.2
-
-# Add Pangolin and PangoLEARN + deps (for ncov)
+# pysam (for ncov/Pangolin)
 RUN pip3 install pysam
-RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
-RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
-RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
-RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
-RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
 
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
