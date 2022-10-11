@@ -115,12 +115,12 @@ RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0
   && chmod a+rx /usr/local/bin/gofasta
 RUN cd /usr/local/bin && curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
   | tar xjvpf - --no-same-owner --strip-components=1 minimap2-2.24_x64-linux/minimap2
-RUN pip install pysam
-RUN pip install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
-RUN pip install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
-RUN pip install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
-RUN pip install git+https://github.com/cov-lineages/constellations.git@v0.1.1
-RUN pip install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
+RUN pip3 install pysam
+RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
+RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
+RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
+RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
+RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
 
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
