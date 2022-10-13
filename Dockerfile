@@ -21,9 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         jq \
         libgmp-dev \
         libpng-dev \
-        nodejs \
-        npm \
         pkg-config
+
+# Install a specific Node.js version
+# https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
+ && apt-get install -y nodejs
 
 # Downloading dependencies, these should be pinned to specific versions
 
@@ -140,13 +143,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gzip \
         jq \
         less \
-        nodejs \
         perl \
         ruby \
         wget \
         xz-utils \
         zip unzip \
         zstd
+
+# Install a specific Node.js version
+# https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
+ && apt-get install -y nodejs
 
 # Configure bash for interactive usage
 COPY bashrc /etc/bash.bashrc
@@ -228,7 +235,7 @@ COPY --from=builder \
     /usr/local/bin/
 
 # Add installed Node libs
-COPY --from=builder /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
+COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
 
 # Add globally linked Auspice script.
 #
@@ -236,7 +243,7 @@ COPY --from=builder /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
 # _contents_ of the target being copied instead of a symlink being created.
 # The symlink is required so that Auspice's locally-installed deps are
 # correctly discovered by node.
-RUN ln -sv /usr/local/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
+RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
 
 # Add Nextstrain components
 COPY --from=builder /nextstrain /nextstrain
