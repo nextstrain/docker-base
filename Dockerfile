@@ -81,16 +81,16 @@ RUN pip3 install google-cloud-storage==2.1.0
 ARG CACHE_DATE
 
 # Add helpers for build
-COPY devel/download-repo devel/latest-augur-release-tag /devel/
+COPY builder-scripts/download-repo builder-scripts/latest-augur-release-tag /builder-scripts/
 
 # Fauna
-RUN /devel/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
+RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
 
 # Augur
-RUN /devel/download-repo https://github.com/nextstrain/augur "$(/devel/latest-augur-release-tag)" /nextstrain/augur
+RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" /nextstrain/augur
 
 # Auspice
-RUN /devel/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
+RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
 
 # Install Fauna deps
 RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
