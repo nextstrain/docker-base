@@ -10,10 +10,10 @@ if [[ $# -ne 1 ]]; then
     exit 1
 fi
 
-tag=$1
+tag="$1"
 
-BASE_IMAGE="nextstrain/base"
-BASE_BUILDER_IMAGE="nextstrain/base-builder"
+BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
 
-docker tag $BASE_BUILDER_IMAGE:{$tag,latest}
-docker tag $BASE_IMAGE:{$tag,latest}
+docker tag "$BUILDER_IMAGE":{"$tag",latest}
+docker tag "$FINAL_IMAGE":{"$tag",latest}
