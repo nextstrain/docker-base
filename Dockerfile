@@ -145,6 +145,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         less \
         perl \
         ruby \
+        util-linux \
         wget \
         xz-utils \
         zip unzip \
@@ -266,6 +267,7 @@ RUN useradd nextstrain \
 
 # The host should bind mount the pathogen build dir into /nextstrain/build.
 WORKDIR /nextstrain/build
+RUN chown nextstrain:nextstrain /nextstrain/build
 
 ENTRYPOINT ["/sbin/entrypoint"]
 
