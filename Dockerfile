@@ -11,6 +11,15 @@ FROM python:3.7-slim-buster AS builder
 SHELL ["/bin/bash", "-c"]
 
 # Add system deps for building
+# autoconf, automake: for building VCFtools; may be used by package managers to build from source
+# build-essential: contains gcc, g++, make, etc. for building various tools; may be used by package managers to build from source
+# ca-certificates: for secure HTTPS connections
+# curl: for downloading source files
+# git: for git pip installs
+# jq: used in builder-scripts/latest-augur-release-tag
+# pkg-config: for building VCFtools; may be used by package managers to build from source
+# zlib1g-dev: for building VCFtools; may be used by package managers to build from source
+# nodejs: for installing Auspice
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
@@ -191,6 +200,15 @@ RUN cd /nextstrain/auspice && npm update && npm install && npm run build && npm 
 FROM python:3.7-slim-buster AS final
 
 # Add system runtime deps
+# bzip2, gzip, xz-utils, zip, unzip, zstd: install compression tools
+# ca-certificates: [Dockerfile] for secure HTTPS connections; may be used by workflows
+# curl: [Dockerfile] for downloading binaries directly; may be used by workflows
+# jq: may be used by workflows
+# less: for usability in an interactive prompt
+# perl: for running VCFtools
+# ruby: may be used by workflows
+# wget: may be used by workflows
+# nodejs: for running Auspice
 RUN apt-get update && apt-get install -y --no-install-recommends \
         bzip2 \
         ca-certificates \
