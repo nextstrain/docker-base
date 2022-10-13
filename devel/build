@@ -49,8 +49,6 @@ docker buildx build \
     --build-arg GIT_REVISION \
     --cache-from $BASE_BUILDER_IMAGE:latest \
     --cache-from $BASE_BUILDER_IMAGE:$tag \
-    --cache-from $BASE_IMAGE:latest \
-    --cache-from $BASE_IMAGE:$tag \
     --cache-to type=inline \
     --tag $BASE_BUILDER_IMAGE:$tag \
     --load \
