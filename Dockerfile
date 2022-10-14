@@ -95,6 +95,8 @@ WORKDIR /build/vcftools
 RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz \
   | tar xzvpf - --no-same-owner --strip-components=2 \
  && ./configure --prefix=$PWD/built \
+      --build=$(TARGETPLATFORM= xx-clang --print-target-triple) \
+      --host=$(xx-clang --print-target-triple) \
  && make && make install \
  && cp -rp built/bin/*    /final/bin \
  && cp -rp built/share/*  /final/share
