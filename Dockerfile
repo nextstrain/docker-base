@@ -183,16 +183,12 @@ COPY builder-scripts/ /builder-scripts/
 
 # Download Nextalign v2
 # Set default Nextalign version to 2
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-x86_64-unknown-linux-gnu \
+RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-$(/builder-scripts/target-triple) \
  && ln -sv nextalign2 /final/bin/nextalign
 
 # Download Nextclade v2
 # Set default Nextclade version to 2
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
+RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
  && ln -sv nextclade2 /final/bin/nextclade
 
 # Fauna
