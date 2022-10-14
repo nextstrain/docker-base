@@ -142,6 +142,7 @@ RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
 RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
 RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
 RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
+RUN pip3 install pysam==0.19.1
 
 
 # 4. Add Nextstrain components
@@ -178,9 +179,6 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . 
 WORKDIR /nextstrain/augur
 RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
  && pip3 install --editable .
-
-# pysam (for ncov/Pangolin)
-RUN pip3 install pysam==0.19.1
 
 # Auspice
 # Install Node deps, build Auspice, and link it into the global search path.  A
