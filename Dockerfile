@@ -180,7 +180,7 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/build
  && pip3 install --editable .
 
 # pysam (for ncov/Pangolin)
-RUN pip3 install pysam
+RUN pip3 install pysam==0.19.1
 
 # Auspice
 # Install Node deps, build Auspice, and link it into the global search path.  A
