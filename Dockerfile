@@ -74,13 +74,13 @@ RUN mkdir -p /final/bin /final/share /final/libexec
 # 1. Build programs from source
 
 # Build RAxML
-# linux/arm64 does not support -mavx and -msse3 compilation flags which are used in the official repository.
-# Make these changes in a fork for now: https://github.com/nextstrain/standard-RAxML/tree/simde
+# Some changes are necessary to allow the Makefile to work with cross-compilation.
+# Make these changes in a fork for now: https://github.com/nextstrain/standard-RAxML/tree/fix-cross-compile
 # TODO: Use the official repository if this PR is ever merged: https://github.com/stamatak/standard-RAxML/pull/50
 WORKDIR /build/RAxML
-RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/4621552064304a219ff03810f5f0d91e1063b68f \
+RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/4868de62a62be8901259807cfea26f336c2ca477 \
   | tar xzvpf - --no-same-owner --strip-components=1 \
-  && make -f Makefile.AVX.PTHREADS.gcc \
+  && CC=xx-clang make -f Makefile.AVX.PTHREADS.gcc \
   && cp -p raxmlHPC-PTHREADS-AVX /final/bin
 
 # Build FastTree
