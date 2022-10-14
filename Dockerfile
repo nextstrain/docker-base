@@ -22,20 +22,20 @@ COPY --from=xx / /
 
 # Add system deps for building
 # autoconf, automake: for building VCFtools; may be used by package managers to build from source
-# build-essential: contains gcc, g++, make, etc. for building various tools; may be used by package managers to build from source
 # ca-certificates: for secure HTTPS connections
 # curl: for downloading source files
 # git: used in builder-scripts/download-repo
+# make: used for building from Makefiles (search for usage); may be used by package managers to build from source
 # pkg-config: for building VCFtools; may be used by package managers to build from source
 # zlib1g-dev: for building VCFtools; may be used by package managers to build from source
 # nodejs: for installing Auspice
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
-        build-essential \
         ca-certificates \
         curl \
         git \
+        make \
         pkg-config \
         zlib1g-dev
 
@@ -298,6 +298,8 @@ RUN pip3 install phylo-treetime
 # CVXOPT, an Augur dependency, does not have pre-built binaries for linux/arm64.
 #
 # First, add system deps for building¹:
+# - gcc: C compiler.
+# - libc6-dev: C libraries and header files.
 # - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
 # - SuiteSparse: Download the source code so it can be built alongside CVXOPT.
 #
@@ -309,6 +311,8 @@ RUN pip3 install phylo-treetime
 WORKDIR /cvxopt
 RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
       apt-get update && apt-get install -y --no-install-recommends \
+          gcc \
+          libc6-dev \
           libopenblas-dev \
    && mkdir SuiteSparse \
    && curl -fsSL https://api.github.com/repos/DrTimothyAldenDavis/SuiteSparse/tarball/v5.8.1 \
