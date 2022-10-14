@@ -50,20 +50,35 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
     docker buildx create --name "$builder" --driver docker-container --driver-opt network=host
 fi
 
-BUILDER_IMAGE=nextstrain/base-builder
+NATIVE_BUILDER_IMAGE=nextstrain/base-native-builder
+EMULATED_BUILDER_IMAGE=nextstrain/base-emulated-builder
 FINAL_IMAGE=nextstrain/base
 
 docker buildx build \
-    --target builder \
+    --target native-builder \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg CACHE_DATE \
-    --cache-from "$BUILDER_IMAGE:latest" \
-    --cache-from "$BUILDER_IMAGE:$tag" \
-    --cache-from "$registry/$BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$BUILDER_IMAGE:$tag" \
+    --cache-from "$NATIVE_BUILDER_IMAGE:latest" \
+    --cache-from "$NATIVE_BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$registry/$BUILDER_IMAGE:$tag" \
+    --tag "$registry/$NATIVE_BUILDER_IMAGE:$tag" \
+    --push \
+    .
+
+docker buildx build \
+    --target emulated-builder \
+    --builder "$builder" \
+    --platform "$platform" \
+    --build-arg CACHE_DATE \
+    --cache-from "$EMULATED_BUILDER_IMAGE:latest" \
+    --cache-from "$EMULATED_BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:$tag" \
+    --cache-to type=inline \
+    --tag "$registry/$EMULATED_BUILDER_IMAGE:$tag" \
     --push \
     .
 
@@ -72,12 +87,16 @@ docker buildx build \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg GIT_REVISION \
-    --cache-from "$BUILDER_IMAGE:latest" \
-    --cache-from "$BUILDER_IMAGE:$tag" \
+    --cache-from "$NATIVE_BUILDER_IMAGE:latest" \
+    --cache-from "$NATIVE_BUILDER_IMAGE:$tag" \
+    --cache-from "$EMULATED_BUILDER_IMAGE:latest" \
+    --cache-from "$EMULATED_BUILDER_IMAGE:$tag" \
     --cache-from "$FINAL_IMAGE:latest" \
     --cache-from "$FINAL_IMAGE:$tag" \
-    --cache-from "$registry/$BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$NATIVE_BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:latest" \
+    --cache-from "$registry/$EMULATED_BUILDER_IMAGE:$tag" \
     --cache-from "$registry/$FINAL_IMAGE:latest" \
     --cache-from "$registry/$FINAL_IMAGE:$tag" \
     --cache-to type=inline \
