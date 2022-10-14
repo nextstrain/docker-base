@@ -27,7 +27,6 @@ COPY --from=xx / /
 # git: used in builder-scripts/download-repo
 # make: used for building from Makefiles (search for usage); may be used by package managers to build from source
 # pkg-config: for building VCFtools; may be used by package managers to build from source
-# zlib1g-dev: for building VCFtools; may be used by package managers to build from source
 # nodejs: for installing Auspice
 # clang: for compiling C/C++ projects; may be used by package managers to build from source
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -38,8 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         git \
         make \
-        pkg-config \
-        zlib1g-dev
+        pkg-config
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
@@ -54,10 +52,12 @@ ARG TARGETARCH
 # Install packages that generate binaries for the target architecture.
 # https://github.com/tonistiigi/xx#building-on-debian
 # binutils, gcc, libc6-dev: for compiling C/C++ programs (TODO: verify)
+# zlib1g-dev: for building VCFtools; may be used by package managers to build from source
 RUN xx-apt-get install -y \
   binutils \
   gcc \
-  libc6-dev
+  libc6-dev \
+  zlib1g-dev
 
 # Add dependencies. All should be pinned to specific versions, except
 # Nextstrain-maintained software.
