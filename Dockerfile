@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         git \
         jq \
-        libgmp-dev \
         pkg-config \
         zlib1g-dev
 
