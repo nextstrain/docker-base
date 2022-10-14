@@ -22,20 +22,20 @@ COPY --from=xx / /
 
 # Add system deps for building
 # autoconf, automake: for building VCFtools; may be used by package managers to build from source
-# build-essential: contains gcc, g++, make, etc. for building various tools; may be used by package managers to build from source
 # ca-certificates: for secure HTTPS connections
 # curl: for downloading source files
 # git: for git clones
+# make: used for building from Makefiles (search for usage); may be used by package managers to build from source
 # pkg-config: for building VCFtools; may be used by package managers to build from source
 # zlib1g-dev: for building VCFtools; may be used by package managers to build from source
 # nodejs: for installing Auspice
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
-        build-essential \
         ca-certificates \
         curl \
         git \
+        make \
         pkg-config \
         zlib1g-dev
 
@@ -234,6 +234,8 @@ RUN mkdir -p /final/bin
 # cvxopt, an Augur dependency, does not have pre-built binaries for linux/arm64.
 #
 # First, add system deps for building¹:
+# - gcc: C compiler.
+# - libc6-dev: C libraries and header files.
 # - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
 # - libsuitesparse-dev: Contains SuiteSparse.
 #
@@ -244,6 +246,8 @@ RUN mkdir -p /final/bin
 # ² https://github.com/cvxopt/cvxopt/issues/125#issuecomment-407396491
 RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
       apt-get update && apt-get install -y --no-install-recommends \
+          gcc \
+          libc6-dev \
           libopenblas-dev \
           libsuitesparse-dev \
    && CVXOPT_SUITESPARSE_INC_DIR=/usr/include/suitesparse \
