@@ -137,6 +137,7 @@ RUN pip3 install google-cloud-storage==2.1.0
 RUN pip3 install epiweeks==2.1.2
 
 # Install Pangolin and PangoLEARN + deps (for ncov)
+# The cov-lineages projects aren't available on PyPI, so install via git URLs.
 RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
 RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
 RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
