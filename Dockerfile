@@ -85,9 +85,9 @@ RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/48
 
 # Build FastTree
 WORKDIR /build/FastTree
-RUN curl -fsSL https://api.github.com/repos/tsibley/FastTree/tarball/50c5b098ea085b46de30bfc29da5e3f113353e6f \
+RUN curl -fsSL https://api.github.com/repos/nextstrain/FastTree/tarball/df4212c8c9991e7e0d432e42d53c21cd8408a181 \
   | tar xzvpf - --no-same-owner --strip-components=1 \
- && make FastTreeDblMP \
+ && CC=$(xx-info)-gcc make FastTreeDblMP \
  && cp -p FastTreeDblMP /final/bin
 
 # Build vcftools
