@@ -53,10 +53,12 @@ ARG TARGETARCH
 # Install packages that generate binaries for the target architecture.
 # https://github.com/tonistiigi/xx#building-on-debian
 # binutils, gcc, libc6-dev: for compiling C/C++ programs (TODO: verify)
+# g++: for building VCFtools; may be used by package managers to build from source
 # zlib1g-dev: for building VCFtools; may be used by package managers to build from source
 RUN xx-apt-get install -y \
   binutils \
   gcc \
+  g++ \
   libc6-dev \
   zlib1g-dev
 
