@@ -142,6 +142,9 @@ RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a
 # docker build --build-arg CACHE_DATE="$(date)"
 ARG CACHE_DATE
 
+# Add helper scripts
+COPY builder-scripts/ /builder-scripts/
+
 # Nextclade/Nextalign v2 are downloaded directly but using the latest version,
 # so they belong after CACHE_DATE (unlike Nextclade/Nextalign v1).
 
@@ -154,9 +157,6 @@ RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/
 # Set default Nextclade version to 2
 RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
  && ln -sv nextclade2 /final/bin/nextclade
-
-# Add helper scripts
-COPY builder-scripts/ /builder-scripts/
 
 # Fauna
 RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
