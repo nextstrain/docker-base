@@ -29,9 +29,11 @@ COPY --from=xx / /
 # pkg-config: for building VCFtools; may be used by package managers to build from source
 # zlib1g-dev: for building VCFtools; may be used by package managers to build from source
 # nodejs: for installing Auspice
+# clang: for compiling C/C++ projects; may be used by package managers to build from source
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
+        clang \
         ca-certificates \
         curl \
         git \
