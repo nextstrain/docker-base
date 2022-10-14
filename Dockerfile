@@ -155,8 +155,8 @@ RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/
 RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
  && ln -sv nextclade2 /final/bin/nextclade
 
-# Add helpers for build
-COPY builder-scripts/download-repo builder-scripts/latest-augur-release-tag /builder-scripts/
+# Add helper scripts
+COPY builder-scripts/ /builder-scripts/
 
 # Fauna
 RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
