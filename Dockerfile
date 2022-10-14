@@ -20,8 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         jq \
         libgmp-dev \
-        libpng-dev \
-        pkg-config
+        pkg-config \
+        zlib1g-dev
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
