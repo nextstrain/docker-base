@@ -94,10 +94,12 @@ RUN curl -fsSL https://api.github.com/repos/nextstrain/FastTree/tarball/df4212c8
  && cp -p FastTreeDblMP /final/bin
 
 # Build vcftools
+# Some unreleased changes are necessary to allow Autoconf to work with cross-compilation¹.
+# ¹ https://github.com/vcftools/vcftools/commit/1cab5204eb0ce01664178bafd0ad6104525709d1
 WORKDIR /build/vcftools
-RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz \
-  | tar xzvpf - --no-same-owner --strip-components=2 \
- && ./configure --prefix=$PWD/built \
+RUN curl -fsSL https://api.github.com/repos/vcftools/vcftools/tarball/1cab5204eb0ce01664178bafd0ad6104525709d1 \
+  | tar xzvpf - --no-same-owner --strip-components=1 \
+ && ./autogen.sh && ./configure --prefix=$PWD/built \
       --build=$(TARGETPLATFORM= xx-clang --print-target-triple) \
       --host=$(xx-clang --print-target-triple) \
  && make && make install \
