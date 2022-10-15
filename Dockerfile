@@ -200,7 +200,10 @@ RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/
 # used for the same reasons described above.
 WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
- && npm update && npm install && npm run build && npm link
+ && npm update \
+ && npm install \
+ && npm run build \
+ && npm link
 
 # Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
 RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets
