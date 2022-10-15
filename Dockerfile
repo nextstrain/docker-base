@@ -24,6 +24,7 @@ COPY --from=xx / /
 # autoconf, automake: for building VCFtools; may be used by package managers to build from source
 # ca-certificates: for secure HTTPS connections
 # curl: for downloading source files
+# g++: for building iltorb, an indirect dependency of Auspice
 # git: for git clones
 # make: used for building from Makefiles (search for usage); may be used by package managers to build from source
 # pkg-config: for building VCFtools; may be used by package managers to build from source
@@ -35,6 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         clang \
         ca-certificates \
         curl \
+        g++ \
         git \
         make \
         pkg-config \
