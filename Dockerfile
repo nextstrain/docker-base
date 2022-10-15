@@ -199,6 +199,19 @@ RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/
 # Linking is used so we can overlay the auspice version in the image with
 # --volume=.../auspice:/nextstrain/auspice and still have it globally accessible
 # and importable.
+#
+# Versions of NPM might differ in platform between where Auspice is installed
+# and where it is used (the final image). This does not matter since Auspice
+# (and its runtime dependencies at the time of writing) are not
+# platform-specific.
+# This may change in the future, which would call for cross-platform
+# installation using npm_config_arch (if using node-gyp¹ or prebuild-install²)
+# or npm_config_target_arch (if using node-pre-gyp³⁴).
+#
+# ¹ https://github.com/nodejs/node-gyp#environment-variables
+# ² https://github.com/prebuild/prebuild-install#help
+# ³ https://github.com/mapbox/node-pre-gyp#options
+# ⁴ https://github.com/mapbox/node-pre-gyp/blob/v1.0.10/lib/node-pre-gyp.js#L186
 WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
  && npm update && npm install && npm run build && npm link
