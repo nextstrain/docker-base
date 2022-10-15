@@ -201,7 +201,9 @@ RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/
 WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
  && npm update \
+    --arch=$TARGETARCH \
  && npm install \
+    --arch=$TARGETARCH \
  && npm run build \
  && npm link
 
