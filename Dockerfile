@@ -150,6 +150,9 @@ RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a
 # docker build --build-arg CACHE_DATE="$(date)"
 ARG CACHE_DATE
 
+# Add helper scripts
+COPY builder-scripts/ /builder-scripts/
+
 # Nextclade/Nextalign v2 are downloaded directly but using the latest version,
 # so they belong after CACHE_DATE (unlike Nextclade/Nextalign v1).
 
@@ -163,36 +166,32 @@ RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/
 RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
  && ln -sv nextclade2 /final/bin/nextclade
 
-# Add helpers for build
-COPY builder-scripts/download-repo builder-scripts/latest-augur-release-tag /builder-scripts/
-
 # Fauna
-RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master /nextstrain/fauna
+WORKDIR /nextstrain/fauna
+RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . \
+ && pip3 install --requirement=requirements.txt
 
 # Augur
-RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" /nextstrain/augur
-
-# Auspice
-RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release /nextstrain/auspice
-
-# Install Fauna deps
-RUN pip3 install --requirement=/nextstrain/fauna/requirements.txt
-
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
-RUN pip3 install --editable "/nextstrain/augur"
+WORKDIR /nextstrain/augur
+RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
+ && pip3 install --editable .
 
 # pysam (for ncov/Pangolin)
 RUN pip3 install pysam
 
+# Auspice
 # Install Node deps, build Auspice, and link it into the global search path.  A
 # fresh install is only ~40 seconds, so we're not worrying about caching these
 # as we did the Python deps.  Building auspice means we can run it without
 # hot-reloading, which is time-consuming and generally unnecessary in the
 # container image.  Linking is equivalent to an editable Python install and
 # used for the same reasons described above.
-RUN cd /nextstrain/auspice && npm update && npm install && npm run build && npm link
+WORKDIR /nextstrain/auspice
+RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
+ && npm update && npm install && npm run build && npm link
 
 # ———————————————————————————————————————————————————————————————————— #
 
