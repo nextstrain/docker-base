@@ -87,6 +87,8 @@ RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vc
 # 2. Download pre-built programs
 
 # Download MAFFT
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 WORKDIR /download/mafft
 RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
   | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/ \
@@ -94,33 +96,49 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
  && cp -p libexec/* /final/libexec
 
 # Download IQ-TREE
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 WORKDIR /download/IQ-TREE
 RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
 # Download Nextalign v1
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -fsSL -o /final/bin/nextalign1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64
 
 # Download Nextclade v1
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -fsSL -o /final/bin/nextclade1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64
 
 # Download tsv-utils
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz \
  && tar -x --no-same-owner -v -C /final/bin -z --strip-components 2 --wildcards -f tsv-utils.tar.gz "*/bin/*" \
  && rm -f tsv-utils.tar.gz
 
 # Download csvtk
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download seqkit
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download gofasta (for ncov/Pangolin)
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
   -o /final/bin/gofasta
 
 # Download minimap2 (for ncov/Pangolin)
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
   | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
 
@@ -169,11 +187,15 @@ COPY builder-scripts/ /builder-scripts/
 
 # Download Nextalign v2
 # Set default Nextalign version to 2
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-x86_64-unknown-linux-gnu \
  && ln -sv nextalign2 /final/bin/nextalign
 
 # Download Nextclade v2
 # Set default Nextclade version to 2
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
 RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
  && ln -sv nextclade2 /final/bin/nextclade
 
