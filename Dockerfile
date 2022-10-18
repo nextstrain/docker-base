@@ -5,7 +5,7 @@
 # image with tools only needed during the image build.
 
 # First build the temporary image.
-FROM python:3.10.8-slim-buster AS builder
+FROM python:3.10-slim-buster AS builder
 
 # Execute subsequent RUN statements with bash for handy modern shell features.
 SHELL ["/bin/bash", "-c"]
