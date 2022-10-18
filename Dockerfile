@@ -196,7 +196,7 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
-FROM python:3.7-slim-buster AS final
+FROM python:3.10-slim-buster AS final
 
 # Add system runtime deps
 # bzip2, gzip, xz-utils, zip, unzip, zstd: install compression tools
@@ -243,7 +243,7 @@ ENV MAFFT_BINARIES=/usr/local/libexec
 RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
-COPY --from=builder /usr/local/lib/python3.7/site-packages/ /usr/local/lib/python3.7/site-packages/
+COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
 
 # Add installed Python scripts that we need.
 #
