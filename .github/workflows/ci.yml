@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request, workflow_dispatch]
 jobs:
-  run:
+  build:
     runs-on: ubuntu-latest
     steps:
 
@@ -22,15 +22,30 @@ jobs:
 
     - run: ./devel/build $TAG
 
-    - if: github.event_name != 'pull_request'
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_LOGIN }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+    - run: |
+        docker save -o images.tar \
+          nextstrain/base-builder:$TAG \
+          nextstrain/base:$TAG
 
-    - if: github.event_name != 'pull_request' && startsWith(env.TAG, 'branch-')
-      name: Push $TAG (non-default branch)
-      run: ./devel/push $TAG
+    - name: Temporarily save Docker image
+      uses: actions/upload-artifact@v3
+      with:
+        name: docker-images
+        path: images.tar
+        retention-days: 1
+
+    outputs:
+      tag: ${{ env.TAG }}
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: docker-images
+
+    - run: docker load -i images.tar
 
     - uses: actions/setup-python@v4
       with:
@@ -39,10 +54,48 @@ jobs:
       run: |
         git clone https://github.com/nextstrain/zika-tutorial
         pip install nextstrain-cli
-        nextstrain build --image nextstrain/base:$TAG zika-tutorial -F
+        nextstrain build --image nextstrain/base:${{ needs.build.outputs.tag }} zika-tutorial -F
 
-    - if: startsWith(env.TAG, 'build-')
-      name: Push $TAG + latest (default branch)
+  push-branch:
+    needs: build
+    if: github.event_name != 'pull_request' && startsWith(needs.build.outputs.tag, 'branch-')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: docker-images
+
+    - run: docker load -i images.tar
+
+    - uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_LOGIN }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Push $TAG (non-default branch)
+      run: ./devel/push ${{ needs.build.outputs.tag }}
+
+  push-build:
+    if: github.event_name != 'pull_request' && startsWith(needs.build.outputs.tag, 'build-')
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: docker-images
+
+    - run: docker load -i images.tar
+
+    - uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_LOGIN }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Push ${{ needs.build.outputs.tag }} + latest (default branch)
       run: |
-        ./devel/tag-latest $TAG
-        ./devel/push latest $TAG
+        ./devel/tag-latest ${{ needs.build.outputs.tag }}
+        ./devel/push latest ${{ needs.build.outputs.tag }}
