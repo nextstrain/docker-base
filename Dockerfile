@@ -125,7 +125,7 @@ RUN pip3 install envdir==1.0.1
 RUN pip3 install awscli==1.18.195
 
 # Install our own CLI so builds can do things like `nextstrain deploy`
-RUN pip3 install nextstrain-cli==2.0.0.post1
+RUN pip3 install nextstrain-cli
 
 # Install Snakemake and related optional dependencies.
 RUN pip3 install snakemake==5.10.0
