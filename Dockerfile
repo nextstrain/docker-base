@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
- && apt-get install -y nodejs
+ && apt-get update && apt-get install -y nodejs
 
 # Add dependencies. All should be pinned to specific versions, except
 # Nextstrain-maintained software.
@@ -226,7 +226,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
- && apt-get install -y nodejs
+ && apt-get update && apt-get install -y nodejs
 
 # Configure bash for interactive usage
 COPY bashrc /etc/bash.bashrc
