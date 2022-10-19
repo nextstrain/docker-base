@@ -192,6 +192,9 @@ WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
  && npm update && npm install && npm run build && npm link
 
+# Add evofr for forecasting
+RUN pip3 install evofr
+
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
