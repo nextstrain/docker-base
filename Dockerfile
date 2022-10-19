@@ -5,7 +5,7 @@
 # image with tools only needed during the image build.
 
 # First build the temporary image.
-FROM python:3.7-slim-buster AS builder
+FROM python:3.7-slim-bullseye AS builder
 
 # Execute subsequent RUN statements with bash for handy modern shell features.
 SHELL ["/bin/bash", "-c"]
@@ -196,7 +196,7 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
-FROM python:3.7-slim-buster AS final
+FROM python:3.7-slim-bullseye AS final
 
 # Add system runtime deps
 # bzip2, gzip, xz-utils, zip, unzip, zstd: install compression tools
