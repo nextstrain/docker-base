@@ -124,9 +124,6 @@ RUN pip3 install envdir==1.0.1
 # Install tooling for our AWS Batch builds, which use `aws s3`.
 RUN pip3 install awscli==1.18.195
 
-# Install our own CLI so builds can do things like `nextstrain deploy`
-RUN pip3 install nextstrain-cli
-
 # Install Snakemake and related optional dependencies.
 RUN pip3 install snakemake==5.10.0
 # Google Cloud Storage package is required for Snakemake to fetch remote files
@@ -151,6 +148,9 @@ RUN pip3 install pysam==0.19.1
 # Allow caching to be avoided from here on out by calling
 # docker build --build-arg CACHE_DATE="$(date)"
 ARG CACHE_DATE
+
+# Install our own CLI so builds can do things like `nextstrain deploy`
+RUN pip3 install nextstrain-cli
 
 # Add helper scripts
 COPY builder-scripts/ /builder-scripts/
