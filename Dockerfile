@@ -17,8 +17,9 @@ SHELL ["/bin/bash", "-c"]
 # curl: for downloading source files
 # git: for git pip installs
 # jq: used in builder-scripts/latest-augur-release-tag
+# libsqlite3-dev: for building pyfastx (for Augur)
 # pkg-config: for building VCFtools; may be used by package managers to build from source
-# zlib1g-dev: for building VCFtools; may be used by package managers to build from source
+# zlib1g-dev: for building VCFtools and pyfastx; may be used by package managers to build from source
 # nodejs: for installing Auspice
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
@@ -28,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         git \
         jq \
+        libsqlite3-dev \
         pkg-config \
         zlib1g-dev
 
@@ -206,9 +208,11 @@ FROM python:3.10-slim-bullseye AS final
 # curl: [Dockerfile] for downloading binaries directly; may be used by workflows
 # jq: may be used by workflows
 # less: for usability in an interactive prompt
+# libsqlite3: for pyfastx (for Augur)
 # perl: for running VCFtools
 # ruby: may be used by workflows
 # wget: may be used by workflows
+# zlib1g: for pyfastx (for Augur)
 # nodejs: for running Auspice
 RUN apt-get update && apt-get install -y --no-install-recommends \
         bzip2 \
@@ -217,12 +221,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gzip \
         jq \
         less \
+        libsqlite3-0 \
         perl \
         ruby \
         util-linux \
         wget \
         xz-utils \
         zip unzip \
+        zlib1g \
         zstd
 
 # Install a specific Node.js version
