@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+# Copy the Nextstrain images from one Docker registry (-i <registry>) to
+# another (-o <registry>).
+#
+# If authentication is required for a registry, ensure the credentials are
+# available in ~/.docker/config.json.
+#
+# This copies just the tag specified by -t <tag>. If the boolean -l flag is
+# specified, the tag will also be copied to "latest" on the destnation.
+#
+set -euo pipefail
+
+# Set default values.
+registry_in=localhost:5000
+registry_out=docker.io
+tag=""
+push_latest=false
+
+# Read command-line arguments.
+while getopts "i:o:t:l" opt; do
+    case "$opt" in
+        i) registry_in="$OPTARG";;
+        o) registry_out="$OPTARG";;
+        t) tag="$OPTARG";;
+        l) push_latest=true;;
+        *) echo "Usage: $0 [-i <registry>] [-o <registry>] [-t <tag>] [-l]" 1>&2; exit 1;;
+    esac
+done
+
+if [[ "$tag" = "" ]]; then
+    echo "Please provide a tag." >&2
+    exit 1
+fi
+
+BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
+
+
+# Use Skopeo via a Docker container¹ to copy a tagged image between registries.
+#
+# Two positional parameters are required, representing the source and
+# destination images each qualified with a Docker registry.
+# Format should be <registry>/image:tag, e.g. docker.io/nextstrain/base:latest.
+#
+# If a registry starts with localhost, do not require HTTPS or verify
+# certificates, and access the registry without authentication.
+#
+# ¹ https://github.com/containers/skopeo/blob/07da29fd371dd88615a0b86e91c6824237484172/install.md#container-images
+copy-image() {
+    local src="$1"
+    local dest="$2"
+
+    docker_run_params=(--rm --network=host)
+    skopeo_copy_params=(--multi-arch=all)
+
+    if [[ "$src" == localhost* ]]; then
+        skopeo_copy_params+=(--src-tls-verify=false)
+    else
+        docker_run_params+=(-v "$HOME"/.docker/config.json:/config.json:ro)
+        skopeo_copy_params+=(--src-authfile config.json)
+    fi
+
+    if [[ "$dest" == localhost* ]]; then
+        skopeo_copy_params+=(--dest-tls-verify=false)
+    else
+        docker_run_params+=(-v "$HOME"/.docker/config.json:/config.json:ro)
+        skopeo_copy_params+=(--dest-authfile config.json)
+    fi
+
+    docker run "${docker_run_params[@]}" \
+        quay.io/skopeo/stable \
+        copy "${skopeo_copy_params[@]}" \
+        "docker://$src" \
+        "docker://$dest"
+}
+
+# Copy $tag between registries.
+
+echo "Copying $registry_in/$FINAL_IMAGE:$tag to $registry_out/$FINAL_IMAGE:$tag."
+copy-image \
+    "$registry_in/$FINAL_IMAGE:$tag" \
+    "$registry_out/$FINAL_IMAGE:$tag"
+
+echo "Copying $registry_in/$BUILDER_IMAGE:$tag to $registry_out/$BUILDER_IMAGE:$tag."
+copy-image \
+    "$registry_in/$BUILDER_IMAGE:$tag" \
+    "$registry_out/$BUILDER_IMAGE:$tag"
+
+if [[ "$push_latest" = true ]]; then
+    # Copy $tag to latest.
+
+    echo "Copying $registry_in/$FINAL_IMAGE:$tag to $registry_out/$FINAL_IMAGE:latest."
+    copy-image \
+        "$registry_in/$FINAL_IMAGE:$tag" \
+        "$registry_out/$FINAL_IMAGE:latest"
+
+    echo "Copying $registry_in/$BUILDER_IMAGE:$tag to $registry_out/$BUILDER_IMAGE:latest."
+    copy-image \
+        "$registry_in/$BUILDER_IMAGE:$tag" \
+        "$registry_out/$BUILDER_IMAGE:latest"
+fi

@@ -28,14 +28,27 @@ This is most helpful when you want the image to contain the latest version of a 
 
 ### Building
 
-To build this image locally, run:
+To build this image locally,
 
-```
-./devel/build
-```
+1. Start a local Docker registry.
 
-By default, this tags the image with `latest`. If you want to use a custom tag
-name, you can specify it as the first argument to the script.
+    ```
+    ./devel/start-localhost-registry
+    ```
+
+    It will be served at `localhost:5000`. Optionally, specify another port as
+    an argument. Running a local Docker registry allows us to mimic direct push
+    to a registry done in the GitHub Actions CI workflow.
+
+2. Build the image.
+
+    ```
+    ./devel/build
+    ```
+
+    By default, this tags the image with `latest` and pushes to
+    `localhost:5000`. See instructions at the top of the script for additional
+    options.
 
 On each subsequent change during your development iterations, you can run just
 the `./devel/build` command again.
@@ -53,12 +66,11 @@ during development iterations.
 
 To push images you've built locally to Docker Hub, you can run:
 
-    ./devel/push latest
+    ./devel/copy-images -t <tag>
 
-This will publish your local `nextstrain/base:latest` image.  This is also what
-happens if you run `./devel/push` with no tags specified.  If you have images
-with other tags, you may provide those tags in addition to or instead of
-`latest`.
+This will copy the `nextstrain/base:<tag>` and `nextstrain/base-builder:<tag>`
+images from the local Docker registry to Docker Hub. See instructions at the top
+of the script for more options.
 
 ### Best practices
 

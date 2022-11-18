@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Starts a Docker registry on localhost using a Docker container.
+#
+set -euo pipefail
+
+# Port to run the registry on. If not provided, default to 5000.
+PORT="${1:-5000}"
+
+# Name of the docker container.
+NAME=nextstrain-local-registry
+
+# Docker image that provides the registry service.
+IMAGE=registry:2
+
+docker run -d -p "$PORT":"$PORT" --restart always --name "$NAME" "$IMAGE" > /dev/null

@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# Stops a local Docker registry created by start-localhost-registry.
+#
+set -euo pipefail
+
+NAME=nextstrain-local-registry
+
+docker stop "$NAME" > /dev/null
+docker rm "$NAME" > /dev/null
