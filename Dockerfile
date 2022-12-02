@@ -169,6 +169,15 @@ RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
       ; \
     fi
 
+# Install jaxlib on linux/arm64
+# jaxlib, an evofr dependency, does not have official pre-built binaries for
+# linux/arm64. A GitHub user has provided them in a fork repo.
+# https://github.com/google/jax/issues/7097#issuecomment-1110730040
+RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
+      pip3 install https://github.com/yoziru/jax/releases/download/jaxlib-v0.3.25/jaxlib-0.3.25-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl \
+      ; \
+    fi
+
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
 
