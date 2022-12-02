@@ -10,6 +10,9 @@ module.exports = async ({octokit, tag}) => {
   org = 'nextstrain';
   packages = ['base', 'base-builder'];
 
+  // Try all packages before terminating with any errors.
+  let errorEncountered = false;
+
   for (const packageName of packages) {
     const { data: packageVersions } = await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
       org: org,
@@ -20,7 +23,9 @@ module.exports = async ({octokit, tag}) => {
     const versionsWithTag = packageVersions.filter(version => version.metadata.container.tags.includes(tag));
 
     if (versionsWithTag.length == 0) {
-      throw new Error(`${org}/${packageName}:${tag} was not found.`);
+      console.error(`${org}/${packageName}:${tag} was not found.`);
+      errorEncountered = true;
+      continue;
     }
 
     // Each tag should only correspond to one package version.
@@ -51,11 +56,19 @@ module.exports = async ({octokit, tag}) => {
           });
         } catch (deletePackageError) {
           console.log(deletePackageError);
-          throw new Error(`Could not delete ${org}/${packageName}.`);
+          console.error(`Could not delete ${org}/${packageName}.`);
+          errorEncountered = true;
+          continue;
         }
       } else {
-        throw new Error(`Could not delete ${org}/${packageName}:${tag}.`);
+        console.error(`Could not delete ${org}/${packageName}:${tag}.`);
+        errorEncountered = true;
+        continue;
       }
     }
+  }
+
+  if (errorEncountered) {
+    throw new Error(`Some package versions could not be deleted.`)
   }
 }
