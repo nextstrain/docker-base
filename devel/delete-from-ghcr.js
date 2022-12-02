@@ -14,11 +14,19 @@ module.exports = async ({octokit, tag}) => {
   let errorEncountered = false;
 
   for (const packageName of packages) {
-    const { data: packageVersions } = await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
-      org: org,
-      package_type: 'container',
-      package_name: packageName,
-    });
+    let packageVersions;
+    try {
+      packageVersions = (await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
+        org: org,
+        package_type: 'container',
+        package_name: packageName,
+      })).data;
+    } catch (listPackageVersionsError) {
+      console.log(listPackageVersionsError);
+      console.error(`Could not list versions of package ${org}/${packageName}.`);
+      errorEncountered = true;
+      continue;
+    }
 
     const versionsWithTag = packageVersions.filter(version => version.metadata.container.tags.includes(tag));
 
