@@ -50,6 +50,7 @@ module.exports = async ({octokit, tag}) => {
         package_name: packageName,
         package_version_id: versionId,
       });
+      console.log("Done.");
     } catch (deleteVersionError) {
       console.log(deleteVersionError);
 
@@ -62,6 +63,7 @@ module.exports = async ({octokit, tag}) => {
             package_type: 'container',
             package_name: packageName,
           });
+          console.log("Done.");
         } catch (deletePackageError) {
           console.log(deletePackageError);
           console.error(`Could not delete ${org}/${packageName}.`);
