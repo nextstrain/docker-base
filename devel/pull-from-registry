@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Pull the Nextstrain images from a Docker registry.
+#
+set -euo pipefail
+
+# Set default values.
+registry=localhost:5000
+tag=latest
+
+# Read command-line arguments.
+while getopts "r:t:" opt; do
+    case "$opt" in
+        r) registry="$OPTARG";;
+        t) tag="$OPTARG";;
+        *) echo "Usage: $0 [-r <registry>] [-t <tag>]" 1>&2; exit 1;;
+    esac
+done
+
+BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
+
+docker pull "$registry/$BUILDER_IMAGE:$tag"
+docker pull "$registry/$FINAL_IMAGE:$tag"

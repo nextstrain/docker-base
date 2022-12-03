@@ -62,6 +62,15 @@ variable to a new timestamp first:
 Otherwise, letting the build process use the cached layers will save you time
 during development iterations.
 
+### Using the images locally
+
+Since the images are pushed directly to the local registry, they are not
+available to the local Docker daemon after building (i.e.
+`nextstrain build --image nextstrain/base` does not refer to the latest built
+image). To pull the images for local usage, run:
+
+    ./devel/pull-from-registry
+
 ### Pushing images to Docker Hub
 
 To push images you've built locally to Docker Hub, you can run:
