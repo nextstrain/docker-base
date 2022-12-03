@@ -10,17 +10,30 @@ module.exports = async ({octokit, tag}) => {
   org = 'nextstrain';
   packages = ['base', 'base-builder'];
 
+  // Try all packages before terminating with any errors.
+  let errorEncountered = false;
+
   for (const packageName of packages) {
-    const { data: packageVersions } = await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
-      org: org,
-      package_type: 'container',
-      package_name: packageName,
-    });
+    let packageVersions;
+    try {
+      packageVersions = (await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
+        org: org,
+        package_type: 'container',
+        package_name: packageName,
+      })).data;
+    } catch (listPackageVersionsError) {
+      console.log(listPackageVersionsError);
+      console.error(`Could not list versions of package ${org}/${packageName}.`);
+      errorEncountered = true;
+      continue;
+    }
 
     const versionsWithTag = packageVersions.filter(version => version.metadata.container.tags.includes(tag));
 
     if (versionsWithTag.length == 0) {
-      throw new Error(`${org}/${packageName}:${tag} was not found.`);
+      console.error(`${org}/${packageName}:${tag} was not found.`);
+      errorEncountered = true;
+      continue;
     }
 
     // Each tag should only correspond to one package version.
@@ -37,6 +50,7 @@ module.exports = async ({octokit, tag}) => {
         package_name: packageName,
         package_version_id: versionId,
       });
+      console.log("Done.");
     } catch (deleteVersionError) {
       console.log(deleteVersionError);
 
@@ -49,13 +63,22 @@ module.exports = async ({octokit, tag}) => {
             package_type: 'container',
             package_name: packageName,
           });
+          console.log("Done.");
         } catch (deletePackageError) {
           console.log(deletePackageError);
-          throw new Error(`Could not delete ${org}/${packageName}.`);
+          console.error(`Could not delete ${org}/${packageName}.`);
+          errorEncountered = true;
+          continue;
         }
       } else {
-        throw new Error(`Could not delete ${org}/${packageName}:${tag}.`);
+        console.error(`Could not delete ${org}/${packageName}:${tag}.`);
+        errorEncountered = true;
+        continue;
       }
     }
+  }
+
+  if (errorEncountered) {
+    throw new Error(`Some package versions could not be deleted.`)
   }
 }
