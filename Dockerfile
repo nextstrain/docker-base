@@ -206,6 +206,7 @@ FROM python:3.10-slim-bullseye AS final
 # bzip2, gzip, xz-utils, zip, unzip, zstd: install compression tools
 # ca-certificates: [Dockerfile] for secure HTTPS connections; may be used by workflows
 # curl: [Dockerfile] for downloading binaries directly; may be used by workflows
+# dos2unix: tsv-utils needs unix line endings
 # jq: may be used by workflows
 # less: for usability in an interactive prompt
 # libsqlite3: for pyfastx (for Augur)
@@ -218,6 +219,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bzip2 \
         ca-certificates \
         curl \
+        dos2unix \
         gzip \
         jq \
         less \
