@@ -81,6 +81,30 @@ This will copy the `nextstrain/base:<tag>` and `nextstrain/base-builder:<tag>`
 images from the local Docker registry to Docker Hub. See instructions at the top
 of the script for more options.
 
+### Adding a new software program
+
+To add a software program to `nextstrain/base`, follow steps in this order:
+
+1. Check if it is available via the Ubuntu package manager. You can use
+   `apt-cache search` or [Ubuntu Packages Search](https://packages.ubuntu.com/)
+   if you do not have an Ubuntu machine. If available, add it to the `apt-get
+   install` command following `FROM … AS final`
+   ([example](https://github.com/nextstrain/docker-base/commit/8f5e059ce897a85194f35517e56b31424e89472e)).
+2. Check if it is available via PyPI. You can search on [PyPI's
+   website](https://pypi.org/search/). If available, add an install command to
+   the section labeled with `Install programs via pip`.
+3. Check if a pre-built binary is available on the software's website (e.g.
+   GitHub release assets). If available, add a download command to the section
+   labeled with `Download pre-built programs`.
+4. The last resort is to build from source. Look for instructions on the
+   software's website. Add a build command to the section labeled with `Build
+   programs from source`.
+
+If possible, pin the software to a specific version. Otherwise, add the
+download/install/build command to the section labeled with `Add unpinned
+programs and Nextstrain components` to ensure the latest version is included in
+every Docker image build.
+
 ### Best practices
 
 The smaller the image size, the better.  To this end we build upon a ["slim"
