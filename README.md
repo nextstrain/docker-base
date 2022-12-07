@@ -93,7 +93,8 @@ To add a software program to `nextstrain/base`, follow steps in this order:
 2. Check if it is available via PyPI. You can search on [PyPI's
    website](https://pypi.org/search/). If available, add an install command to
    the section labeled with `Install programs via pip`.
-3. Check if a pre-built binary is available on the software's website (e.g.
+3. Check if a pre-built binary for the `linux/amd64` platform (name contains
+   `linux` and `amd64`/`x86_64`) is available on the software's website (e.g.
    GitHub release assets). If available, add a download command to the section
    labeled with `Download pre-built programs`.
 4. The last resort is to build from source. Look for instructions on the
