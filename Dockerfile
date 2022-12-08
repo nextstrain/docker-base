@@ -197,6 +197,10 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release
 # Add evofr for forecasting
 RUN pip3 install evofr
 
+# Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
+RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/datasets
+RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/dataformat
+
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
