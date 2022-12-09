@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         jq \
         libsqlite3-dev \
         pkg-config \
+        rsync \
         zlib1g-dev
 
 # Install a specific Node.js version
@@ -117,7 +118,6 @@ RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0
 RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
   | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
 
-
 # 3. Install programs via pip
 
 # Install envdir, which is used by pathogen builds
@@ -127,7 +127,7 @@ RUN pip3 install envdir==1.0.1
 RUN pip3 install awscli==1.18.195
 
 # Install Snakemake and related optional dependencies.
-RUN pip3 install snakemake==5.10.0
+RUN pip3 install snakemake==6.8.0
 # Google Cloud Storage package is required for Snakemake to fetch remote files
 # from Google Storage URIs.
 RUN pip3 install google-cloud-storage==2.1.0
@@ -137,11 +137,10 @@ RUN pip3 install epiweeks==2.1.2
 
 # Install Pangolin and PangoLEARN + deps (for ncov)
 # The cov-lineages projects aren't available on PyPI, so install via git URLs.
-RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
-RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
-RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
-RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
-RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
+RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v4.1.3
+RUN pip3 install git+https://github.com/cov-lineages/pangolin-data.git@v1.16
+RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.17
+RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.10
 RUN pip3 install pysam==0.19.1
 
 
@@ -203,6 +202,27 @@ RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/dataset
 
 # ———————————————————————————————————————————————————————————————————— #
 
+# Build UShER for use with pangolin 4+
+FROM debian:bullseye AS usher
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+ENV DEBIAN_FRONTEND=noninteractive
+USER root
+RUN apt-get update && apt-get install -yq --no-install-recommends \
+    git wget \
+    ca-certificates \
+    sudo python3 python3-pip
+RUN mkdir -p /usherbuild
+WORKDIR /usherbuild
+# faSomeRecords and faSize are needed for the UShER WDL workflow
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faSomeRecords
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faSize
+RUN chmod 775 *
+## Checkout latest release
+RUN git clone https://github.com/yatisht/usher.git
+RUN cd usher && git checkout v0.6.0 && ./install/installUbuntu.sh
+
+# ———————————————————————————————————————————————————————————————————— #
+
 # Now build the final image.
 FROM python:3.10-slim-bullseye AS final
 
@@ -219,6 +239,7 @@ FROM python:3.10-slim-bullseye AS final
 # wget: may be used by workflows
 # zlib1g: for pyfastx (for Augur)
 # nodejs: for running Auspice
+# boost libs: for running Usher
 RUN apt-get update && apt-get install -y --no-install-recommends \
         bzip2 \
         ca-certificates \
@@ -235,12 +256,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         xz-utils \
         zip unzip \
         zlib1g \
-        zstd
-
+        zstd \
+        libboost-filesystem1.74.0 \
+        libboost-program-options1.74.0 \
+        libboost-iostreams1.74.0 \
+        libboost-date-time1.74.0 \
+        libprotobuf23 \
+        libtbb2
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
  && apt-get update && apt-get install -y nodejs
+
+# libtbb doesn't install well on bullseye:
+RUN ln -s /usr/lib/x86_64-linux-gnu/libtbb.so.2 /usr/lib/x86_64-linux-gnu/libtbb_preview.so.2
 
 # Configure bash for interactive usage
 COPY bashrc /etc/bash.bashrc
@@ -249,6 +278,22 @@ COPY bashrc /etc/bash.bashrc
 COPY --from=builder /final/bin/ /usr/local/bin/
 COPY --from=builder /final/share/ /usr/local/share/
 COPY --from=builder /final/libexec/ /usr/local/libexec/
+COPY --from=usher \
+    /usherbuild/usher/build/compareVCF \
+    /usherbuild/usher/build/faToVcf \
+    /usherbuild/usher/build/matOptimize \
+    /usherbuild/usher/build/matUtils \
+    /usherbuild/usher/build/ripples \
+    /usherbuild/usher/build/ripples-fast \
+    /usherbuild/usher/build/ripplesInit \
+    /usherbuild/usher/build/ripplesUtils \
+    /usherbuild/usher/build/transpose_vcf \
+    /usherbuild/usher/build/transposed_vcf_print_name \
+    /usherbuild/usher/build/transposed_vcf_to_fa \
+    /usherbuild/usher/build/transposed_vcf_to_vcf \
+    /usherbuild/usher/build/usher \
+    /usherbuild/usher/build/usher-sampled \
+    /usr/local/bin
 
 # Set MAFFT_BINARIES explicitly for MAFFT
 ENV MAFFT_BINARIES=/usr/local/libexec

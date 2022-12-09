@@ -13,4 +13,4 @@ NAME=nextstrain-local-registry
 # Docker image that provides the registry service.
 IMAGE=registry:2
 
-docker run -d -p "$PORT":"$PORT" --restart always --name "$NAME" "$IMAGE" > /dev/null
+docker run -d -p $PORT:5000 --restart always --name "$NAME" "$IMAGE" > /dev/null
