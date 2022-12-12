@@ -31,7 +31,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         jq \
         libsqlite3-dev \
         pkg-config \
-        rsync \
         zlib1g-dev
 
 # Install a specific Node.js version
