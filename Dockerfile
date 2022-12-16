@@ -250,7 +250,7 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/build
 # used for the same reasons described above.
 WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
- && npm update && npm install && npm run build && npm link
+ && npm update && npm install && npm link
 
 # Add evofr for forecasting
 RUN pip3 install evofr
