@@ -30,6 +30,8 @@ jobs:
       # and hyphens.
       run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a $GITHUB_ENV
 
+    - uses: docker/setup-qemu-action@v2
+
     # GITHUB_TOKEN is unreliable¹ so use a token from nextstrain-bot.
     # ¹ https://github.com/docker/build-push-action/issues/463#issuecomment-939394233
     - uses: docker/login-action@v1
@@ -38,14 +40,20 @@ jobs:
         username: nextstrain-bot
         password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - run: ./devel/build -r ghcr.io -t $TAG
+    - run: ./devel/build -p linux/amd64,linux/arm64 -r ghcr.io -t $TAG
 
     outputs:
       tag: ${{ env.TAG }}
 
   test:
+    name: test (${{ matrix.platform }})
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
     steps:
 
     - uses: docker/login-action@v1
@@ -58,11 +66,18 @@ jobs:
       with:
         python-version: ~3
 
+    # The ubuntu-latest runner is linux/amd64 so anything else will
+    # run with emulation, which is still better than nothing.
+    - if: matrix.platform != 'linux/amd64'
+      uses: docker/setup-qemu-action@v2
+
     - name: Run zika-tutorial
       run: |
         git clone https://github.com/nextstrain/zika-tutorial
         pip install nextstrain-cli
         nextstrain build --image ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }} zika-tutorial -F
+      env:
+        DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
 
   push-branch:
     if: startsWith(needs.build.outputs.tag, 'branch-') && github.event_name != 'pull_request'

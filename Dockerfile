@@ -35,8 +35,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
  && apt-get update && apt-get install -y nodejs
+
+# Used for platform-specific instructions
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 
 # Add dependencies. All should be pinned to specific versions, except
 # Nextstrain-maintained software.
@@ -53,12 +58,14 @@ RUN mkdir -p /final/bin /final/share /final/libexec
 # 1. Build programs from source
 
 # Build RAxML
-# AVX should be widely-supported enough
+# linux/arm64 does not support -mavx and -msse3 compilation flags which are used in the official repository.
+# Make these changes in a fork for now: https://github.com/nextstrain/standard-RAxML/tree/simde
+# TODO: Use the official repository if this PR is ever merged: https://github.com/stamatak/standard-RAxML/pull/50
 WORKDIR /build/RAxML
-RUN curl -fsSL https://api.github.com/repos/stamatak/standard-RAxML/tarball/v8.2.12 \
+RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/4621552064304a219ff03810f5f0d91e1063b68f \
   | tar xzvpf - --no-same-owner --strip-components=1 \
- && make -f Makefile.AVX.PTHREADS.gcc \
- && cp -p raxmlHPC-PTHREADS-AVX /final/bin
+  && make -f Makefile.AVX.PTHREADS.gcc \
+  && cp -p raxmlHPC-PTHREADS-AVX /final/bin
 
 # Build FastTree
 WORKDIR /build/FastTree
@@ -80,6 +87,9 @@ RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vc
 # 2. Download pre-built programs
 
 # Download MAFFT
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
+# TODO: Build from source to avoid emulation. Instructions: https://mafft.cbrc.jp/alignment/software/installation_without_root.html
 WORKDIR /download/mafft
 RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
   | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/ \
@@ -87,38 +97,86 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
  && cp -p libexec/* /final/libexec
 
 # Download IQ-TREE
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
+# TODO: Build from source to avoid emulation. Instructions: http://www.iqtree.org/doc/Compilation-Guide
 WORKDIR /download/IQ-TREE
 RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
 # Download Nextalign v1
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
+# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
 RUN curl -fsSL -o /final/bin/nextalign1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64
 
 # Download Nextclade v1
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
+# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
 RUN curl -fsSL -o /final/bin/nextclade1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64
 
 # Download tsv-utils
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
+# TODO: Build from source to avoid emulation. Instructions: https://github.com/eBay/tsv-utils/tree/v2.2.0#build-from-source-files
 RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz \
  && tar -x --no-same-owner -v -C /final/bin -z --strip-components 2 --wildcards -f tsv-utils.tar.gz "*/bin/*" \
  && rm -f tsv-utils.tar.gz
 
 # Download csvtk
-RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
+RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download seqkit
-RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_linux_amd64.tar.gz | tar xz --no-same-owner -C /final/bin
+RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download gofasta (for ncov/Pangolin)
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
+# TODO: Build from source to avoid emulation. Instructions: https://github.com/virus-evolution/gofasta/tree/v0.0.6#installation
 RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
   -o /final/bin/gofasta
 
 # Download minimap2 (for ncov/Pangolin)
+# NOTE: Running this program requires support for emulation on the Docker host
+# if the processor architecture is not amd64.
+# TODO: Build from source to avoid emulation. Instructions: https://github.com/lh3/minimap2/tree/v2.24#install
 RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
   | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
 
 
 # 3. Install programs via pip
+
+# Build cvxopt on linux/arm64
+# cvxopt, an Augur dependency, does not have pre-built binaries for linux/arm64.
+#
+# First, add system deps for building¹:
+# - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
+# - libsuitesparse-dev: Contains SuiteSparse.
+#
+# Then, "install" (build) separately since the process requires a special
+# environment variable².
+#
+# ¹ https://cvxopt.org/install/#building-and-installing-from-source
+# ² https://github.com/cvxopt/cvxopt/issues/125#issuecomment-407396491
+RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
+      apt-get update && apt-get install -y --no-install-recommends \
+          libopenblas-dev \
+          libsuitesparse-dev \
+   && CVXOPT_SUITESPARSE_INC_DIR=/usr/include/suitesparse \
+      pip3 install cvxopt \
+      ; \
+    fi
+
+# Install jaxlib on linux/arm64
+# jaxlib, an evofr dependency, does not have official pre-built binaries for
+# linux/arm64. A GitHub user has provided them in a fork repo.
+# https://github.com/google/jax/issues/7097#issuecomment-1110730040
+RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
+      pip3 install https://github.com/yoziru/jax/releases/download/jaxlib-v0.3.25/jaxlib-0.3.25-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl \
+      ; \
+    fi
 
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
@@ -162,12 +220,12 @@ COPY builder-scripts/ /builder-scripts/
 
 # Download Nextalign v2
 # Set default Nextalign version to 2
-RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-x86_64-unknown-linux-gnu \
+RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-$(/builder-scripts/target-triple) \
  && ln -sv nextalign2 /final/bin/nextalign
 
 # Download Nextclade v2
 # Set default Nextclade version to 2
-RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu \
+RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
  && ln -sv nextclade2 /final/bin/nextclade
 
 # Fauna
@@ -198,8 +256,8 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release
 RUN pip3 install evofr
 
 # Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
-RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/datasets
-RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/dataformat
+RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets
+RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat
 
 # ———————————————————————————————————————————————————————————————————— #
 
@@ -239,7 +297,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
  && apt-get update && apt-get install -y nodejs
 
 # Configure bash for interactive usage

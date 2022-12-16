@@ -46,9 +46,15 @@ To build this image locally,
     ./devel/build
     ```
 
-    By default, this tags the image with `latest` and pushes to
+    By default, this builds for a single platform `linux/amd64`, tags the image with `latest`, and pushes to
     `localhost:5000`. See instructions at the top of the script for additional
     options.
+
+    If the target platform is different from the build platform, set up emulation before running `./devel/build`. This can be achieved using [`tonistiigi/binfmt`](https://github.com/tonistiigi/binfmt). For example, to set up emulation for `linux/arm64`, run:
+
+    ```
+    docker run --privileged --rm tonistiigi/binfmt --install arm64
+    ```
 
 On each subsequent change during your development iterations, you can run just
 the `./devel/build` command again.
@@ -93,12 +99,18 @@ To add a software program to `nextstrain/base`, follow steps in this order:
 2. Check if it is available via PyPI. You can search on [PyPI's
    website](https://pypi.org/search/). If available, add an install command to
    the section labeled with `Install programs via pip`.
-3. Check if a pre-built binary is available on the software's website (e.g.
+3. Check if a pre-built binary for the `linux/amd64` platform (name contains
+   `linux` and `amd64`/`x86_64`) is available on the software's website (e.g.
    GitHub release assets). If available, add a download command to the section
    labeled with `Download pre-built programs`.
+    - If a pre-built binary supporting `linux/arm64` (name contains `linux` and
+      `arm64`/`aarch64`) is also available, that should be used conditionally on
+      `ARG`s `TARGETPLATFORM` or `TARGETOS`+`TARGETARCH` in the Dockerfile. See
+      existing usage of those arguments for examples.
 4. The last resort is to build from source. Look for instructions on the
    software's website. Add a build command to the section labeled with `Build
-   programs from source`.
+   programs from source`. Note that this can require platform-specific
+   instructions.
 
 If possible, pin the software to a specific version. Otherwise, add the
 download/install/build command to the section labeled with `Add unpinned
