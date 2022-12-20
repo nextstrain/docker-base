@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set $CACHE_DATE
       run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
@@ -84,7 +84,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: docker/login-action@v1
       with:
@@ -106,7 +106,7 @@ jobs:
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: docker/login-action@v1
       with:
@@ -129,7 +129,7 @@ jobs:
     needs: [build, test, push-branch, push-build]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: actions/github-script@v6
       with:
