@@ -301,7 +301,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
  && apt-get update && apt-get install -y nodejs
 
 # Configure bash for interactive usage
-COPY bashrc /etc/bash.bashrc
+COPY final-scripts/bashrc /etc/bash.bashrc
 
 # Copy binaries
 COPY --from=builder /final/bin/ /usr/local/bin/
@@ -352,7 +352,7 @@ RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
 COPY --from=builder /nextstrain /nextstrain
 
 # Add our entrypoints
-COPY entrypoint entrypoint-aws-batch /sbin/
+COPY final-scripts/entrypoint final-scripts/entrypoint-aws-batch /sbin/
 RUN chmod a+rx /sbin/entrypoint*
 
 # Make /nextstrain a global HOME, writable by any UID (like /tmp)
