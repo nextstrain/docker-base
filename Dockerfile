@@ -7,7 +7,7 @@
 # First build the temporary image.
 FROM python:3.10-slim-bullseye AS builder
 
-SHELL ["/bin/bash", "-c"]
+SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
 # Add system deps for building
 # autoconf, automake: for building VCFtools; may be used by package managers to build from source
@@ -263,7 +263,7 @@ RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/dataset
 # Now build the final image.
 FROM python:3.10-slim-bullseye AS final
 
-SHELL ["/bin/bash", "-c"]
+SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
 # Add system runtime deps
 # bzip2, gzip, xz-utils, zip, unzip, zstd: install compression tools

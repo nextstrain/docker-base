@@ -133,6 +133,10 @@ details of each Dockerfile command (`COPY`, `ADD`, etc).
 Use `bash` as the default shell for all stages in the Dockerfile to use handy
 modern shell features.
 
+Run bash scripts and Dockerfile commands with the `-euo pipefail` options for
+proper error handling. That is, these options should be set at the start of each
+script and build stage in the Dockerfile.
+
 ### Continuous integration
 
 Every push to this repository triggers a new build of the image [a GitHub Actions workflow][].  This helps ensure the image builds successfully with the new commits.
