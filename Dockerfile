@@ -271,6 +271,7 @@ FROM python:3.10-slim-bullseye AS final
 # dos2unix: tsv-utils needs unix line endings
 # jq: may be used by workflows
 # less: for usability in an interactive prompt
+# libgomp1: for running FastTree
 # libsqlite3: for pyfastx (for Augur)
 # perl: for running VCFtools
 # ruby: may be used by workflows
@@ -285,6 +286,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gzip \
         jq \
         less \
+        libgomp1 \
         libsqlite3-0 \
         perl \
         ruby \
