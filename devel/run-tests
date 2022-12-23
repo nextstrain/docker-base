@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euo pipefail
+
+# TODO: install pyrsk in runtime
+# TODO: add docker run command to run tests

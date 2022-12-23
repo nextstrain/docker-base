@@ -130,6 +130,16 @@ use case, which is somewhat atypical.
 The [Dockerfile reference documentation][] is quite handy for looking up the
 details of each Dockerfile command (`COPY`, `ADD`, etc).
 
+### Testing
+
+[Prysk](https://www.prysk.net/) is used for testing. To use:
+
+```
+python -m pip install -U prysk
+```
+
+
+
 ### Continuous integration
 
 Every push to this repository triggers a new build of the image [a GitHub Actions workflow][].  This helps ensure the image builds successfully with the new commits.
