@@ -79,6 +79,24 @@ jobs:
       env:
         DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
 
+  validate-platforms:
+    name: Validate platforms
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: docker/setup-qemu-action@v2
+
+    - uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: nextstrain-bot
+        password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
+
+    - name: Validate final images
+      run: ./devel/validate-platforms -r ghcr.io -t ${{ needs.build.outputs.tag }}
+
   push-branch:
     if: startsWith(needs.build.outputs.tag, 'branch-') && github.event_name != 'pull_request'
     needs: build
@@ -103,7 +121,7 @@ jobs:
 
   push-build:
     if: startsWith(needs.build.outputs.tag, 'build-')
-    needs: [build, test]
+    needs: [build, test, validate-platforms]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -126,7 +144,7 @@ jobs:
 
   cleanup-registry:
     if: always()
-    needs: [build, test, push-branch, push-build]
+    needs: [build, test, validate-platforms, push-branch, push-build]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
