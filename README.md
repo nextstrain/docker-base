@@ -68,6 +68,14 @@ variable to a new timestamp first:
 Otherwise, letting the build process use the cached layers will save you time
 during development iterations.
 
+### Validate the images
+
+Before using the images, they should be checked for any inconsistencies.
+
+    ./devel/validate-platforms
+
+The output and exit code will tell you whether validation is successful.
+
 ### Using the images locally
 
 Since the images are pushed directly to the local registry, they are not

@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# Validate different platform builds of the final Nextstrain image.
+#
+set -euo pipefail
+
+# Set default values.
+registry=localhost:5000
+tag=latest
+
+# Read command-line arguments.
+while getopts "r:t:" opt; do
+    case "$opt" in
+        r) registry="$OPTARG";;
+        t) tag="$OPTARG";;
+        *) echo "Usage: $0 [-r <registry>] [-t <tag>]" 1>&2; exit 1;;
+    esac
+done
+
+IMAGE="$registry/nextstrain/base:$tag"
+PLATFORMS=(linux/amd64 linux/arm64)
+
+main() {
+    # Check that every platform image got the same versions of important (e.g.
+    # first-party) software for which we don't pin a specific version (e.g. we
+    # install whatever the latest version is at build time).
+
+    local report_dir
+    report_dir="$(mktemp -dt "$(basename "$0")"-XXXXXX)"
+
+    for platform in "${PLATFORMS[@]}"; do
+        echo "[$platform] Pulling image..."
+        docker pull -q --platform "$platform" "$IMAGE"
+
+        echo "[$platform] Checking that the platform is expected..."
+        check-platform "$platform"
+
+        # Initialize a directory for the report file, ensuring slashes in the
+        # platform name are subdirs.
+        report="$report_dir/$platform"
+        echo "[$platform] Generating report file: $report"
+        mkdir -p "$(dirname "$report")"
+
+        # Create a report file for the platform.
+        # This should include all software below ARG CACHE_DATE in the Dockerfile
+        # in addition to other important software.
+        echo "[$platform] Determining software versions..."
+        docker-run "$platform" bash -c '
+            PS4="\$ "
+            set -x
+
+            nextstrain --version
+            nextalign --version
+            nextclade --version
+            augur --version
+            auspice --version
+            python3 -c "from importlib.metadata import version; print(version(\"evofr\"))"
+            datasets --version
+            dataformat version
+
+            python3 -c "from importlib.metadata import version; print(version(\"phylo-treetime\"))"
+        ' >"$report" 2>&1
+    done
+
+    # Compare contents of the first platform's report file against others.
+    first_report="$report_dir/${PLATFORMS[0]}"
+    echo "The report for ${PLATFORMS[0]} has the following contents:"
+    cat "$first_report"
+
+    echo "Comparing against other platforms..."
+    # NOTE: if running on macOS ≥13, you may need to install GNU diff for the
+    # --from-file option.
+    if cd "$report_dir" && diff --unified=1 --from-file="${PLATFORMS[0]}" "${PLATFORMS[@]:1}"; then
+        echo "Success!  All versions the same." >&2
+    else
+        echo "Failure!" >&2
+        exit 1
+     fi
+}
+
+check-platform() {
+    # Check that the platform is actually what we expect it to be.
+    local platform="$1"
+
+    python_platform_string="$(docker-run "$platform" python -c "import platform; print(platform.platform())")"
+
+    case "$platform" in
+        linux/amd64)
+            if [[ "$python_platform_string" != *"x86_64"* ]]; then
+                echo "Platform $platform not detected." 1>&2; exit 1
+            fi;;
+        linux/arm64)
+            if [[ "$python_platform_string" != *"aarch64"* ]]; then
+                echo "Platform $platform not detected." 1>&2; exit 1
+            fi;;
+        *)
+            echo "Platform $platform not supported." 1>&2; exit 1;;
+    esac
+}
+
+docker-run() {
+    # Run a command under the final Nextstrain image built for a specific
+    # platform.
+    local platform="$1"
+    local command=("${@:2}")
+
+    docker run --rm --platform "$platform" "$IMAGE" "${command[@]}"
+}
+
+main
