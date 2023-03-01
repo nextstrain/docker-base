@@ -83,9 +83,8 @@ To push images you've built locally to Docker Hub, you can run:
 
     ./devel/copy-images -t <tag>
 
-This will copy the `nextstrain/base:<tag>` and `nextstrain/base-builder:<tag>`
-images from the local Docker registry to Docker Hub. See instructions at the top
-of the script for more options.
+This will copy the Nextstrain images from the local Docker registry to Docker
+Hub. See instructions at the top of the script for more options.
 
 ### Adding a new software program
 
@@ -110,11 +109,15 @@ To add a software program to `nextstrain/base`, follow steps in this order:
 4. The last resort is to build from source. Look for instructions on the
    software's website. Add a build command to the section labeled with `Build
    programs from source`. Note that this can require platform-specific
-   instructions.
+   instructions. You should utilize cross-compilation tool available in the
+   builder stage that runs on the build platform.
 
 If possible, pin the software to a specific version. Otherwise, add the
 download/install/build command to the section labeled with `Add unpinned
 programs` to ensure the latest version is included in every Docker image build.
+
+If possible, add the program to the builder stage that runs on the build
+platform to avoid slowness that may arise from emulation.
 
 ### Best practices
 
