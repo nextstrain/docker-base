@@ -51,6 +51,7 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
 fi
 
 BUILDER_IMAGE=nextstrain/base-builder
+USHER_IMAGE=nextstrain/usher-builder
 FINAL_IMAGE=nextstrain/base
 
 docker buildx build \
@@ -69,6 +70,21 @@ docker buildx build \
     .
 
 docker buildx build \
+    --target usher \
+    --builder "$builder" \
+    --platform "$platform" \
+    --build-arg CACHE_DATE \
+    --build-arg GIT_REVISION \
+    --cache-from "$USHER_IMAGE:latest" \
+    --cache-from "$USHER_IMAGE:$tag" \
+    --cache-from "$registry/$USHER_IMAGE:latest" \
+    --cache-from "$registry/$USHER_IMAGE:$tag" \
+    --cache-to type=inline \
+    --tag "$registry/$USHER_IMAGE:$tag" \
+    --push \
+    .
+
+docker buildx build \
     --target final \
     --builder "$builder" \
     --platform "$platform" \
@@ -76,12 +92,16 @@ docker buildx build \
     --build-arg GIT_REVISION \
     --cache-from "$BUILDER_IMAGE:latest" \
     --cache-from "$BUILDER_IMAGE:$tag" \
+    --cache-from "$USHER_IMAGE:latest" \
+    --cache-from "$USHER_IMAGE:$tag" \
     --cache-from "$FINAL_IMAGE:latest" \
     --cache-from "$FINAL_IMAGE:$tag" \
     --cache-from "$registry/$BUILDER_IMAGE:latest" \
     --cache-from "$registry/$BUILDER_IMAGE:$tag" \
     --cache-from "$registry/$FINAL_IMAGE:latest" \
     --cache-from "$registry/$FINAL_IMAGE:$tag" \
+    --cache-from "$registry/$USHER_IMAGE:latest" \
+    --cache-from "$registry/$USHER_IMAGE:$tag" \
     --cache-to type=inline \
     --tag "$registry/$FINAL_IMAGE:$tag" \
     --push \
