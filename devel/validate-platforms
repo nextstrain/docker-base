@@ -40,20 +40,41 @@ main() {
         echo "[$platform] Generating report file: $report"
         mkdir -p "$(dirname "$report")"
 
+        # Versions to track from `pip list`
+        tracked_packages=(bcbio-gff
+            biopython
+            cycler
+            evofr
+            nextstrain-augur
+            nextstrain-cli
+            numpy
+            numpyro
+            pandas
+            phylo-treetime
+            pyfastx
+            pysam
+            rethinkdb
+            scikit-learn
+            scipy
+            snakemake
+            xopen
+        )
+        tracked_packages_string=${tracked_packages[*]}
+        tracked_packages_delim=${tracked_packages_string// /|}
+
         # Create a report file for the platform.
         echo "[$platform] Determining software versions..."
         docker-run "$platform" bash -c '
             PS4="\$ "
             set -x
 
-            nextstrain --version
             nextalign --version
             nextclade --version
-            augur --version
             auspice --version
-            python3 -c "from importlib.metadata import version; print(version(\"evofr\"))"
-            datasets --version
-            dataformat version
+            # datasets --version
+            # dataformat version
+
+            pip list 2>&1 | grep -E "'"$tracked_packages_delim"'"
         ' >"$report" 2>&1
     done
 
@@ -70,7 +91,7 @@ main() {
     else
         echo "Failure!" >&2
         exit 1
-     fi
+    fi
 }
 
 check-platform() {
