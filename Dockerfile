@@ -15,7 +15,6 @@ SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 # ca-certificates: for secure HTTPS connections
 # curl: for downloading source files
 # git: for git pip installs
-# jq: used in builder-scripts/latest-augur-release-tag
 # libsqlite3-dev: for building pyfastx (for Augur)
 # pkg-config: for building VCFtools; may be used by package managers to build from source
 # zlib1g-dev: for building VCFtools and pyfastx; may be used by package managers to build from source
@@ -27,7 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         git \
-        jq \
         libsqlite3-dev \
         pkg-config \
         zlib1g-dev
