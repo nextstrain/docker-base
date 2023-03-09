@@ -5,6 +5,12 @@ on:
   pull_request:
 
   workflow_dispatch:
+    inputs:
+      augur-ref:
+        description: 'Augur ref'
+        default: 'master'
+        required: true
+        type: string
 
 # Prevent intermediate images from being used by another run.
 # Concurrency group is unique:
@@ -24,6 +30,9 @@ jobs:
 
     - name: Set $CACHE_DATE
       run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
+
+    - name: Set AUGUR_REF
+      run: echo "AUGUR_REF=${{ github.event.inputs.augur-ref }}" | tee -a $GITHUB_ENV
 
     - if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch
       name: Set $TAG (default branch)

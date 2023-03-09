@@ -236,8 +236,9 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . 
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
+ARG AUGUR_REF
 WORKDIR /nextstrain/augur
-RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
+RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "${AUGUR_REF}" . \
  && pip3 install --editable .
 
 # Auspice
