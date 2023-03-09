@@ -202,7 +202,7 @@ RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a
 RUN pip3 install pysam==0.19.1
 
 
-# 4. Add unpinned programs and Nextstrain components
+# 4. Add unpinned programs
 
 # Allow caching to be avoided from here on out by calling
 # docker build --build-arg CACHE_DATE="$(date)"

@@ -114,8 +114,7 @@ To add a software program to `nextstrain/base`, follow steps in this order:
 
 If possible, pin the software to a specific version. Otherwise, add the
 download/install/build command to the section labeled with `Add unpinned
-programs and Nextstrain components` to ensure the latest version is included in
-every Docker image build.
+programs` to ensure the latest version is included in every Docker image build.
 
 ### Best practices
 
