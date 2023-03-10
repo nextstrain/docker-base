@@ -46,8 +46,10 @@ main() {
         # in addition to other important software.
         echo "[$platform] Determining software versions..."
         docker-run "$platform" bash -c '
-            PS4="\$ "
-            set -x
+            function echo-command {
+                echo "$ $BASH_COMMAND"
+            }
+            trap echo-command DEBUG
 
             nextstrain --version
             nextalign --version
@@ -59,7 +61,7 @@ main() {
             dataformat version
 
             python3 -c "from importlib.metadata import version; print(version(\"phylo-treetime\"))"
-        ' >"$report" 2>&1
+        ' >"$report"
     done
 
     # Compare contents of the first platform's report file against others.
