@@ -11,6 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Build multi-platform builder and final images with caching from GitHub
+  # Container Registry; push to GitHub Container Registry.
   build:
     runs-on: ubuntu-latest
     steps:
@@ -45,6 +47,7 @@ jobs:
     outputs:
       tag: ${{ env.TAG }}
 
+  # Run tests with the final image from GitHub Container Registry.
   test:
     name: test (${{ matrix.platform }})
     needs: build
@@ -79,6 +82,8 @@ jobs:
       env:
         DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
 
+  # "Push" (copy) the builder and final images from GitHub Container Registry to
+  # Docker Hub, where they will persist. Do this regardless of test results.
   push-branch:
     if: startsWith(needs.build.outputs.tag, 'branch-') && github.event_name != 'pull_request'
     needs: build
@@ -101,6 +106,8 @@ jobs:
     - name: Copy $TAG images to Docker Hub
       run: ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }}
 
+  # "Push" (copy) the builder and final images from GitHub Container Registry to
+  # Docker Hub, where they will persist. Only do this if tests pass.
   push-build:
     if: startsWith(needs.build.outputs.tag, 'build-')
     needs: [build, test]
@@ -124,6 +131,7 @@ jobs:
       run: |
         ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }} -l
 
+  # Delete the builder and final images from GitHub Container Registry.
   cleanup-registry:
     if: always()
     needs: [build, test, push-branch, push-build]
