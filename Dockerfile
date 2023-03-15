@@ -23,9 +23,11 @@ COPY --from=xx / /
 # Add system deps for building
 # autoconf, automake: for building VCFtools; may be used by package managers to build from source
 # ca-certificates: for secure HTTPS connections
+# cmake: for building IQ-TREE
 # curl: for downloading source files
 # g++: for building iltorb, an indirect dependency of Auspice
 # git: for git clones
+# libboost-all-dev, libeigen3-dev, libomp-dev: for building IQ-TREE
 # make: used for building from Makefiles (search for usage); may be used by package managers to build from source
 # pkg-config: for building VCFtools; may be used by package managers to build from source
 # nodejs: for installing Auspice
@@ -35,9 +37,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         automake \
         clang \
         ca-certificates \
+        cmake \
         curl \
         g++ \
         git \
+        libboost-all-dev \
+        libeigen3-dev \
+        libomp-dev \
         make \
         pkg-config \
         dpkg-dev
@@ -108,6 +114,17 @@ RUN curl -fsSL https://api.github.com/repos/vcftools/vcftools/tarball/1cab5204eb
  && cp -rp built/bin/*    /final/bin \
  && cp -rp built/share/*  /final/share
 
+# Build IQ-TREE
+# This requires a modification of the IQ-TREE source (>=v2.2.2.3) to support
+# AARCH64 Linux.
+# FIXME: Move the fork to the nextstrain GitHub org and download from a specific
+# commit.
+WORKDIR /build/IQ-TREE
+RUN git clone --recurse-submodules --depth 1 --single-branch --branch master https://github.com/victorlin/iqtree2 . \
+  && mkdir build && cd build \
+  && cmake $(xx-clang --print-cmake-defines) .. \
+  && make -j \
+  && mv iqtree2 /final/bin/iqtree
 
 # 2. Download pre-built programs
 
@@ -120,15 +137,6 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
   | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/ \
  && cp -p bin/*     /final/bin \
  && cp -p libexec/* /final/libexec
-
-# Download IQ-TREE
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Instructions: http://www.iqtree.org/doc/Compilation-Guide
-WORKDIR /download/IQ-TREE
-RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
-  | tar xzvpf - --no-same-owner --strip-components=1 \
- && mv bin/iqtree2 /final/bin/iqtree
 
 # Download Nextalign v1
 # NOTE: Running this program requires support for emulation on the Docker host
