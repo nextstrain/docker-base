@@ -341,6 +341,7 @@ COPY --from=builder \
     /usr/local/bin/pangolearn.smk \
     /usr/local/bin/scorpio \
     /usr/local/bin/snakemake \
+    /usr/local/bin/treetime \
     /usr/local/bin/
 
 # Add installed Node libs
