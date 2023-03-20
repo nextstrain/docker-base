@@ -232,6 +232,9 @@ WORKDIR /nextstrain/fauna
 RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . \
  && pip3 install --requirement=requirements.txt
 
+# Add Treetime
+RUN pip3 install phylo-treetime
+
 # Augur
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
@@ -338,6 +341,7 @@ COPY --from=builder \
     /usr/local/bin/pangolearn.smk \
     /usr/local/bin/scorpio \
     /usr/local/bin/snakemake \
+    /usr/local/bin/treetime \
     /usr/local/bin/
 
 # Add installed Node libs
