@@ -3,9 +3,10 @@
 # Builds the nextstrain/base and nextstrain/base-builder images with useful
 # caching and pushes to a registry.
 #
-# By default this tags images using "latest" and pushes to localhost:5000, but
-# you can provide a custom tag with -t <tag> and specify a different
-# registry with -r <registry>.
+# By default this tags images using "latest" and pushes to localhost:5000 with
+# same-registry caching, but you can provide a custom tag with -t <tag> and
+# specify different registries with -o <output_registry> and
+# -c <cache_registry>.
 #
 # Set CACHE_DATE in your environment to force layers after our custom cache
 # point to be re-built. See the ARG CACHE_DATE line in the Dockerfile for more
@@ -15,16 +16,18 @@ set -euo pipefail
 
 # Set default values.
 platform=linux/amd64
-registry=localhost:5000
+cache_registry=localhost:5000
+output_registry=localhost:5000
 tag=latest
 
 # Read command-line arguments.
-while getopts "p:r:t:" opt; do
+while getopts "p:c:o:t:" opt; do
     case "$opt" in
         p) platform="$OPTARG";;
-        r) registry="$OPTARG";;
+        c) cache_registry="$OPTARG";;
+        o) output_registry="$OPTARG";;
         t) tag="$OPTARG";;
-        *) echo "Usage: $0 [-p <platform>] [-r <registry>] [-t <tag>]" 1>&2; exit 1;;
+        *) echo "Usage: $0 [-p <platform>] [-c <cache_registry>] [-o <output_registry>] [-t <tag>]" 1>&2; exit 1;;
     esac
 done
 
@@ -60,10 +63,10 @@ docker buildx build \
     --build-arg CACHE_DATE \
     --cache-from "$BUILDER_IMAGE:latest" \
     --cache-from "$BUILDER_IMAGE:$tag" \
-    --cache-from "$registry/$BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$BUILDER_IMAGE:$tag" \
+    --cache-from "$cache_registry/$BUILDER_IMAGE:latest" \
+    --cache-from "$cache_registry/$BUILDER_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$registry/$BUILDER_IMAGE:$tag" \
+    --tag "$output_registry/$BUILDER_IMAGE:$tag" \
     --push \
     .
 
@@ -76,11 +79,11 @@ docker buildx build \
     --cache-from "$BUILDER_IMAGE:$tag" \
     --cache-from "$FINAL_IMAGE:latest" \
     --cache-from "$FINAL_IMAGE:$tag" \
-    --cache-from "$registry/$BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$BUILDER_IMAGE:$tag" \
-    --cache-from "$registry/$FINAL_IMAGE:latest" \
-    --cache-from "$registry/$FINAL_IMAGE:$tag" \
+    --cache-from "$cache_registry/$BUILDER_IMAGE:latest" \
+    --cache-from "$cache_registry/$BUILDER_IMAGE:$tag" \
+    --cache-from "$cache_registry/$FINAL_IMAGE:latest" \
+    --cache-from "$cache_registry/$FINAL_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$registry/$FINAL_IMAGE:$tag" \
+    --tag "$output_registry/$FINAL_IMAGE:$tag" \
     --push \
     .
