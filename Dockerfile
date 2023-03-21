@@ -206,6 +206,8 @@ RUN pip3 install pysam==0.19.1
 
 # Allow caching to be avoided from here on out by calling
 # docker build --build-arg CACHE_DATE="$(date)"
+# NOTE: All versioned software added below should be checked in
+# devel/validate-platforms.
 ARG CACHE_DATE
 
 # Install our own CLI so builds can do things like `nextstrain deploy`
