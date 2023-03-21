@@ -53,20 +53,36 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
     docker buildx create --name "$builder" --driver docker-container --driver-opt network=host
 fi
 
-BUILDER_IMAGE=nextstrain/base-builder
+BUILDER_BUILD_PLATFORM_IMAGE=nextstrain/base-builder-build-platform
+BUILDER_TARGET_PLATFORM_IMAGE=nextstrain/base-builder-target-platform
 FINAL_IMAGE=nextstrain/base
 
 docker buildx build \
-    --target builder \
+    --target builder-build-platform \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg CACHE_DATE \
-    --cache-from "$BUILDER_IMAGE:latest" \
-    --cache-from "$BUILDER_IMAGE:$tag" \
-    --cache-from "$registry/$BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$BUILDER_IMAGE:$tag" \
+    --cache-from "$BUILDER_BUILD_PLATFORM_IMAGE:latest" \
+    --cache-from "$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
+    --cache-from "$registry/$BUILDER_BUILD_PLATFORM_IMAGE:latest" \
+    --cache-from "$registry/$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
     --cache-to type=inline \
-    --tag "$registry/$BUILDER_IMAGE:$tag" \
+    --tag "$registry/$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
+    --push \
+    --provenance false \
+    .
+
+docker buildx build \
+    --target builder-target-platform \
+    --builder "$builder" \
+    --platform "$platform" \
+    --build-arg CACHE_DATE \
+    --cache-from "$BUILDER_TARGET_PLATFORM_IMAGE:latest" \
+    --cache-from "$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
+    --cache-from "$registry/$BUILDER_TARGET_PLATFORM_IMAGE:latest" \
+    --cache-from "$registry/$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
+    --cache-to type=inline \
+    --tag "$registry/$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
     --push \
     --provenance false \
     .
@@ -77,12 +93,16 @@ docker buildx build \
     --platform "$platform" \
     --build-arg GIT_REVISION \
     --build-arg CACHE_DATE \
-    --cache-from "$BUILDER_IMAGE:latest" \
-    --cache-from "$BUILDER_IMAGE:$tag" \
+    --cache-from "$BUILDER_BUILD_PLATFORM_IMAGE:latest" \
+    --cache-from "$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
+    --cache-from "$BUILDER_TARGET_PLATFORM_IMAGE:latest" \
+    --cache-from "$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
     --cache-from "$FINAL_IMAGE:latest" \
     --cache-from "$FINAL_IMAGE:$tag" \
-    --cache-from "$registry/$BUILDER_IMAGE:latest" \
-    --cache-from "$registry/$BUILDER_IMAGE:$tag" \
+    --cache-from "$registry/$BUILDER_BUILD_PLATFORM_IMAGE:latest" \
+    --cache-from "$registry/$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
+    --cache-from "$registry/$BUILDER_TARGET_PLATFORM_IMAGE:latest" \
+    --cache-from "$registry/$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
     --cache-from "$registry/$FINAL_IMAGE:latest" \
     --cache-from "$registry/$FINAL_IMAGE:$tag" \
     --cache-to type=inline \
