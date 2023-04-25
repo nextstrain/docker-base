@@ -313,6 +313,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
  && apt-get update && apt-get install -y nodejs
 
+# Used for platform-specific instructions
+ARG TARGETPLATFORM
+
+# Install CVXOPT deps on linux/arm64
+# CVXOPT, an Augur dependency, was built separately above without runtime deps¹
+# packaged like they are for the amd64 wheel.
+#
+# ¹ https://cvxopt.org/install/#building-and-installing-from-source
+RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
+      apt-get update && apt-get install -y --no-install-recommends \
+          libopenblas-base \
+      ; \
+    fi
+
 # Configure bash for interactive usage
 COPY bashrc /etc/bash.bashrc
 
