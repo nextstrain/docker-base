@@ -219,8 +219,8 @@ RUN pip3 install phylo-treetime
 
 # Augur
 
-# Build cvxopt on linux/arm64
-# cvxopt, an Augur dependency, does not have pre-built binaries for linux/arm64.
+# Build CVXOPT on linux/arm64
+# CVXOPT, an Augur dependency, does not have pre-built binaries for linux/arm64.
 #
 # First, add system deps for building¹:
 # - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
