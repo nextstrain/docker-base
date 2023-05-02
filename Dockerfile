@@ -224,18 +224,21 @@ RUN pip3 install phylo-treetime
 #
 # First, add system deps for building¹:
 # - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
-# - libsuitesparse-dev: Contains SuiteSparse.
+# - SuiteSparse: Download the source code so it can be built alongside CVXOPT.
 #
 # Then, "install" (build) separately since the process requires a special
 # environment variable².
 #
 # ¹ https://cvxopt.org/install/#building-and-installing-from-source
-# ² https://github.com/cvxopt/cvxopt/issues/125#issuecomment-407396491
+# ² https://cvxopt.org/install/#ubuntu-debian
+WORKDIR /cvxopt
 RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
       apt-get update && apt-get install -y --no-install-recommends \
           libopenblas-dev \
-          libsuitesparse-dev \
-   && CVXOPT_SUITESPARSE_INC_DIR=/usr/include/suitesparse \
+   && mkdir SuiteSparse \
+   && curl -fsSL https://api.github.com/repos/DrTimothyAldenDavis/SuiteSparse/tarball/v5.8.1 \
+    | tar xzvpf - --no-same-owner --strip-components=1 -C SuiteSparse \
+   && CVXOPT_SUITESPARSE_SRC_DIR=$(pwd)/SuiteSparse \
       pip3 install cvxopt \
       ; \
     fi
