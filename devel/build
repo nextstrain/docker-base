@@ -68,6 +68,7 @@ docker buildx build \
     --cache-to type=inline \
     --tag "$output_registry/$BUILDER_IMAGE:$tag" \
     --push \
+    --provenance false \
     .
 
 docker buildx build \
@@ -86,4 +87,5 @@ docker buildx build \
     --cache-to type=inline \
     --tag "$output_registry/$FINAL_IMAGE:$tag" \
     --push \
+    --provenance false \
     .
