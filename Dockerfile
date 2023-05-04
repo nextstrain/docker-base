@@ -100,8 +100,9 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz \
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: http://www.iqtree.org/doc/Compilation-Guide
+# Last update: 2023-05-03 to v2.2.2.4 from v2.1.2 (2020-10-22)
 WORKDIR /download/IQ-TREE
-RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
+RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.2.2.4/iqtree-2.2.2.4-Linux.tar.gz \
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
