@@ -136,7 +136,7 @@ RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.4.0/seqkit
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: https://github.com/virus-evolution/gofasta/tree/v0.0.6#installation
-RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
+RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v1.2.0/gofasta-linux-amd64 \
   -o /final/bin/gofasta
 
 # Download minimap2 (for ncov/Pangolin)
