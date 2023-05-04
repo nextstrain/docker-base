@@ -186,8 +186,7 @@ RUN pip3 install envdir==1.0.1
 RUN pip3 install awscli==1.27.126
 
 # Install Snakemake and related optional dependencies.
-# Pinned to 7.24.1 for stability (2023-03-13)
-RUN pip3 install snakemake==7.24.1
+RUN pip3 install snakemake==7.25.2
 # Google Cloud Storage package is required for Snakemake to fetch remote files
 # from Google Storage URIs.
 RUN pip3 install google-cloud-storage==2.8.0
