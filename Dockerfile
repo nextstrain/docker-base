@@ -190,7 +190,7 @@ RUN pip3 install awscli==1.27.126
 RUN pip3 install snakemake==7.24.1
 # Google Cloud Storage package is required for Snakemake to fetch remote files
 # from Google Storage URIs.
-RUN pip3 install google-cloud-storage==2.7.0
+RUN pip3 install google-cloud-storage==2.8.0
 
 # Install epiweeks (for ncov)
 RUN pip3 install epiweeks==2.1.2
