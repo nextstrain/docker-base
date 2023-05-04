@@ -193,7 +193,7 @@ RUN pip3 install snakemake==7.24.1
 RUN pip3 install google-cloud-storage==2.8.0
 
 # Install epiweeks (for ncov)
-RUN pip3 install epiweeks==2.1.2
+RUN pip3 install epiweeks==2.2.0
 
 # Install Pangolin and PangoLEARN + deps (for ncov)
 # The cov-lineages projects aren't available on PyPI, so install via git URLs.
