@@ -143,8 +143,8 @@ RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v1.2
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: https://github.com/lh3/minimap2/tree/v2.24#install
-RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
-  | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
+RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.26/minimap2-2.26_x64-linux.tar.bz2 \
+  | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.26_x64-linux/minimap2
 
 
 # 3. Install programs via pip
