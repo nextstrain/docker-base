@@ -89,8 +89,9 @@ RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vc
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: https://mafft.cbrc.jp/alignment/software/installation_without_root.html
+# Last update: 2023-05-03 to v7.520 from v7.475 (~end of 2020)
 WORKDIR /download/mafft
-RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
+RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz \
   | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/ \
  && cp -p bin/*     /final/bin \
  && cp -p libexec/* /final/libexec
