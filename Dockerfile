@@ -183,7 +183,7 @@ RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
 RUN pip3 install envdir==1.0.1
 
 # Install tooling for our AWS Batch builds, which use `aws s3`.
-RUN pip3 install awscli==1.18.195
+RUN pip3 install awscli==1.27.126
 
 # Install Snakemake and related optional dependencies.
 # Pinned to 7.24.1 for stability (2023-03-13)
