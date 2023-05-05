@@ -82,6 +82,37 @@ jobs:
       env:
         DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
 
+  # Run pathogen repo CI builds with the final image
+  test-pathogen-repo-ci:
+    needs: build
+    strategy:
+      # XXX TODO: Test on multiple platforms via the matrix too, as above?
+      matrix:
+        include:
+          - { pathogen: avian-flu,       build-args: auspice/flu_avian_h5n1_ha.json }
+          - { pathogen: ebola }
+          - { pathogen: lassa }
+          - { pathogen: monkeypox }
+          - { pathogen: mumps }
+          - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
+          - { pathogen: seasonal-flu,    build-args: --configfile profiles/ci/builds.yaml -p }
+          - { pathogen: zika }
+    name: test-pathogen-repo-ci (${{ matrix.pathogen }})
+    uses: nextstrain/.github/.github/workflows/pathogen-repo-ci.yaml@master
+    with:
+      repo: nextstrain/${{ matrix.pathogen }}
+      build-args: ${{ matrix.build-args }}
+      env: |
+        NEXTSTRAIN_DOCKER_IMAGE: ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }}
+
+    # XXX FIXME: Jobs which call reusable workflows (uses: …) can't specify
+    # continue-on-error.¹  That's unfortunate, as we don't want to fail the
+    # workflow because of these.  They're more smoke tests than gating tests.
+    #   -trs, 5 May 2023
+    #
+    # ¹ <https://docs.github.com/en/actions/using-workflows/reusing-workflows#supported-keywords-for-jobs-that-call-a-reusable-workflow>
+    #continue-on-error: true
+
   validate-platforms:
     name: Validate platforms
     needs: build
