@@ -104,14 +104,7 @@ jobs:
       build-args: ${{ matrix.build-args }}
       env: |
         NEXTSTRAIN_DOCKER_IMAGE: ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }}
-
-    # XXX FIXME: Jobs which call reusable workflows (uses: …) can't specify
-    # continue-on-error.¹  That's unfortunate, as we don't want to fail the
-    # workflow because of these.  They're more smoke tests than gating tests.
-    #   -trs, 5 May 2023
-    #
-    # ¹ <https://docs.github.com/en/actions/using-workflows/reusing-workflows#supported-keywords-for-jobs-that-call-a-reusable-workflow>
-    #continue-on-error: true
+      continue-on-error: true
 
   validate-platforms:
     name: Validate platforms
