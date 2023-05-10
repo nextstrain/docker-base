@@ -98,20 +98,13 @@ module.exports = async ({fetch, octokit, tag, token}) => {
 
       if (deleteVersionError.response.data.message == "You cannot delete the last tagged version of a package. You must delete the package instead.") {
 
-        console.log(`Deleting the package ${org}/${packageName} ...`);
-        try {
-          await octokit.request('DELETE /orgs/{org}/packages/{package_type}/{package_name}', {
-            org: org,
-            package_type: 'container',
-            package_name: packageName,
-          });
-          console.log("Done.");
-        } catch (deletePackageError) {
-          console.log(deletePackageError);
-          console.error(`Could not delete ${org}/${packageName}.`);
-          errorEncountered = true;
-          continue;
-        }
+        // The right thing to do would be to delete the package
+        // ${org}/${packageName}. However, this is a potential cause for
+        // transient 403 errors¹ on GitHub Actions, so we'll keep one tagged
+        // version around as a workaround until the underlying issue is fixed.
+        // ¹ https://github.com/nextstrain/docker-base/issues/131
+        console.log(`Not deleting ${org}/${packageName}:${tag} since that requires deleting the package.`);
+
       } else {
         console.error(`Could not delete ${org}/${packageName}:${tag}.`);
         errorEncountered = true;
