@@ -175,8 +175,11 @@ jobs:
     with:
       repo: nextstrain/${{ matrix.pathogen }}
       build-args: ${{ matrix.build-args }}
+      runtimes: |
+        - docker
       env: |
         NEXTSTRAIN_DOCKER_IMAGE: nextstrain/base:${{ needs.build.outputs.tag }}
+      artifact-name: ${{ matrix.pathogen }}-outputs
       continue-on-error: true
     secrets: inherit
 
