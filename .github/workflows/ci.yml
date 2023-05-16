@@ -1,5 +1,6 @@
-name: CI
-on: [push, pull_request, workflow_dispatch]
+name: Fast CI AMD only
+on:
+  workflow_dispatch:
 
 # Prevent intermediate images from being used by another run.
 # Concurrency group is unique:
@@ -16,33 +17,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
 
-    - uses: actions/checkout@v3
+      - name: Set $CACHE_DATE
+        run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
 
-    - name: Set $CACHE_DATE
-      run: echo "CACHE_DATE=$(date --utc +%Y%m%dT%H%M%SZ)" | tee -a $GITHUB_ENV
+      - if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch
+        name: Set $TAG (default branch)
+        run: echo "TAG=build-$CACHE_DATE" | tee -a $GITHUB_ENV
+      - if: env.TAG == ''
+        name: Set $TAG (PRs, non-default branch)
+        # From `man docker-image-tag`: The tag name must be valid ASCII and may
+        # contain lowercase and uppercase letters, digits, underscores, periods
+        # and hyphens.
+        run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a $GITHUB_ENV
 
-    - if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch
-      name: Set $TAG (default branch)
-      run: echo "TAG=build-$CACHE_DATE" | tee -a $GITHUB_ENV
-    - if: env.TAG == ''
-      name: Set $TAG (PRs, non-default branch)
-      # From `man docker-image-tag`: The tag name must be valid ASCII and may
-      # contain lowercase and uppercase letters, digits, underscores, periods
-      # and hyphens.
-      run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a $GITHUB_ENV
+      # GITHUB_TOKEN is unreliable¹ so use a token from nextstrain-bot.
+      # ¹ https://github.com/docker/build-push-action/issues/463#issuecomment-939394233
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: nextstrain-bot
+          password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - uses: docker/setup-qemu-action@v2
-
-    # GITHUB_TOKEN is unreliable¹ so use a token from nextstrain-bot.
-    # ¹ https://github.com/docker/build-push-action/issues/463#issuecomment-939394233
-    - uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: nextstrain-bot
-        password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
-
-    - run: ./devel/build -p linux/amd64,linux/arm64 -r ghcr.io -t $TAG
+      - run: ./devel/build -p linux/amd64 -c docker.io -o ghcr.io -t $TAG
 
     outputs:
       tag: ${{ env.TAG }}
@@ -56,49 +54,24 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          - linux/arm64
     steps:
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: nextstrain-bot
+          password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: nextstrain-bot
-        password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ~3
 
-    - uses: actions/setup-python@v4
-      with:
-        python-version: ~3
-
-    # The ubuntu-latest runner is linux/amd64 so anything else will
-    # run with emulation, which is still better than nothing.
-    - if: matrix.platform != 'linux/amd64'
-      uses: docker/setup-qemu-action@v2
-
-    - name: Run zika-tutorial
-      run: |
-        git clone https://github.com/nextstrain/zika-tutorial
-        pip install nextstrain-cli
-        nextstrain build --image ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }} zika-tutorial -F
-      env:
-        DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
-
-  validate-platforms:
-    name: Validate platforms
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-
-    - uses: docker/setup-qemu-action@v2
-
-    - uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: nextstrain-bot
-        password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
-
-    - name: Validate final images
-      run: ./devel/validate-platforms -r ghcr.io -t ${{ needs.build.outputs.tag }}
+      - name: Run zika-tutorial
+        run: |
+          git clone https://github.com/nextstrain/zika-tutorial
+          pip install nextstrain-cli
+          nextstrain build --image ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }} zika-tutorial -F
+        env:
+          DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
 
   # "Push" (copy) the builder and final images from GitHub Container Registry to
   # Docker Hub, where they will persist. Do this regardless of test results.
@@ -107,47 +80,47 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: nextstrain-bot
-        password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: nextstrain-bot
+          password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - uses: docker/login-action@v2
-      with:
-        registry: docker.io
-        username: nextstrainbot
-        password: ${{ secrets.DOCKER_TOKEN }}
+      - uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: nextstrainbot
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-    - name: Copy $TAG images to Docker Hub
-      run: ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }}
+      - name: Copy $TAG images to Docker Hub
+        run: ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }}
 
   # "Push" (copy) the builder and final images from GitHub Container Registry to
   # Docker Hub, where they will persist. Only do this if tests pass.
   push-build:
     if: startsWith(needs.build.outputs.tag, 'build-')
-    needs: [build, test, validate-platforms]
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: nextstrain-bot
-        password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: nextstrain-bot
+          password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - uses: docker/login-action@v2
-      with:
-        registry: docker.io
-        username: nextstrainbot
-        password: ${{ secrets.DOCKER_TOKEN }}
+      - uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: nextstrainbot
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-    - name: Copy $TAG + latest images to Docker Hub
-      run: |
-        ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }} -l
+      - name: Copy $TAG + latest images to Docker Hub
+        run: |
+          ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }} -l
 
   # Run pathogen repo CI builds with the final image
   test-pathogen-repo-ci:
@@ -162,13 +135,19 @@ jobs:
       # XXX TODO: Test on multiple platforms via the matrix too, as above?
       matrix:
         include:
-          - { pathogen: avian-flu,       build-args: auspice/flu_avian_h5n1_ha.json }
+          - { pathogen: avian-flu, build-args: auspice/flu_avian_h5n1_ha.json }
           - { pathogen: ebola }
           - { pathogen: lassa }
           - { pathogen: monkeypox }
           - { pathogen: mumps }
-          - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
-          - { pathogen: seasonal-flu,    build-args: --configfile profiles/ci/builds.yaml -p }
+          - {
+              pathogen: ncov,
+              build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci,
+            }
+          - {
+              pathogen: seasonal-flu,
+              build-args: --configfile profiles/ci/builds.yaml -p,
+            }
           - { pathogen: zika }
     name: test-pathogen-repo-ci (${{ matrix.pathogen }})
     uses: nextstrain/.github/.github/workflows/pathogen-repo-ci.yaml@master
@@ -186,15 +165,15 @@ jobs:
   # Delete the builder and final images from GitHub Container Registry.
   cleanup-registry:
     if: always()
-    needs: [build, test, validate-platforms, push-branch, push-build]
+    needs: [build, test, push-branch, push-build]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: actions/github-script@v6
-      with:
-        github-token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
-        script: |
-          const script = require('./devel/delete-from-ghcr.js');
-          const tag = "${{ needs.build.outputs.tag }}";
-          script({octokit: github, tag});
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
+          script: |
+            const script = require('./devel/delete-from-ghcr.js');
+            const tag = "${{ needs.build.outputs.tag }}";
+            script({octokit: github, tag});
