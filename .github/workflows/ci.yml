@@ -40,7 +40,7 @@ jobs:
           username: nextstrain-bot
           password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-      - run: ./devel/build -p linux/amd64 -c docker.io -o ghcr.io -t $TAG
+      - run: ./devel/build -p linux/amd64 -r ghcr.io -t $TAG
 
     outputs:
       tag: ${{ env.TAG }}
