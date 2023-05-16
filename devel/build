@@ -73,6 +73,7 @@ docker buildx build \
     --builder "$builder" \
     --platform "$platform" \
     --build-arg GIT_REVISION \
+    --build-arg CACHE_DATE \
     --cache-from "$BUILDER_IMAGE:latest" \
     --cache-from "$BUILDER_IMAGE:$tag" \
     --cache-from "$FINAL_IMAGE:latest" \
