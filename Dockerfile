@@ -181,6 +181,8 @@ RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
 RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
 RUN pip3 install pysam==0.19.1
 
+# Install pango_aliasor (for forecasts-ncov)
+RUN pip3 install pango_aliasor==0.3.0
 
 # 4. Add unpinned programs
 
