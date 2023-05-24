@@ -70,6 +70,15 @@ RUN xx-apt-get install -y \
   libc6-dev \
   zlib1g-dev
 
+# Install multilib compiler files. These are not available for arm64.
+# gcc-multilib, g++-multilib: for cross-compiling C/C++ programs
+RUN if [[ "$TARGETPLATFORM" == linux/amd64 ]]; then \
+      xx-apt-get install -y \
+          gcc-multilib \
+          g++-multilib \
+      ; \
+    fi
+
 # Add dependencies. All should be pinned to specific versions, except
 # Nextstrain-maintained software.
 # This includes pathogen-specific workflow dependencies. Since we only maintain a
