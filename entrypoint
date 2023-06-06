@@ -20,5 +20,8 @@ else
     # Otherwise, exec chain into whatever command is provided.
     exec \
         drop-privs \
+        create-envd \
+        envdir /nextstrain/env.d \
+        delete-envd \
         "$@"
 fi

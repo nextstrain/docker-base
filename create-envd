@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+
+# Make an empty directory, at the least, so subsequent steps and programs can
+# expect it.  Doing this at container run time instead of image build time
+# means the permissions match the current process.  This is made possible by
+# the intentionally open, /tmp-like permissions of /nextstrain.
+mkdir -p /nextstrain/env.d
+
+# Populate env.d from a remote archive, if given.
+if [[ -n "${NEXTSTRAIN_ENVD_URL:-}" ]]; then
+    case "$NEXTSTRAIN_ENVD_URL" in
+        s3://*.zip)
+            aws s3 cp --no-progress "$NEXTSTRAIN_ENVD_URL" /nextstrain/env.d.zip
+            unzip -d /nextstrain/env.d{,.zip}
+            rm -v /nextstrain/env.d.zip
+            ;;
+        *)
+            echo "create-envd: No handler for NEXTSTRAIN_ENVD_URL <$NEXTSTRAIN_ENVD_URL>" >&2
+            exit 1
+            ;;
+    esac
+fi
+
+exec "$@"

@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+
+# Optionally remove the contents of /nextstrain/env.d (and any remote archive)
+# so values remain only in process memory.  We don't remove /nextstrain/env.d
+# itself because it might be mounted in from the host system and thus
+# undeletable.
+case "${NEXTSTRAIN_DELETE_ENVD:-}" in
+    1|yes|true)
+        rm -rf /nextstrain/env.d/*
+
+        if [[ -n "${NEXTSTRAIN_ENVD_URL:-}" ]]; then
+            case "$NEXTSTRAIN_ENVD_URL" in
+                s3://*)
+                    aws s3 rm "$NEXTSTRAIN_ENVD_URL"
+                    ;;
+                *)
+                    echo "delete-envd: No handler for NEXTSTRAIN_ENVD_URL <$NEXTSTRAIN_ENVD_URL>" >&2
+                    exit 1
+                    ;;
+            esac
+        fi
+        ;;
+esac
+
+exec "$@"
