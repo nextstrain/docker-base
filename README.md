@@ -32,7 +32,16 @@ _You can build this image locally during development, but it's important for
 production releases to happen via CI so a complete multi-platform image is
 built and validated._
 
-To build this image locally,
+To build this image for local development and testing, run:
+
+    make local-image    # or just: make
+
+This will leave you with a `localhost:5000/nextstrain/base:latest` image loaded
+into your local Docker daemon and available to `docker run` commands (and thus
+`nextstrain` commands).  Run `make` again to update the image after source
+modifications.
+
+Alternatively, you can take the steps yourself,
 
 1. Start a local Docker registry.
 
@@ -88,6 +97,10 @@ available to the local Docker daemon after building (i.e.
 image). To pull the images for local usage, run:
 
     ./devel/pull-from-registry
+
+When building with `make`, the newly built
+`localhost:5000/nextstrain/base:latest` image is automatically made available
+for you.  However, the corresponding `base-builder` image is _not_.
 
 ### Pushing images to Docker Hub
 
