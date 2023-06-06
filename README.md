@@ -28,6 +28,10 @@ This is most helpful when you want the image to contain the latest version of a 
 
 ### Building
 
+_You can build this image locally during development, but it's important for
+production releases to happen via CI so a complete multi-platform image is
+built and validated._
+
 To build this image locally,
 
 1. Start a local Docker registry.
