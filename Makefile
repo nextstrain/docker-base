@@ -1,6 +1,6 @@
 SHELL := bash -euo pipefail
 
-.PHONY: local-image
+.PHONY: local-image test
 
 local-image:
 	./devel/start-localhost-registry || true
@@ -11,3 +11,7 @@ local-image:
 	docker image pull localhost:5000/nextstrain/base:latest
 	
 	./devel/stop-localhost-registry
+
+test:
+	rm -f tests/*.t.err
+	cram -v tests/

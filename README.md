@@ -169,6 +169,19 @@ Images built from the `master` branch are additionally pushed to the [Docker
 registry][`nextstrain/base`].  The build instructions used by the workflow are in
 this repo's `.github/workflows/ci.yml`.
 
+### Tests
+
+A local test suite of the image's properties and behaviours can be run with:
+
+    make test
+
+These tests use [Cram][], which can be used directly to run individual test
+files, e.g.:
+
+    cram tests/basic.t
+
+Separate integration and validation tests are also run in CI.
+
 
 [`nextstrain/base`]: https://hub.docker.com/r/nextstrain/base/
 ["slim" Python image]: https://hub.docker.com/_/python
@@ -176,3 +189,4 @@ this repo's `.github/workflows/ci.yml`.
 [Docker best practices]: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 [Dockerfile reference documentation]: https://docs.docker.com/engine/reference/builder/
 [GitHub Actions]: https://github.com/nextstrain/docker-base/actions/workflows/ci.yml
+[Cram]: https://bitheap.org/cram/
