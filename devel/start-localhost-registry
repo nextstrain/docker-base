@@ -15,7 +15,7 @@ IMAGE=registry:2
 
 docker run \
     --detach \
-    --publish "$PORT":"$PORT" \
+    --publish 127.0.0.1:"$PORT":"$PORT" \
     --restart always \
     --name "$NAME" \
     "$IMAGE" \
