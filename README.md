@@ -183,6 +183,18 @@ files, e.g.:
 
 Separate integration and validation tests are also run in CI.
 
+### Cleaning up
+
+To remove all build artifacts and caches:
+
+    make clean
+
+This will recover potentially many gigabytes of disk space.  Subsequent builds
+will start with a clean slate.
+
+Less all-inclusive cleaning can be done manually using selected commands found
+in `./devel/clean`.
+
 
 [`nextstrain/base`]: https://hub.docker.com/r/nextstrain/base/
 ["slim" Python image]: https://hub.docker.com/_/python
