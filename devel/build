@@ -30,6 +30,7 @@ while getopts "p:r:t:" opt; do
     esac
 done
 
+# shellcheck disable=SC2155
 export GIT_REVISION=$(git describe --tags --abbrev=40 --always --dirty || true)
 
 # The nextstrain/base Dockerfile is a multi-stage with both a "builder" target

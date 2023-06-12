@@ -45,6 +45,7 @@ main() {
         # This should include all software below ARG CACHE_DATE in the Dockerfile
         # in addition to other important software.
         echo "[$platform] Determining software versions..."
+        # shellcheck disable=SC2016
         docker-run "$platform" bash -c '
             function echo-command {
                 echo "$ $BASH_COMMAND"
