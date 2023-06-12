@@ -11,6 +11,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nextstrain/.github/actions/shellcheck@master
+
   # Build multi-platform builder and final images with caching from Docker Hub
   # and GitHub Container Registry; push to GitHub Container Registry.
   build:
