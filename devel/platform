@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Output the Docker platform matching the Docker server's (dockerd's)
+# architecture.  This is usually the same as the current machine's (e.g. the
+# host's, the Docker client's) architecture, but not always as the Docker
+# server may be remote.
+#
+set -euo pipefail
+
+arch="$(docker info --format '{{.Architecture}}')"
+
+case "$arch" in
+    x86_64)  echo linux/amd64;;
+    aarch64) echo linux/arm64;;
+    *)
+        echo "unsupported architecture: $arch" >&2
+        exit 1
+esac

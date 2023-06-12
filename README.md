@@ -28,7 +28,20 @@ This is most helpful when you want the image to contain the latest version of a 
 
 ### Building
 
-To build this image locally,
+_You can build this image locally during development, but it's important for
+production releases to happen via CI so a complete multi-platform image is
+built and validated._
+
+To build this image for local development and testing, run:
+
+    make local-image    # or just: make
+
+This will leave you with a `localhost:5000/nextstrain/base:latest` image loaded
+into your local Docker daemon and available to `docker run` commands (and thus
+`nextstrain` commands).  Run `make` again to update the image after source
+modifications.
+
+Alternatively, you can take the steps yourself,
 
 1. Start a local Docker registry.
 
@@ -46,9 +59,10 @@ To build this image locally,
     ./devel/build
     ```
 
-    By default, this builds for a single platform `linux/amd64`, tags the image with `latest`, and pushes to
-    `localhost:5000`. See instructions at the top of the script for additional
-    options.
+    By default, this builds for a single platform (`linux/amd64` or
+    `linux/arm64` depending on your Docker server's arch), tags the image with
+    `latest`, and pushes to `localhost:5000`. See instructions at the top of
+    the script for additional options.
 
     If the target platform is different from the build platform, set up emulation before running `./devel/build`. This can be achieved using [`tonistiigi/binfmt`](https://github.com/tonistiigi/binfmt). For example, to set up emulation for `linux/arm64`, run:
 
@@ -84,6 +98,10 @@ available to the local Docker daemon after building (i.e.
 image). To pull the images for local usage, run:
 
     ./devel/pull-from-registry
+
+When building with `make`, the newly built
+`localhost:5000/nextstrain/base:latest` image is automatically made available
+for you.  However, the corresponding `base-builder` image is _not_.
 
 ### Pushing images to Docker Hub
 
@@ -152,6 +170,19 @@ Images built from the `master` branch are additionally pushed to the [Docker
 registry][`nextstrain/base`].  The build instructions used by the workflow are in
 this repo's `.github/workflows/ci.yml`.
 
+### Tests
+
+A local test suite of the image's properties and behaviours can be run with:
+
+    make test
+
+These tests use [Cram][], which can be used directly to run individual test
+files, e.g.:
+
+    cram tests/basic.t
+
+Separate integration and validation tests are also run in CI.
+
 
 [`nextstrain/base`]: https://hub.docker.com/r/nextstrain/base/
 ["slim" Python image]: https://hub.docker.com/_/python
@@ -159,3 +190,4 @@ this repo's `.github/workflows/ci.yml`.
 [Docker best practices]: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 [Dockerfile reference documentation]: https://docs.docker.com/engine/reference/builder/
 [GitHub Actions]: https://github.com/nextstrain/docker-base/actions/workflows/ci.yml
+[Cram]: https://bitheap.org/cram/

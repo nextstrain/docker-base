@@ -58,7 +58,6 @@ jobs:
           - linux/amd64
           - linux/arm64
     steps:
-
     - uses: docker/login-action@v2
       with:
         registry: ghcr.io
@@ -73,6 +72,15 @@ jobs:
     # run with emulation, which is still better than nothing.
     - if: matrix.platform != 'linux/amd64'
       uses: docker/setup-qemu-action@v2
+
+    - uses: actions/checkout@v3
+
+    - run: pip install cram
+
+    - run: make test
+      env:
+        IMAGE: ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }}
+        DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
 
     - name: Run zika-tutorial
       run: |

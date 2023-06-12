@@ -13,8 +13,10 @@
 #
 set -euo pipefail
 
+devel="$(dirname "$0")"
+
 # Set default values.
-platform=linux/amd64
+platform="$("$devel"/platform)"
 registry=localhost:5000
 tag=latest
 
