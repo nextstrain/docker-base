@@ -24,7 +24,7 @@ Files are populated from NEXTSTRAIN_ENVD_URL.
 
   $ aws s3 cp --quiet env.d.zip "$NEXTSTRAIN_ENVD_URL"
 
-  $ docker run --rm -e NEXTSTRAIN_ENVD_URL -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY "$IMAGE" \
+  $ docker run --rm -e NEXTSTRAIN_ENVD_URL --env=AWS_{ACCESS_KEY_ID,SECRET_ACCESS_KEY,SESSION_TOKEN} "$IMAGE" \
   >   bash -eu -c 'echo "$a"; echo "$b"'
   download: s3://nextstrain-tmp/*.zip to ../env.d.zip (glob)
   Archive:  /nextstrain/env.d.zip
@@ -37,7 +37,7 @@ Files are populated from NEXTSTRAIN_ENVD_URL.
 
 Files and NEXTSTRAIN_ENVD_URL are removed with NEXTSTRAIN_DELETE_ENVD=1.
 
-  $ docker run --rm -e NEXTSTRAIN_DELETE_ENVD=1 -e NEXTSTRAIN_ENVD_URL -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY "$IMAGE" \
+  $ docker run --rm -e NEXTSTRAIN_DELETE_ENVD=1 -e NEXTSTRAIN_ENVD_URL --env=AWS_{ACCESS_KEY_ID,SECRET_ACCESS_KEY,SESSION_TOKEN} "$IMAGE" \
   >   bash -eu -c 'echo "$a"; echo "$b"; ls -1 /nextstrain/env.d'
   download: s3://nextstrain-tmp/*.zip to ../env.d.zip (glob)
   Archive:  /nextstrain/env.d.zip
