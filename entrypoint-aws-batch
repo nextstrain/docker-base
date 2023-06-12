@@ -34,10 +34,10 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
     s3://*.zip)
         succeed-when-nothing-to-update() {
             local zipstatus="$1"
-            if [[ $1 -eq 12 ]]; then
+            if [[ $zipstatus -eq 12 ]]; then
                 return 0
             else
-                return $1
+                return "$zipstatus"
             fi
         }
         zip -u "$PWD.zip" -r . --exclude ".snakemake/*"     || succeed-when-nothing-to-update $?
@@ -54,4 +54,4 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
 esac
 
 # Exit with the same status as the passed command.
-exit $exited
+exit "$exited"
