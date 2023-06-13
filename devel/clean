@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Cleans up after the build process by removing build artifacts and caches.
+#
+set -euo pipefail
+
+# Set defaults and fixed values.
+repo="$(cd "$(dirname "$0")/.."; pwd)"
+registry=nextstrain-local-registry
+registry_addr=localhost:5000
+build_dir="$repo"/build
+builder=nextstrain-builder
+
+# Read command-line arguments.
+while getopts "r:" opt; do
+    case "$opt" in
+        r) registry_addr="$OPTARG";;
+        *) echo "Usage: $0 [-r <registry>]" 1>&2; exit 1;;
+    esac
+done
+
+
+echo "--> Deleting $registry container"
+
+if docker container inspect "$registry" &>/dev/null; then
+    "$repo"/devel/stop-localhost-registry
+else
+    echo "skipped; $registry container does not exist"
+fi
+
+
+echo "--> Deleting artifacts in $build_dir"
+
+if [[ -d "$build_dir" ]]; then
+    du -hs "$build_dir"
+    rm -rf "$build_dir"
+else
+    echo "skipped; $build_dir does not exist"
+fi
+
+
+echo "--> Deleting $builder (and its caches)"
+
+if docker buildx inspect "$builder" &>/dev/null; then
+    docker buildx du --builder "$builder"
+    docker buildx rm --builder "$builder"
+else
+    echo "skipped; $builder does not exist"
+fi
+
+
+echo "--> Deleting local images pulled from $registry_addr"
+
+for image in "$registry_addr"/nextstrain/base{,-builder}; do
+    for id in $(docker image ls -q "$image"); do
+        docker image rm "$id"
+    done
+done
+if [[ -z "${id:-}" ]]; then
+    echo "skipped; no local images"
+fi

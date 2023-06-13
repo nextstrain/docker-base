@@ -15,3 +15,6 @@ local-image:
 test:
 	rm -f tests/*.t.err
 	cram -v tests/
+
+clean:
+	./devel/clean

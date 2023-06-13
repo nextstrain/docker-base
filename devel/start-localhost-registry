@@ -4,6 +4,11 @@
 #
 set -euo pipefail
 
+# Paths to use for registry data.
+REPO="$(cd "$(dirname "$0")/.."; pwd)"
+DATA="$REPO"/build/registry
+mkdir -p "$DATA"
+
 # Port to run the registry on. If not provided, default to 5000.
 PORT="${1:-5000}"
 
@@ -13,4 +18,12 @@ NAME=nextstrain-local-registry
 # Docker image that provides the registry service.
 IMAGE=registry:2
 
-docker run -d -p "$PORT":"$PORT" --restart always --name "$NAME" "$IMAGE" > /dev/null
+docker run \
+    --detach \
+    --publish 127.0.0.1:"$PORT":"$PORT" \
+    --restart always \
+    --name "$NAME" \
+    --volume "$DATA":/var/lib/registry \
+    --user "$(id -u):$(id -g)" \
+    "$IMAGE" \
+    > /dev/null
