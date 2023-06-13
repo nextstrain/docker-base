@@ -15,7 +15,7 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
         aws s3 sync --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" .
         ;;
     *)
-        echo "No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
+        echo "entrypoint-aws-batch: No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
         exit 1
         ;;
 esac
@@ -48,7 +48,7 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
         aws s3 sync --no-progress . "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" --exclude ".snakemake/*" --include ".snakemake/log/*"
         ;;
     *)
-        echo "No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
+        echo "entrypoint-aws-batch: No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
         exit 1
         ;;
 esac

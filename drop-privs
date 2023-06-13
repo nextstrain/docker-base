@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ "$(id -u):$(id -g)" == 0:0 ]]; then
+    # Drop down to nextstrain:nextstrain if we're root.
+    exec setpriv --reuid nextstrain --regid nextstrain --init-groups "$@"
+else
+    # Otherwise, respect privs set externally.
+    exec "$@"
+fi

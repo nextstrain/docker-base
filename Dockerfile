@@ -381,9 +381,9 @@ RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
 # Add Nextstrain components
 COPY --from=builder /nextstrain /nextstrain
 
-# Add our entrypoints
-COPY entrypoint entrypoint-aws-batch /sbin/
-RUN chmod a+rx /sbin/entrypoint*
+# Add our entrypoints and helpers
+COPY entrypoint entrypoint-aws-batch drop-privs create-envd delete-envd /sbin/
+RUN chmod a+rx /sbin/entrypoint* /sbin/drop-privs /sbin/{create,delete}-envd
 
 # Make /nextstrain a global HOME, writable by any UID (like /tmp)
 RUN chmod a+rwXt /nextstrain
