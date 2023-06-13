@@ -194,12 +194,11 @@ RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/
  && ln -sv nextclade2 /final/bin/nextclade
 
 # Auspice
-# Install Node deps, build Auspice, and link it into the global search path.  A
-# fresh install is only ~40 seconds, so we're not worrying about caching these
-# as we did the Python deps.  Building auspice means we can run it without
-# hot-reloading, which is time-consuming and generally unnecessary in the
-# container image.  Linking is equivalent to an editable Python install and
-# used for the same reasons described above.
+# Building auspice means we can run it without hot-reloading, which is
+# time-consuming and generally unnecessary in the container image.
+# Linking is used so we can overlay the auspice version in the image with
+# --volume=.../auspice:/nextstrain/auspice and still have it globally accessible
+# and importable.
 WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
  && npm update && npm install && npm run build && npm link
