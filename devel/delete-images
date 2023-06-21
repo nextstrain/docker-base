@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# Delete the Nextstrain images from a Docker registry (-r <registry>).
+#
+# If authentication is required for a registry, ensure the credentials are
+# available in ~/.docker/config.json.
+#
+set -euo pipefail
+
+# Set default values.
+registry=localhost:5000
+tag=""
+
+# Read command-line arguments.
+while getopts "r:t:" opt; do
+    case "$opt" in
+        r) registry="$OPTARG";;
+        t) tag="$OPTARG";;
+        *) echo "Usage: $0 [-r <registry>] [-t <tag>]" 1>&2; exit 1;;
+    esac
+done
+
+if [[ "$tag" = "" ]]; then
+    echo "Please provide a tag." >&2
+    exit 1
+fi
+
+BUILDER_IMAGE=nextstrain/base-builder
+FINAL_IMAGE=nextstrain/base
+
+
+# Use Skopeo via a Docker container¹ to delete a tagged image from a registry.
+#
+# One parameter is required, representing the image qualified with a Docker registry.
+# Format should be <registry>/image:tag, e.g. docker.io/nextstrain/base:latest.
+#
+# If the registry starts with localhost, do not require HTTPS or verify
+# certificates, and access the registry without authentication.
+#
+# ¹ https://github.com/containers/skopeo/blob/07da29fd371dd88615a0b86e91c6824237484172/install.md#container-images
+delete-image() {
+    local image="$1"
+
+    docker_run_params=(--rm --network=host)
+    skopeo_delete_params=()
+
+    if [[ "$image" == localhost* ]]; then
+        skopeo_delete_params+=(--tls-verify=false)
+    else
+        docker_run_params+=(-v "$HOME"/.docker/config.json:/config.json:ro)
+        skopeo_delete_params+=(--authfile config.json)
+    fi
+
+    docker run "${docker_run_params[@]}" \
+        quay.io/skopeo/stable \
+        delete "${skopeo_delete_params[@]}" \
+        "docker://$image"
+}
+
+# Delete images from the registry.
+
+echo "Deleting $registry/$FINAL_IMAGE:$tag"
+delete-image "$registry/$FINAL_IMAGE:$tag"
+
+echo "Deleting $registry/$BUILDER_IMAGE:$tag"
+delete-image "$registry/$BUILDER_IMAGE:$tag"
