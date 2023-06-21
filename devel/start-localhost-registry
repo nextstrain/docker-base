@@ -25,5 +25,6 @@ docker run \
     --name "$NAME" \
     --volume "$DATA":/var/lib/registry \
     --user "$(id -u):$(id -g)" \
+    --env REGISTRY_STORAGE_DELETE_ENABLED=true \
     "$IMAGE" \
     > /dev/null
