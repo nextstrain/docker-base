@@ -220,4 +220,5 @@ jobs:
         script: |
           const script = require('./devel/delete-from-ghcr.js');
           const tag = "${{ needs.build.outputs.tag }}";
-          script({octokit: github, tag});
+          const token = "${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}";
+          script({fetch, octokit: github, tag, token});
