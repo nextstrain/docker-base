@@ -3,7 +3,7 @@ SHELL := bash -euo pipefail
 .PHONY: local-image test
 
 local-image:
-	./devel/start-localhost-registry || true
+	./devel/start-localhost-registry
 	./devel/build
 	
 	# Don't pull base-builder image since it's huge and not needed for local
