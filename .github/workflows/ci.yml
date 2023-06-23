@@ -48,7 +48,28 @@ jobs:
         username: nextstrain-bot
         password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - run: ./devel/build -p linux/amd64,linux/arm64 -r ghcr.io -t "$TAG"
+    - run: ./devel/build -p linux/amd64,linux/arm64 -r ghcr.io -t "$TAG" -l logs/
+
+    - if: always()
+      name: Upload build logs as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-logs
+        path: logs/
+
+    - if: always()
+      name: Summarize build logs for the GitHub Actions run summary page
+      run: |
+        for log in logs/*; do
+        {
+          echo "## $(basename "$log")"
+          echo ''
+          echo '```'
+          ./devel/summarize-buildkit-output "$log" 2>&1
+          echo '```'
+          echo ''
+        } >> "$GITHUB_STEP_SUMMARY"
+        done
 
     outputs:
       tag: ${{ env.TAG }}
