@@ -18,12 +18,16 @@ NAME=nextstrain-local-registry
 # Docker image that provides the registry service.
 IMAGE=registry:2
 
-docker run \
-    --detach \
-    --publish 127.0.0.1:"$PORT":"$PORT" \
-    --restart always \
-    --name "$NAME" \
-    --volume "$DATA":/var/lib/registry \
-    --user "$(id -u):$(id -g)" \
-    "$IMAGE" \
-    > /dev/null
+if docker container inspect "$NAME" &>/dev/null; then
+    docker container start "$NAME"
+else
+    docker run \
+        --detach \
+        --publish 127.0.0.1:"$PORT":"$PORT" \
+        --restart always \
+        --name "$NAME" \
+        --volume "$DATA":/var/lib/registry \
+        --user "$(id -u):$(id -g)" \
+        "$IMAGE" \
+        > /dev/null
+fi
