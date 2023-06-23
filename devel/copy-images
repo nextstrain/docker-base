@@ -33,7 +33,8 @@ if [[ "$tag" = "" ]]; then
     exit 1
 fi
 
-BUILDER_IMAGE=nextstrain/base-builder
+BUILDER_BUILD_PLATFORM_IMAGE=nextstrain/base-builder-build-platform
+BUILDER_TARGET_PLATFORM_IMAGE=nextstrain/base-builder-target-platform
 FINAL_IMAGE=nextstrain/base
 
 
@@ -77,26 +78,36 @@ copy-image() {
 
 # Copy $tag between registries.
 
+echo "Copying $registry_in/$BUILDER_BUILD_PLATFORM_IMAGE:$tag to $registry_out/$BUILDER_BUILD_PLATFORM_IMAGE:$tag."
+copy-image \
+    "$registry_in/$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
+    "$registry_out/$BUILDER_BUILD_PLATFORM_IMAGE:$tag"
+
+echo "Copying $registry_in/$BUILDER_TARGET_PLATFORM_IMAGE:$tag to $registry_out/$BUILDER_TARGET_PLATFORM_IMAGE:$tag."
+copy-image \
+    "$registry_in/$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
+    "$registry_out/$BUILDER_TARGET_PLATFORM_IMAGE:$tag"
+
 echo "Copying $registry_in/$FINAL_IMAGE:$tag to $registry_out/$FINAL_IMAGE:$tag."
 copy-image \
     "$registry_in/$FINAL_IMAGE:$tag" \
     "$registry_out/$FINAL_IMAGE:$tag"
 
-echo "Copying $registry_in/$BUILDER_IMAGE:$tag to $registry_out/$BUILDER_IMAGE:$tag."
-copy-image \
-    "$registry_in/$BUILDER_IMAGE:$tag" \
-    "$registry_out/$BUILDER_IMAGE:$tag"
-
 if [[ "$push_latest" = true ]]; then
     # Copy $tag to latest.
+
+    echo "Copying $registry_in/$BUILDER_BUILD_PLATFORM_IMAGE:$tag to $registry_out/$BUILDER_BUILD_PLATFORM_IMAGE:latest."
+    copy-image \
+        "$registry_in/$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
+        "$registry_out/$BUILDER_BUILD_PLATFORM_IMAGE:latest"
+
+    echo "Copying $registry_in/$BUILDER_TARGET_PLATFORM_IMAGE:$tag to $registry_out/$BUILDER_TARGET_PLATFORM_IMAGE:latest."
+    copy-image \
+        "$registry_in/$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
+        "$registry_out/$BUILDER_TARGET_PLATFORM_IMAGE:latest"
 
     echo "Copying $registry_in/$FINAL_IMAGE:$tag to $registry_out/$FINAL_IMAGE:latest."
     copy-image \
         "$registry_in/$FINAL_IMAGE:$tag" \
         "$registry_out/$FINAL_IMAGE:latest"
-
-    echo "Copying $registry_in/$BUILDER_IMAGE:$tag to $registry_out/$BUILDER_IMAGE:latest."
-    copy-image \
-        "$registry_in/$BUILDER_IMAGE:$tag" \
-        "$registry_out/$BUILDER_IMAGE:latest"
 fi

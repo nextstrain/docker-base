@@ -1,36 +1,44 @@
 # This is a multi-stage image build.
 #
-# We first create a "builder" image and then create our final image by copying
-# things from the builder image.  The point is to avoid bloating the final
-# image with tools only needed during the image build.
+# We first create two builder images (builder-build-platform,
+# builder-target-platform). Then we create our final image by copying things
+# from the builder images. The point is to avoid bloating the final image with
+# tools only needed during the image build.
 
-# First build the temporary image.
-FROM python:3.10-slim-bullseye AS builder
+# Setup: pull cross-compilation tools.
+FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
+
+# ———————————————————————————————————————————————————————————————————— #
+
+# Define a builder stage that runs on the build platform.
+# Even if the target platform is different, instructions will run natively for
+# faster compilation.
+FROM --platform=$BUILDPLATFORM debian:11-slim AS builder-build-platform
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
+# Copy cross-compilation tools.
+COPY --from=xx / /
+
 # Add system deps for building
 # autoconf, automake: for building VCFtools; may be used by package managers to build from source
-# build-essential: contains gcc, g++, make, etc. for building various tools; may be used by package managers to build from source
 # ca-certificates: for secure HTTPS connections
 # curl: for downloading source files
-# git: for git pip installs
-# jq: used in builder-scripts/latest-augur-release-tag
-# libsqlite3-dev: for building pyfastx (for Augur)
+# git: used in builder-scripts/download-repo
+# make: used for building from Makefiles (search for usage); may be used by package managers to build from source
 # pkg-config: for building VCFtools; may be used by package managers to build from source
-# zlib1g-dev: for building VCFtools and pyfastx; may be used by package managers to build from source
 # nodejs: for installing Auspice
+# clang: for compiling C/C++ projects; may be used by package managers to build from source
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
-        build-essential \
+        clang \
         ca-certificates \
         curl \
         git \
-        jq \
-        libsqlite3-dev \
+        make \
         pkg-config \
-        zlib1g-dev
+        dpkg-dev
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
@@ -41,6 +49,18 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
 ARG TARGETPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
+
+# Install packages that generate binaries for the target architecture.
+# https://github.com/tonistiigi/xx#building-on-debian
+# binutils, gcc, libc6-dev: for compiling C/C++ programs (TODO: verify)
+# g++: for building VCFtools; may be used by package managers to build from source
+# zlib1g-dev: for building VCFtools; may be used by package managers to build from source
+RUN xx-apt-get install -y \
+  binutils \
+  gcc \
+  g++ \
+  libc6-dev \
+  zlib1g-dev
 
 # Add dependencies. All should be pinned to specific versions, except
 # Nextstrain-maintained software.
@@ -57,27 +77,31 @@ RUN mkdir -p /final/bin /final/share /final/libexec
 # 1. Build programs from source
 
 # Build RAxML
-# linux/arm64 does not support -mavx and -msse3 compilation flags which are used in the official repository.
-# Make these changes in a fork for now: https://github.com/nextstrain/standard-RAxML/tree/simde
+# Some changes are necessary to allow the Makefile to work with cross-compilation.
+# Make these changes in a fork for now: https://github.com/nextstrain/standard-RAxML/tree/fix-cross-compile
 # TODO: Use the official repository if this PR is ever merged: https://github.com/stamatak/standard-RAxML/pull/50
 WORKDIR /build/RAxML
-RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/4621552064304a219ff03810f5f0d91e1063b68f \
+RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/4868de62a62be8901259807cfea26f336c2ca477 \
   | tar xzvpf - --no-same-owner --strip-components=1 \
-  && make -f Makefile.AVX.PTHREADS.gcc \
+  && CC=xx-clang make -f Makefile.AVX.PTHREADS.gcc \
   && cp -p raxmlHPC-PTHREADS-AVX /final/bin
 
 # Build FastTree
 WORKDIR /build/FastTree
-RUN curl -fsSL https://api.github.com/repos/tsibley/FastTree/tarball/50c5b098ea085b46de30bfc29da5e3f113353e6f \
+RUN curl -fsSL https://api.github.com/repos/nextstrain/FastTree/tarball/df4212c8c9991e7e0d432e42d53c21cd8408a181 \
   | tar xzvpf - --no-same-owner --strip-components=1 \
- && make FastTreeDblMP \
+ && CC=$(xx-info)-gcc make FastTreeDblMP \
  && cp -p FastTreeDblMP /final/bin
 
 # Build vcftools
+# Some unreleased changes are necessary to allow Autoconf to work with cross-compilation¹.
+# ¹ https://github.com/vcftools/vcftools/commit/1cab5204eb0ce01664178bafd0ad6104525709d1
 WORKDIR /build/vcftools
-RUN curl -fsSL https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz \
-  | tar xzvpf - --no-same-owner --strip-components=2 \
- && ./configure --prefix=$PWD/built \
+RUN curl -fsSL https://api.github.com/repos/vcftools/vcftools/tarball/1cab5204eb0ce01664178bafd0ad6104525709d1 \
+  | tar xzvpf - --no-same-owner --strip-components=1 \
+ && ./autogen.sh && ./configure --prefix=$PWD/built \
+      --build=$(TARGETPLATFORM= xx-clang --print-target-triple) \
+      --host=$(xx-clang --print-target-triple) \
  && make && make install \
  && cp -rp built/bin/*    /final/bin \
  && cp -rp built/share/*  /final/share
@@ -145,7 +169,89 @@ RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-
   | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
 
 
-# 3. Install programs via pip
+# 3. Add unpinned programs
+
+# Allow caching to be avoided from here on out in this stage by calling
+# docker build --build-arg CACHE_DATE="$(date)"
+# NOTE: All versioned software added below should be checked in
+# devel/validate-platforms.
+ARG CACHE_DATE
+
+# Add helper scripts
+COPY builder-scripts/ /builder-scripts/
+
+# Nextclade/Nextalign v2 are downloaded directly but using the latest version,
+# so they belong after CACHE_DATE (unlike Nextclade/Nextalign v1).
+
+# Download Nextalign v2
+# Set default Nextalign version to 2
+RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-$(/builder-scripts/target-triple) \
+ && ln -sv nextalign2 /final/bin/nextalign
+
+# Download Nextclade v2
+# Set default Nextclade version to 2
+RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
+ && ln -sv nextclade2 /final/bin/nextclade
+
+# Auspice
+# Building auspice means we can run it without hot-reloading, which is
+# time-consuming and generally unnecessary in the container image.
+# Linking is used so we can overlay the auspice version in the image with
+# --volume=.../auspice:/nextstrain/auspice and still have it globally accessible
+# and importable.
+#
+# Versions of NPM might differ in platform between where Auspice is installed
+# and where it is used (the final image). This does not matter since Auspice
+# (and its runtime dependencies at the time of writing) are not
+# platform-specific.
+# This may change in the future, which would call for cross-platform
+# installation using npm_config_arch (if using node-gyp¹ or prebuild-install²)
+# or npm_config_target_arch (if using node-pre-gyp³⁴).
+#
+# ¹ https://github.com/nodejs/node-gyp#environment-variables
+# ² https://github.com/prebuild/prebuild-install#help
+# ³ https://github.com/mapbox/node-pre-gyp#options
+# ⁴ https://github.com/mapbox/node-pre-gyp/blob/v1.0.10/lib/node-pre-gyp.js#L186
+WORKDIR /nextstrain/auspice
+RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
+ && npm update && npm install && npm run build && npm link
+
+# Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
+RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets
+RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat
+
+# ———————————————————————————————————————————————————————————————————— #
+
+# Define a builder stage that runs on the target platform.
+# If the target platform is different from the build platform, instructions will
+# run under emulation which can be slower.
+# This is in place for Python programs which are not easy to install for a
+# different target platform¹.
+# ¹ https://github.com/pypa/pip/issues/5453
+FROM --platform=$TARGETPLATFORM python:3.10-slim-bullseye AS builder-target-platform
+
+SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
+
+# Used for platform-specific instructions
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
+# Add system deps for building
+# curl, jq: used in builder-scripts/latest-augur-release-tag
+# git: for git pip installs
+# gcc: for building datrie (for Snakemake)
+# libsqlite3-dev, zlib1g-dev: for building pyfastx (for Augur)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl \
+        gcc \
+        git \
+        jq \
+        libsqlite3-dev \
+        zlib1g-dev
+
+
+# 1. Install programs via pip
 
 # Install jaxlib on linux/arm64
 # jaxlib, an evofr dependency, does not have official pre-built binaries for
@@ -184,32 +290,20 @@ RUN pip3 install pysam==0.19.1
 # Install pango_aliasor (for forecasts-ncov)
 RUN pip3 install pango_aliasor==0.3.0
 
-# 4. Add unpinned programs
 
-# Allow caching to be avoided from here on out by calling
+# 2. Add unpinned programs
+
+# Allow caching to be avoided from here on out in this stage by calling
 # docker build --build-arg CACHE_DATE="$(date)"
 # NOTE: All versioned software added below should be checked in
 # devel/validate-platforms.
 ARG CACHE_DATE
 
-# Install our own CLI so builds can do things like `nextstrain deploy`
-RUN pip3 install nextstrain-cli
-
 # Add helper scripts
 COPY builder-scripts/ /builder-scripts/
 
-# Nextclade/Nextalign v2 are downloaded directly but using the latest version,
-# so they belong after CACHE_DATE (unlike Nextclade/Nextalign v1).
-
-# Download Nextalign v2
-# Set default Nextalign version to 2
-RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-$(/builder-scripts/target-triple) \
- && ln -sv nextalign2 /final/bin/nextalign
-
-# Download Nextclade v2
-# Set default Nextclade version to 2
-RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
- && ln -sv nextclade2 /final/bin/nextclade
+# Install our own CLI so builds can do things like `nextstrain deploy`
+RUN pip3 install nextstrain-cli
 
 # Fauna
 WORKDIR /nextstrain/fauna
@@ -225,6 +319,8 @@ RUN pip3 install phylo-treetime
 # CVXOPT, an Augur dependency, does not have pre-built binaries for linux/arm64.
 #
 # First, add system deps for building¹:
+# - gcc: C compiler.
+# - libc6-dev: C libraries and header files.
 # - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
 # - SuiteSparse: Download the source code so it can be built alongside CVXOPT.
 #
@@ -236,6 +332,8 @@ RUN pip3 install phylo-treetime
 WORKDIR /cvxopt
 RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
       apt-get update && apt-get install -y --no-install-recommends \
+          gcc \
+          libc6-dev \
           libopenblas-dev \
    && mkdir SuiteSparse \
    && curl -fsSL https://api.github.com/repos/DrTimothyAldenDavis/SuiteSparse/tarball/v5.8.1 \
@@ -252,23 +350,8 @@ WORKDIR /nextstrain/augur
 RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
  && pip3 install --editable .
 
-# Auspice
-# Install Node deps, build Auspice, and link it into the global search path.  A
-# fresh install is only ~40 seconds, so we're not worrying about caching these
-# as we did the Python deps.  Building auspice means we can run it without
-# hot-reloading, which is time-consuming and generally unnecessary in the
-# container image.  Linking is equivalent to an editable Python install and
-# used for the same reasons described above.
-WORKDIR /nextstrain/auspice
-RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
- && npm update && npm install && npm run build && npm link
-
 # Add evofr for forecasting
 RUN pip3 install evofr
-
-# Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
-RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets
-RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat
 
 # ———————————————————————————————————————————————————————————————————— #
 
@@ -333,9 +416,9 @@ RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
 COPY bashrc /etc/bash.bashrc
 
 # Copy binaries
-COPY --from=builder /final/bin/ /usr/local/bin/
-COPY --from=builder /final/share/ /usr/local/share/
-COPY --from=builder /final/libexec/ /usr/local/libexec/
+COPY --from=builder-build-platform  /final/bin/     /usr/local/bin/
+COPY --from=builder-build-platform  /final/share/   /usr/local/share/
+COPY --from=builder-build-platform  /final/libexec/ /usr/local/libexec/
 
 # Set MAFFT_BINARIES explicitly for MAFFT
 ENV MAFFT_BINARIES=/usr/local/libexec
@@ -344,7 +427,7 @@ ENV MAFFT_BINARIES=/usr/local/libexec
 RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
-COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+COPY --from=builder-target-platform /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
 
 # Add installed Python scripts that we need.
 #
@@ -355,7 +438,7 @@ COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/pyth
 # as the set of things to copy) in the future if the maintenance burden becomes
 # troublesome or excessive.
 #   -trs, 15 June 2018
-COPY --from=builder \
+COPY --from=builder-target-platform \
     /usr/local/bin/augur \
     /usr/local/bin/aws \
     /usr/local/bin/envdir \
@@ -368,7 +451,7 @@ COPY --from=builder \
     /usr/local/bin/
 
 # Add installed Node libs
-COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
+COPY --from=builder-build-platform /usr/lib/node_modules/ /usr/lib/node_modules/
 
 # Add globally linked Auspice script.
 #
@@ -379,7 +462,8 @@ COPY --from=builder /usr/lib/node_modules/ /usr/lib/node_modules/
 RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
 
 # Add Nextstrain components
-COPY --from=builder /nextstrain /nextstrain
+COPY --from=builder-build-platform  /nextstrain /nextstrain
+COPY --from=builder-target-platform /nextstrain /nextstrain
 
 # Add our entrypoints and helpers
 COPY entrypoint entrypoint-aws-batch drop-privs create-envd delete-envd /sbin/
