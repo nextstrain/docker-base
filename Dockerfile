@@ -290,31 +290,6 @@ RUN pip3 install pysam==0.19.1
 # Install pango_aliasor (for forecasts-ncov)
 RUN pip3 install pango_aliasor==0.3.0
 
-
-# 2. Add unpinned programs
-
-# Allow caching to be avoided from here on out in this stage by calling
-# docker build --build-arg CACHE_DATE="$(date)"
-# NOTE: All versioned software added below should be checked in
-# devel/validate-platforms.
-ARG CACHE_DATE
-
-# Add helper scripts
-COPY builder-scripts/ /builder-scripts/
-
-# Install our own CLI so builds can do things like `nextstrain deploy`
-RUN pip3 install nextstrain-cli
-
-# Fauna
-WORKDIR /nextstrain/fauna
-RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . \
- && pip3 install --requirement=requirements.txt
-
-# Add Treetime
-RUN pip3 install phylo-treetime
-
-# Augur
-
 # Build CVXOPT on linux/arm64
 # CVXOPT, an Augur dependency, does not have pre-built binaries for linux/arm64.
 #
@@ -339,10 +314,34 @@ RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
    && curl -fsSL https://api.github.com/repos/DrTimothyAldenDavis/SuiteSparse/tarball/v5.8.1 \
     | tar xzvpf - --no-same-owner --strip-components=1 -C SuiteSparse \
    && CVXOPT_SUITESPARSE_SRC_DIR=$(pwd)/SuiteSparse \
-      pip3 install cvxopt \
+      pip3 install cvxopt==1.3.1 \
       ; \
     fi
 
+
+# 2. Add unpinned programs
+
+# Allow caching to be avoided from here on out in this stage by calling
+# docker build --build-arg CACHE_DATE="$(date)"
+# NOTE: All versioned software added below should be checked in
+# devel/validate-platforms.
+ARG CACHE_DATE
+
+# Add helper scripts
+COPY builder-scripts/ /builder-scripts/
+
+# Install our own CLI so builds can do things like `nextstrain deploy`
+RUN pip3 install nextstrain-cli
+
+# Fauna
+WORKDIR /nextstrain/fauna
+RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . \
+ && pip3 install --requirement=requirements.txt
+
+# Add Treetime
+RUN pip3 install phylo-treetime
+
+# Augur
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
