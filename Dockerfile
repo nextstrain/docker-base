@@ -291,19 +291,23 @@ RUN pip3 install pysam==0.19.1
 RUN pip3 install pango_aliasor==0.3.0
 
 # Build CVXOPT on linux/arm64
-# CVXOPT, an Augur dependency, does not have pre-built binaries for linux/arm64.
+# CVXOPT, an Augur dependency, does not have pre-built binaries for linux/arm64¹.
 #
-# First, add system deps for building¹:
+# First, add system deps for building²:
 # - gcc: C compiler.
 # - libc6-dev: C libraries and header files.
 # - libopenblas-dev: Contains optimized versions of BLAS and LAPACK.
 # - SuiteSparse: Download the source code so it can be built alongside CVXOPT.
 #
 # Then, "install" (build) separately since the process requires a special
-# environment variable².
+# environment variable³.
 #
-# ¹ https://cvxopt.org/install/#building-and-installing-from-source
-# ² https://cvxopt.org/install/#ubuntu-debian
+# ¹ https://github.com/cvxopt/cvxopt-wheels/issues/12
+# ² https://cvxopt.org/install/#building-and-installing-from-source
+# ³ https://cvxopt.org/install/#ubuntu-debian
+#
+# TODO: If this is removed, the installation of libopenblas in the final stage
+# should also be removed.
 WORKDIR /cvxopt
 RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
       apt-get update && apt-get install -y --no-install-recommends \
