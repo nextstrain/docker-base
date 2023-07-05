@@ -31,11 +31,7 @@ def get_id_map(f):
 
     id_map = {}
     for line in f:
-        start_match = start_pattern.match(line)
-        cached_match = cached_pattern.match(line)
-        done_match = done_pattern.match(line)
-
-        if start_match:
+        if start_match := start_pattern.match(line):
             layer_id = start_match["layer_id"]
             if layer_id in id_map:
                 assert line == id_map[layer_id]["line"]
@@ -48,11 +44,11 @@ def get_id_map(f):
             id_map[layer_id]["line"] = line
             id_map[layer_id]["name"] = f"[{platform_info}] {command}"
 
-        elif cached_match:
+        elif cached_match := cached_pattern.match(line):
             layer_id = cached_match["layer_id"]
             id_map[layer_id]["time"] = None
 
-        elif done_match:
+        elif done_match := done_pattern.match(line):
             layer_id = done_match["layer_id"]
             if layer_id not in id_map:
                 # This can happen for tasks such as "importing cache manifest" that do not have start lines.
