@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
  && apt-get update && apt-get install -y nodejs
 
 # Used for platform-specific instructions
@@ -395,7 +395,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/0d81da75/README.md#installation-instructions
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
  && apt-get update && apt-get install -y nodejs
 
 # Used for platform-specific instructions
