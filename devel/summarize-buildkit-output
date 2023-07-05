@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+import re
+import sys
+"""
+Summarize BuildKit output by layer execution time.
+"""
+
+
+def main(file):
+    with open(file) as f:
+        id_map = get_id_map(f)
+        print_summary(id_map)
+
+
+def get_id_map(f):
+    """Return information extracted from a BuildKit output file handle.
+
+    Returns
+    -------
+    {
+        <Layer ID>: {
+            "line": The full layer start line from the output.
+            "name": A shorter version of the line that should still uniquely identify the layer.
+            "time": The build time for the layer, or None if it was cached.
+        }
+    }
+    """
+    start_pattern = re.compile(r'^(?P<layer_id>#\d+) \[(?P<tag>.*?)\] (?P<command>.*)$')
+    cached_pattern = re.compile(r'^(?P<layer_id>#\d+) CACHED$')
+    done_pattern = re.compile(r'^(?P<layer_id>#\d+) DONE (?P<time>\d+.\d+s)$')
+
+    id_map = {}
+    for line in f:
+        if start_match := start_pattern.match(line):
+            layer_id = start_match["layer_id"]
+            if layer_id in id_map:
+                assert line == id_map[layer_id]["line"]
+                # Skip duplicate start lines.
+                continue
+
+            id_map[layer_id] = dict()
+            platform_info = get_platform_info(start_match["tag"])
+            command = start_match["command"]
+            id_map[layer_id]["line"] = line
+            id_map[layer_id]["name"] = f"[{platform_info}] {command}"
+
+        elif cached_match := cached_pattern.match(line):
+            layer_id = cached_match["layer_id"]
+            id_map[layer_id]["time"] = None
+
+        elif done_match := done_pattern.match(line):
+            layer_id = done_match["layer_id"]
+            if layer_id not in id_map:
+                # This can happen for tasks such as "importing cache manifest" that do not have start lines.
+                continue
+            id_map[layer_id]["time"] = get_seconds(done_match["time"])
+
+    # Handle incomplete layers.
+    incomplete = False
+    for layer_id, info in list(id_map.items()):
+        if "time" not in info:
+            warn(f'WARNING: Build for layer {layer_id} was started but not finished.')
+            del id_map[layer_id]
+            incomplete = True
+
+    if incomplete:
+        warn("WARNING: This log is from an incomplete build.")
+
+    return id_map
+
+
+def print_summary(id_map):
+    """Print a summary of execution times per layer.
+
+    Bar charts inspired by https://alexwlchan.net/2018/ascii-bar-charts/
+    """
+    total_time = sum(info["time"] or 0 for _, info in id_map.items())
+    print(f"Total time: {total_time:.1f}s")
+    print()
+
+    longest_time = max(info["time"] or 0 for _, info in id_map.items())
+
+    # Set column widths.
+    max_name_width = 100
+    max_time_width = len(f"{longest_time}s (100.0%)")
+    max_bar_width = 20
+
+    # Calculate how much time a bar chunk should represent.
+    increment = longest_time / max_bar_width
+
+    print(f'{"Layer information":<{max_name_width}} | {"Time":<{max_time_width}} {"▏Time bar"}')
+    print(f'{"-" * max_name_width} | {"-" * max_time_width} {"-" * max_bar_width}')
+
+    for layer_id, info in id_map.items():
+
+        time = info["time"] or 0
+        time_percent = time / total_time * 100
+        time_str = f'{info["time"]:.1f}s ({time_percent:.1f}%)' if info["time"] else "CACHED"
+
+        bar_chunks, remainder = divmod(int(time * 8 / increment), 8)
+
+        # First draw the full width chunks, then add the fractional part.
+        bar = '█' * bar_chunks
+        if remainder > 0:
+            bar += chr(ord('█') + (8 - remainder))
+
+        # Handle empty bars.
+        bar = bar or  '▏'
+
+        print(f'{info["name"][:max_name_width]:<{max_name_width}} | {time_str:<{max_time_width}} {bar}')
+
+
+def get_platform_info(tag):
+    """Return platform info from the tag enclosed by brackets in BuildKit output.
+
+    Uses a hardcoded list of possible strings and returns the first match.
+    """
+    for s in possible_platform_strings:
+        if s in tag:
+            return s
+
+
+# Order by most→least specific to return the most specific match.
+possible_platform_strings = [
+    "linux/amd64->arm64",
+    "linux/amd64",
+    "linux/arm64",
+]
+
+
+def get_seconds(s):
+    """Get the amount of seconds from BuildKit output as a numeric type."""
+    pattern = re.compile(r'^(?P<time>\d+.\d+)s$')
+    match = pattern.match(s)
+    assert match is not None
+    return float(match["time"])
+
+
+def warn(message):
+    print(message, file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])

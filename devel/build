@@ -19,14 +19,16 @@ devel="$(dirname "$0")"
 platform="$("$devel"/platform)"
 registry=localhost:5000
 tag=latest
+log_directory="logs/"
 
 # Read command-line arguments.
-while getopts "p:r:t:" opt; do
+while getopts "p:r:t:l:" opt; do
     case "$opt" in
         p) platform="$OPTARG";;
         r) registry="$OPTARG";;
         t) tag="$OPTARG";;
-        *) echo "Usage: $0 [-p <platform>] [-r <registry>] [-t <tag>]" 1>&2; exit 1;;
+        l) log_directory="$OPTARG";;
+        *) echo "Usage: $0 [-p <platform>] [-r <registry>] [-t <tag>] [-l <log directory>]" 1>&2; exit 1;;
     esac
 done
 
@@ -53,6 +55,8 @@ if ! docker buildx inspect "$builder" &>/dev/null; then
     docker buildx create --name "$builder" --driver docker-container --driver-opt network=host
 fi
 
+mkdir -p "$log_directory"
+
 BUILDER_BUILD_PLATFORM_IMAGE=nextstrain/base-builder-build-platform
 BUILDER_TARGET_PLATFORM_IMAGE=nextstrain/base-builder-target-platform
 FINAL_IMAGE=nextstrain/base
@@ -70,7 +74,9 @@ docker buildx build \
     --tag "$registry/$BUILDER_BUILD_PLATFORM_IMAGE:$tag" \
     --push \
     --provenance false \
-    .
+    --progress=plain \
+    . 2>&1 | tee "$log_directory"/builder-build-platform
+
 
 docker buildx build \
     --target builder-target-platform \
@@ -85,7 +91,8 @@ docker buildx build \
     --tag "$registry/$BUILDER_TARGET_PLATFORM_IMAGE:$tag" \
     --push \
     --provenance false \
-    .
+    --progress=plain \
+    . 2>&1 | tee "$log_directory"/builder-target-platform
 
 docker buildx build \
     --target final \
@@ -109,4 +116,5 @@ docker buildx build \
     --tag "$registry/$FINAL_IMAGE:$tag" \
     --push \
     --provenance false \
-    .
+    --progress=plain \
+    . 2>&1 | tee "$log_directory"/final

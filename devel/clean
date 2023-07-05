@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Cleans up after the build process by removing build artifacts and caches.
+# Cleans up after the build process by removing build artifacts, caches, and logs.
 #
 set -euo pipefail
 
@@ -10,6 +10,7 @@ registry=nextstrain-local-registry
 registry_addr=localhost:5000
 build_dir="$repo"/build
 builder=nextstrain-builder
+build_logs_dir="$repo"/logs
 
 # Read command-line arguments.
 while getopts "r:" opt; do
@@ -58,4 +59,14 @@ for image in "$registry_addr"/nextstrain/base{,-builder}; do
 done
 if [[ -z "${id:-}" ]]; then
     echo "skipped; no local images"
+fi
+
+
+echo "--> Deleting build logs in $build_logs_dir"
+
+if [[ -d "$build_logs_dir" ]]; then
+    du -hs "$build_logs_dir"
+    rm -rf "$build_logs_dir"
+else
+    echo "skipped; $build_logs_dir does not exist"
 fi
