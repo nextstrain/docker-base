@@ -258,7 +258,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # linux/arm64. A GitHub user has provided them in a fork repo.
 # https://github.com/google/jax/issues/7097#issuecomment-1110730040
 RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
-      pip3 install https://github.com/yoziru/jax/releases/download/jaxlib-v0.3.25/jaxlib-0.3.25-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl \
+      pip3 install https://github.com/yoziru/jax/releases/download/jaxlib-v0.4.6/jaxlib-0.4.6-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl \
       ; \
     fi
 
@@ -354,6 +354,9 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/build
  && pip3 install --editable .
 
 # Add evofr for forecasting
+# NOTE: if there is an issue with the evofr installation on linux/arm64, make
+# sure to check that the jaxlib installation above satisfies the latest evofr
+# dependency requirements.
 RUN pip3 install evofr
 
 # ———————————————————————————————————————————————————————————————————— #
