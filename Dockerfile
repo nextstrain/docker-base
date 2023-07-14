@@ -371,6 +371,7 @@ SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 # ca-certificates: [Dockerfile] for secure HTTPS connections; may be used by workflows
 # curl: [Dockerfile] for downloading binaries directly; may be used by workflows
 # dos2unix: tsv-utils needs unix line endings
+# git: used to clone workflows within a Docker instance (e.g., through GitPod)
 # jq: may be used by workflows
 # less: for usability in an interactive prompt
 # libgomp1: for running FastTree
@@ -385,6 +386,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         dos2unix \
+        git \
         gzip \
         jq \
         less \
