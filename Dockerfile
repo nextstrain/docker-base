@@ -113,8 +113,9 @@ RUN curl -fsSL https://api.github.com/repos/vcftools/vcftools/tarball/1cab5204eb
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: https://mafft.cbrc.jp/alignment/software/installation_without_root.html
+# Last update: 2023-05-03 to v7.520 from v7.475 (~end of 2020)
 WORKDIR /download/mafft
-RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
+RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz \
   | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/ \
  && cp -p bin/*     /final/bin \
  && cp -p libexec/* /final/libexec
@@ -123,8 +124,9 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: http://www.iqtree.org/doc/Compilation-Guide
+# Last update: 2023-05-03 to v2.2.2.4 from v2.1.2 (2020-10-22)
 WORKDIR /download/IQ-TREE
-RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
+RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.2.2.4/iqtree-2.2.2.4-Linux.tar.gz \
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
@@ -149,24 +151,24 @@ RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/downl
  && rm -f tsv-utils.tar.gz
 
 # Download csvtk
-RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
+RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.25.0/csvtk_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download seqkit
-RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
+RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.4.0/seqkit_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
 
 # Download gofasta (for ncov/Pangolin)
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: https://github.com/virus-evolution/gofasta/tree/v0.0.6#installation
-RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
+RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v1.2.0/gofasta-linux-amd64 \
   -o /final/bin/gofasta
 
 # Download minimap2 (for ncov/Pangolin)
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: https://github.com/lh3/minimap2/tree/v2.24#install
-RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
-  | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
+RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.26/minimap2-2.26_x64-linux.tar.bz2 \
+  | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.26_x64-linux/minimap2
 
 
 # 3. Add unpinned programs
@@ -270,17 +272,16 @@ RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
 RUN pip3 install envdir==1.0.1
 
 # Install tooling for our AWS Batch builds, which use `aws s3`.
-RUN pip3 install awscli==1.18.195
+RUN pip3 install awscli==1.27.126
 
 # Install Snakemake and related optional dependencies.
-# Pinned to 7.24.1 for stability (2023-03-13)
-RUN pip3 install snakemake==7.24.1
+RUN pip3 install snakemake==7.25.2
 # Google Cloud Storage package is required for Snakemake to fetch remote files
 # from Google Storage URIs.
-RUN pip3 install google-cloud-storage==2.7.0
+RUN pip3 install google-cloud-storage==2.8.0
 
 # Install epiweeks (for ncov)
-RUN pip3 install epiweeks==2.1.2
+RUN pip3 install epiweeks==2.2.0
 
 # Install Pangolin and PangoLEARN + deps (for ncov)
 # The cov-lineages projects aren't available on PyPI, so install via git URLs.
