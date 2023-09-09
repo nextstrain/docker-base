@@ -317,10 +317,12 @@ SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 # less: for usability in an interactive prompt
 # libgomp1: for running FastTree
 # libsqlite3: for pyfastx (for Augur)
+# nano: for usability in an interactive prompt
 # ncbi-blast+: for GenoFLU in avian-flu
 # perl: for running VCFtools
 # ruby: may be used by workflows
 # sqlite3: for `augur merge`
+# vim-tiny: for usability in an interactive prompt
 # wget: may be used by workflows
 # zlib1g: for pyfastx (for Augur)
 # nodejs: for running Auspice
@@ -335,11 +337,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         less \
         libgomp1 \
         libsqlite3-0 \
+	      nano \
         ncbi-blast+ \
         perl \
         ruby \
         sqlite3 \
         util-linux \
+        vim-tiny \
         wget \
         xz-utils \
         zip unzip \
