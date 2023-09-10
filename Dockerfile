@@ -71,53 +71,11 @@ RUN xx-apt-get install -y \
 # the original pathogen that added these dependencies.
 
 # Create directories to be copied in final stage.
-RUN mkdir -p /final/bin /final/share /final/libexec
-
-
-# 1. Build programs from source
-
-# Build RAxML
-# Some changes are necessary to allow the Makefile to work with cross-compilation.
-# Make these changes in a fork for now: https://github.com/nextstrain/standard-RAxML/tree/fix-cross-compile
-# TODO: Use the official repository if this PR is ever merged: https://github.com/stamatak/standard-RAxML/pull/50
-WORKDIR /build/RAxML
-RUN curl -fsSL https://api.github.com/repos/nextstrain/standard-RAxML/tarball/4868de62a62be8901259807cfea26f336c2ca477 \
-  | tar xzvpf - --no-same-owner --strip-components=1 \
-  && CC=xx-clang make -f Makefile.AVX.PTHREADS.gcc \
-  && cp -p raxmlHPC-PTHREADS-AVX /final/bin
-
-# Build FastTree
-WORKDIR /build/FastTree
-RUN curl -fsSL https://api.github.com/repos/nextstrain/FastTree/tarball/df4212c8c9991e7e0d432e42d53c21cd8408a181 \
-  | tar xzvpf - --no-same-owner --strip-components=1 \
- && CC=$(xx-info)-gcc make FastTreeDblMP \
- && cp -p FastTreeDblMP /final/bin
-
-# Build vcftools
-# Some unreleased changes are necessary to allow Autoconf to work with cross-compilation¹.
-# ¹ https://github.com/vcftools/vcftools/commit/1cab5204eb0ce01664178bafd0ad6104525709d1
-WORKDIR /build/vcftools
-RUN curl -fsSL https://api.github.com/repos/vcftools/vcftools/tarball/1cab5204eb0ce01664178bafd0ad6104525709d1 \
-  | tar xzvpf - --no-same-owner --strip-components=1 \
- && ./autogen.sh && ./configure --prefix=$PWD/built \
-      --build=$(TARGETPLATFORM= xx-clang --print-target-triple) \
-      --host=$(xx-clang --print-target-triple) \
- && make && make install \
- && cp -rp built/bin/*    /final/bin \
- && cp -rp built/share/*  /final/share
+RUN mkdir -p /final/bin /final/share
 
 
 # 2. Download pre-built programs
 
-# Download MAFFT
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Instructions: https://mafft.cbrc.jp/alignment/software/installation_without_root.html
-WORKDIR /download/mafft
-RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
-  | tar xzvpf - --no-same-owner --strip-components=2 mafft-linux64/mafftdir/ \
- && cp -p bin/*     /final/bin \
- && cp -p libexec/* /final/libexec
 
 # Download IQ-TREE
 # NOTE: Running this program requires support for emulation on the Docker host
@@ -128,17 +86,6 @@ RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
-# Download Nextalign v1
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
-RUN curl -fsSL -o /final/bin/nextalign1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64
-
-# Download Nextclade v1
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
-RUN curl -fsSL -o /final/bin/nextclade1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64
 
 # Download tsv-utils
 # NOTE: Running this program requires support for emulation on the Docker host
@@ -148,25 +95,8 @@ RUN curl -L -o tsv-utils.tar.gz https://github.com/eBay/tsv-utils/releases/downl
  && tar -x --no-same-owner -v -C /final/bin -z --strip-components 2 --wildcards -f tsv-utils.tar.gz "*/bin/*" \
  && rm -f tsv-utils.tar.gz
 
-# Download csvtk
-RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.24.0/csvtk_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
-
 # Download seqkit
 RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
-
-# Download gofasta (for ncov/Pangolin)
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Instructions: https://github.com/virus-evolution/gofasta/tree/v0.0.6#installation
-RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
-  -o /final/bin/gofasta
-
-# Download minimap2 (for ncov/Pangolin)
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Instructions: https://github.com/lh3/minimap2/tree/v2.24#install
-RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
-  | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
 
 
 # 3. Add unpinned programs
@@ -216,9 +146,6 @@ WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
  && npm install --omit dev && npm link
 
-# Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
-RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets
-RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat
 
 # ———————————————————————————————————————————————————————————————————— #
 
@@ -253,19 +180,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 1. Install programs via pip
 
-# Install jaxlib & jax on linux/arm64
-# jaxlib, an evofr dependency, does not have official pre-built binaries for
-# linux/arm64. A GitHub user has provided them in a fork repo.
-# https://github.com/google/jax/issues/7097#issuecomment-1110730040
-# Also hard-coding jax version here since it needs to match the jaxlib version
-# The minimum version requirement for jaxlib is checked at runtime rather than by pip
-# https://jax.readthedocs.io/en/latest/jep/9419-jax-versioning.html#how-are-jax-and-jaxlib-versioned
-RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
-      pip3 install https://github.com/yoziru/jax/releases/download/jaxlib-v0.4.6/jaxlib-0.4.6-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl \
-          jax==0.4.6 \
-      ; \
-    fi
-
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
 
@@ -273,23 +187,9 @@ RUN pip3 install envdir==1.0.1
 RUN pip3 install awscli==1.18.195
 
 # Install Snakemake and related optional dependencies.
-# Pinned to 7.24.1 for stability (2023-03-13)
-RUN pip3 install snakemake==7.24.1
-# Google Cloud Storage package is required for Snakemake to fetch remote files
-# from Google Storage URIs.
-RUN pip3 install google-cloud-storage==2.7.0
+# Pinned to 7.32.3 for stability (2023-03-13)
+RUN pip3 install snakemake==7.32.3
 
-# Install epiweeks (for ncov)
-RUN pip3 install epiweeks==2.1.2
-
-# Install Pangolin and PangoLEARN + deps (for ncov)
-# The cov-lineages projects aren't available on PyPI, so install via git URLs.
-RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
-RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
-RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
-RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
-RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
-RUN pip3 install pysam==0.19.1
 
 # Install pango_aliasor (for forecasts-ncov)
 RUN pip3 install pango_aliasor==0.3.0
@@ -341,27 +241,16 @@ COPY builder-scripts/ /builder-scripts/
 # Install our own CLI so builds can do things like `nextstrain deploy`
 RUN pip3 install nextstrain-cli
 
-# Fauna
-WORKDIR /nextstrain/fauna
-RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . \
- && pip3 install --requirement=requirements.txt
-
 # Add Treetime
-RUN pip3 install phylo-treetime
+RUN pip3 install phylo-treetime==0.11.1
 
 # Augur
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
 WORKDIR /nextstrain/augur
-RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
- && pip3 install --editable .
+RUN pip3 install git+https://github.com/nextstrain/augur.git@ab780b05b96b5ffc6301388c0a0bbb311c7701b0
 
-# Add evofr for forecasting
-# NOTE: if there is an issue with the evofr installation on linux/arm64, make
-# sure to check that the jaxlib installation above satisfies the latest evofr
-# dependency requirements.
-RUN pip3 install evofr
 
 # ———————————————————————————————————————————————————————————————————— #
 
@@ -430,13 +319,9 @@ COPY bashrc /etc/bash.bashrc
 # Copy binaries
 COPY --from=builder-build-platform  /final/bin/     /usr/local/bin/
 COPY --from=builder-build-platform  /final/share/   /usr/local/share/
-COPY --from=builder-build-platform  /final/libexec/ /usr/local/libexec/
-
-# Set MAFFT_BINARIES explicitly for MAFFT
-ENV MAFFT_BINARIES=/usr/local/libexec
 
 # Ensure all container users can execute these programs
-RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
+RUN chmod a+rx /usr/local/bin/*
 
 # Add installed Python libs
 COPY --from=builder-target-platform /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
@@ -455,9 +340,6 @@ COPY --from=builder-target-platform \
     /usr/local/bin/aws \
     /usr/local/bin/envdir \
     /usr/local/bin/nextstrain \
-    /usr/local/bin/pangolin \
-    /usr/local/bin/pangolearn.smk \
-    /usr/local/bin/scorpio \
     /usr/local/bin/snakemake \
     /usr/local/bin/treetime \
     /usr/local/bin/
