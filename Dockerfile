@@ -493,6 +493,13 @@ RUN useradd nextstrain \
     --home-dir /nextstrain \
     --no-log-init
 
+# No nesting of runtimes, please.  Use the ambient runtime inside this runtime.
+ENV NEXTSTRAIN_HOME=/nextstrain
+RUN nextstrain check-setup --set-default ambient \
+ && chown nextstrain:nextstrain /nextstrain/config \
+ && chmod a+rw /nextstrain/config \
+ && rm -f /nextstrain/lock
+
 # The host should bind mount the pathogen build dir into /nextstrain/build.
 WORKDIR /nextstrain/build
 RUN chown nextstrain:nextstrain /nextstrain/build
