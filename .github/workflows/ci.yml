@@ -98,7 +98,7 @@ jobs:
         username: nextstrain-bot
         password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - uses: aws-actions/configure-aws-credentials@v2
+    - uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: us-east-1
         role-to-assume: arn:aws:iam::827581582529:role/GitHubActionsRoleNextstrainTmpBucket
