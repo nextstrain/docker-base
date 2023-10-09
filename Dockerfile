@@ -253,19 +253,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 1. Install programs via pip
 
-# Install jaxlib & jax on linux/arm64
-# jaxlib, an evofr dependency, does not have official pre-built binaries for
-# linux/arm64. A GitHub user has provided them in a fork repo.
-# https://github.com/google/jax/issues/7097#issuecomment-1110730040
-# Also hard-coding jax version here since it needs to match the jaxlib version
-# The minimum version requirement for jaxlib is checked at runtime rather than by pip
-# https://jax.readthedocs.io/en/latest/jep/9419-jax-versioning.html#how-are-jax-and-jaxlib-versioned
-RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
-      pip3 install https://github.com/yoziru/jax/releases/download/jaxlib-v0.4.6/jaxlib-0.4.6-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl \
-          jax==0.4.6 \
-      ; \
-    fi
-
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
 
@@ -358,9 +345,6 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/build
  && pip3 install --editable .
 
 # Add evofr for forecasting
-# NOTE: if there is an issue with the evofr installation on linux/arm64, make
-# sure to check that the jaxlib installation above satisfies the latest evofr
-# dependency requirements.
 RUN pip3 install evofr
 
 # ———————————————————————————————————————————————————————————————————— #
