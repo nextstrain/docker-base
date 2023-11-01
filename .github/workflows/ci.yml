@@ -122,10 +122,13 @@ jobs:
         IMAGE: ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }}
         DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
 
+    - uses: nextstrain/.github/actions/setup-nextstrain-cli@master
+      with:
+        python-version: "3.10"
+
     - name: Run zika-tutorial
       run: |
         git clone https://github.com/nextstrain/zika-tutorial
-        pip install nextstrain-cli
         nextstrain build --image ghcr.io/nextstrain/base:${{ needs.build.outputs.tag }} zika-tutorial -F
       env:
         DOCKER_DEFAULT_PLATFORM: ${{ matrix.platform }}
