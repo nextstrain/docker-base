@@ -243,13 +243,14 @@ ARG TARGETARCH
 # Add system deps for building
 # curl, jq: used in builder-scripts/latest-augur-release-tag
 # git: for git pip installs
-# gcc: for building datrie (for Snakemake)
+# gcc, libc6-dev: for building datrie (for Snakemake)
 # libsqlite3-dev, zlib1g-dev: for building pyfastx (for Augur)
 # make: for building isal (if necessary, for Augur)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         gcc \
         git \
+        libc6-dev \
         make \
         jq \
         libsqlite3-dev \
