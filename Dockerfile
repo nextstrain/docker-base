@@ -136,12 +136,14 @@ COPY builder-scripts/ /builder-scripts/
 
 # Download Nextalign v2
 # Set default Nextalign version to 2
-RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextalign-$(/builder-scripts/target-triple) \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextalign-$(/builder-scripts/target-triple) \
+  -o /final/bin/nextalign2 \
   && ln -sv nextalign2 /final/bin/nextalign
 
 # Download Nextclade v2
 # Set default Nextclade version to 2
-RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextclade-$(/builder-scripts/target-triple) \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextclade-$(/builder-scripts/target-triple) \
+  -o /final/bin/nextclade2 \
   && ln -sv nextclade2 /final/bin/nextclade
 
 # Download tsv-utils
@@ -205,8 +207,10 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release
  && npm install --omit dev && npm link
 
 # Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
-RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets
-RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat
+RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets \
+  -o /final/bin/datasets
+RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat \
+  -o /final/bin/dataformat
 
 # ———————————————————————————————————————————————————————————————————— #
 
