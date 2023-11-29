@@ -131,18 +131,6 @@ RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
-# Download Nextalign v1
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
-RUN curl -fsSL -o /final/bin/nextalign1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64
-
-# Download Nextclade v1
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
-RUN curl -fsSL -o /final/bin/nextclade1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64
-
 # Download tsv-utils
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
