@@ -131,6 +131,19 @@ RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
+# Add helper scripts
+COPY builder-scripts/ /builder-scripts/
+
+# Download Nextalign v2
+# Set default Nextalign version to 2
+RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextalign-$(/builder-scripts/target-triple) \
+  && ln -sv nextalign2 /final/bin/nextalign
+
+# Download Nextclade v2
+# Set default Nextclade version to 2
+RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextclade-$(/builder-scripts/target-triple) \
+  && ln -sv nextclade2 /final/bin/nextclade
+
 # Download tsv-utils
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
@@ -167,22 +180,6 @@ RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-
 # NOTE: All versioned software added below should be checked in
 # devel/validate-platforms.
 ARG CACHE_DATE
-
-# Add helper scripts
-COPY builder-scripts/ /builder-scripts/
-
-# Nextclade/Nextalign v2 are downloaded directly but using the latest version,
-# so they belong after CACHE_DATE (unlike Nextclade/Nextalign v1).
-
-# Download Nextalign v2
-# Set default Nextalign version to 2
-RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-$(/builder-scripts/target-triple) \
- && ln -sv nextalign2 /final/bin/nextalign
-
-# Download Nextclade v2
-# Set default Nextclade version to 2
-RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
- && ln -sv nextclade2 /final/bin/nextclade
 
 # Auspice
 # Building auspice means we can run it without hot-reloading, which is
