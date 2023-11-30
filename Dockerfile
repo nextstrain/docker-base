@@ -131,17 +131,20 @@ RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
-# Download Nextalign v1
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
-RUN curl -fsSL -o /final/bin/nextalign1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextalign-Linux-x86_64
+# Add helper scripts
+COPY builder-scripts/ /builder-scripts/
 
-# Download Nextclade v1
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Example: https://github.com/nextstrain/nextclade/blob/1.11.0/.circleci/config.yml#L183-L223
-RUN curl -fsSL -o /final/bin/nextclade1 https://github.com/nextstrain/nextclade/releases/download/1.11.0/nextclade-Linux-x86_64
+# Download Nextalign v2
+# Set default Nextalign version to 2
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextalign-$(/builder-scripts/target-triple) \
+  -o /final/bin/nextalign2 \
+  && ln -sv nextalign2 /final/bin/nextalign
+
+# Download Nextclade v2
+# Set default Nextclade version to 2
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextclade-$(/builder-scripts/target-triple) \
+  -o /final/bin/nextclade2 \
+  && ln -sv nextclade2 /final/bin/nextclade
 
 # Download tsv-utils
 # NOTE: Running this program requires support for emulation on the Docker host
@@ -180,21 +183,14 @@ RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-
 # devel/validate-platforms.
 ARG CACHE_DATE
 
-# Add helper scripts
-COPY builder-scripts/ /builder-scripts/
-
-# Nextclade/Nextalign v2 are downloaded directly but using the latest version,
-# so they belong after CACHE_DATE (unlike Nextclade/Nextalign v1).
-
-# Download Nextalign v2
-# Set default Nextalign version to 2
-RUN curl -fsSL -o /final/bin/nextalign2 https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-$(/builder-scripts/target-triple) \
- && ln -sv nextalign2 /final/bin/nextalign
-
-# Download Nextclade v2
-# Set default Nextclade version to 2
-RUN curl -fsSL -o /final/bin/nextclade2 https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
- && ln -sv nextclade2 /final/bin/nextclade
+# Download Nextclade v3
+# Note: Before v3 there used to be separate binaries for Nextclade and
+# Nextalign. Since v3 there is only Nextclade, which can do both.
+# TODO: After Nextclade 3 is released, update the URL to download the latest
+# version instead of hardcoded.
+# TODO: At some point, update the v2 binary symlinks to use Nextclade v3.
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/3.0.0-alpha.0/nextclade-$(/builder-scripts/target-triple) \
+  -o /final/bin/nextclade3
 
 # Auspice
 # Building auspice means we can run it without hot-reloading, which is
@@ -220,8 +216,10 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release
  && npm install --omit dev && npm link
 
 # Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
-RUN curl -fsSL -o /final/bin/datasets https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets
-RUN curl -fsSL -o /final/bin/dataformat https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat
+RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets \
+  -o /final/bin/datasets
+RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat \
+  -o /final/bin/dataformat
 
 # ———————————————————————————————————————————————————————————————————— #
 
