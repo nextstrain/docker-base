@@ -42,7 +42,7 @@ jobs:
       # and hyphens.
       run: echo "TAG=branch-${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" | tee -a "$GITHUB_ENV"
 
-    - uses: docker/setup-qemu-action@v2
+    - uses: docker/setup-qemu-action@v3
 
     # GITHUB_TOKEN is unreliable¹ so use a token from nextstrain-bot.
     # ¹ https://github.com/docker/build-push-action/issues/463#issuecomment-939394233
@@ -111,7 +111,7 @@ jobs:
     # The ubuntu-latest runner is linux/amd64 so anything else will
     # run with emulation, which is still better than nothing.
     - if: matrix.platform != 'linux/amd64'
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
 
     - uses: actions/checkout@v4
 
@@ -140,7 +140,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: docker/setup-qemu-action@v2
+    - uses: docker/setup-qemu-action@v3
 
     - uses: docker/login-action@v2
       with:
