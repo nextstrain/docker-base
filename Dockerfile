@@ -189,7 +189,7 @@ ARG CACHE_DATE
 # TODO: After Nextclade 3 is released, update the URL to download the latest
 # version instead of hardcoded.
 # TODO: At some point, update the v2 binary symlinks to use Nextclade v3.
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/3.0.0-alpha.0/nextclade-$(/builder-scripts/target-triple) \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/3.0.0-alpha.1/nextclade-$(/builder-scripts/target-triple) \
   -o /final/bin/nextclade3
 
 # Auspice
