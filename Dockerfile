@@ -184,12 +184,8 @@ RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-
 ARG CACHE_DATE
 
 # Download Nextclade v3
-# Note: Before v3 there used to be separate binaries for Nextclade and
-# Nextalign. Since v3 there is only Nextclade, which can do both.
-# TODO: After Nextclade 3 is released, update the URL to download the latest
-# version instead of hardcoded.
 # TODO: At some point, update the v2 binary symlinks to use Nextclade v3.
-RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/3.0.0-alpha.2/nextclade-$(/builder-scripts/target-triple) \
+RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
   -o /final/bin/nextclade3
 
 # Auspice
