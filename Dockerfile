@@ -141,10 +141,8 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/
   && ln -sv nextalign2 /final/bin/nextalign
 
 # Download Nextclade v2
-# Set default Nextclade version to 2
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextclade-$(/builder-scripts/target-triple) \
-  -o /final/bin/nextclade2 \
-  && ln -sv nextclade2 /final/bin/nextclade
+  -o /final/bin/nextclade2
 
 # Download tsv-utils
 # NOTE: Running this program requires support for emulation on the Docker host
@@ -184,9 +182,10 @@ RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-
 ARG CACHE_DATE
 
 # Download Nextclade v3
-# TODO: At some point, update the v2 binary symlinks to use Nextclade v3.
+# Set default Nextclade version to 3
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
-  -o /final/bin/nextclade3
+  -o /final/bin/nextclade3 \
+  && ln -sv nextclade3 /final/bin/nextclade
 
 # Auspice
 # Building auspice means we can run it without hot-reloading, which is
