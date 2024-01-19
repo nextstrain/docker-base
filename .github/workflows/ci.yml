@@ -216,14 +216,16 @@ jobs:
           - { pathogen: avian-flu,       build-args: auspice/flu_avian_h5n1_ha.json }
           - { pathogen: ebola }
           - { pathogen: lassa }
-          # Disable mpox CI until pathogen-repo-ci supports custom build directories
-          # TODO: Re-enable once issue is resolved: https://github.com/nextstrain/.github/issues/63
-          # - { pathogen: mpox }
           - { pathogen: mumps }
           - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
           - { pathogen: rsv }
           - { pathogen: seasonal-flu,    build-args: --configfile profiles/ci/builds.yaml -p }
-          - { pathogen: zika }
+
+          # Disable some pathogens until pathogen-repo-ci supports custom build directories
+          # TODO: Re-enable once issue is resolved: https://github.com/nextstrain/.github/issues/63
+          # - { pathogen: mpox }
+          # - { pathogen: zika }
+
     name: test-pathogen-repo-ci (${{ matrix.pathogen }})
     uses: nextstrain/.github/.github/workflows/pathogen-repo-ci.yaml@master
     with:
