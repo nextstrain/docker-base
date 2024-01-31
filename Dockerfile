@@ -339,7 +339,7 @@ RUN pip3 install phylo-treetime
 # accessible and importable.
 # Pin Biopython 1.81: https://github.com/nextstrain/augur/issues/1373
 WORKDIR /nextstrain/augur
-RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
+RUN /builder-scripts/download-repo https://github.com/nextstrain/augur victorlin/improved-filter-io . \
  && pip3 install --editable . biopython==1.81
 
 # Add evofr for forecasting
