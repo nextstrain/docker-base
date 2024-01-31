@@ -337,10 +337,9 @@ RUN pip3 install phylo-treetime
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
-# Pin Biopython 1.81: https://github.com/nextstrain/augur/issues/1373
 WORKDIR /nextstrain/augur
 RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
- && pip3 install --editable . biopython==1.81
+ && pip3 install --editable .
 
 # Add evofr for forecasting
 RUN pip3 install evofr
