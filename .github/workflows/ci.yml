@@ -77,6 +77,7 @@ jobs:
 
     outputs:
       tag: ${{ env.TAG }}
+      digest: 
 
   # Run tests with the final image from GitHub Container Registry.
   test:
@@ -197,6 +198,27 @@ jobs:
     - name: Copy $TAG + latest images to Docker Hub
       run: |
         ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }} -l
+
+  push-summary:
+    # Only one of push-{branch,build} runs for any given workflow run, and
+    # we're ok with either of them.
+    needs: [build, push-branch, push-build]
+    if: |2
+         success()
+      || needs.push-branch.result == 'success'
+      || needs.push-build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Generate summary
+      run: |
+        # Replace ${x} in Markdown with value of environment variable "x".
+        perl -pe 's/\$\{(.+?)\}/$ENV{$1}/ge' \
+          < .github/workflows/ci.release.md \
+          > "$GITHUB_STEP_SUMMARY"
+      env:
+        TAG: ${{ needs.build.outputs.tag }}
 
   # Run pathogen repo CI builds with the final image
   test-pathogen-repo-ci:
