@@ -211,7 +211,7 @@ jobs:
       # XXX TODO: Test on multiple platforms via the matrix too, as above?
       matrix:
         include:
-          - { pathogen: avian-flu,       build-args: auspice/avian-flu_h5n1_ha.json }
+          - { pathogen: avian-flu,       build-args: test_target }
           - { pathogen: ebola }
           - { pathogen: lassa }
           - { pathogen: mumps }
