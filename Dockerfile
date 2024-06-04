@@ -29,6 +29,7 @@ COPY --from=xx / /
 # pkg-config: for building VCFtools; may be used by package managers to build from source
 # nodejs: for installing Auspice
 # clang: for compiling C/C++ projects; may be used by package managers to build from source
+# unzip: for AWS CLI
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
@@ -38,7 +39,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         make \
         pkg-config \
-        dpkg-dev
+        dpkg-dev \
+        unzip
 
 # Install a specific Node.js version
 # https://github.com/nodesource/distributions/blob/4f746d991e099f9494b12e275abe1aab21f1ddf0/README.md#installation-instructions
@@ -216,6 +218,14 @@ RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-$
 RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/dataformat \
   -o /final/bin/dataformat
 
+# Install tooling for our AWS Batch builds, which use `aws s3`.
+# Using `xx-info march` to translate amd64 -> x86_64 and arm64 -> aarch64
+# based on https://github.com/docker/buildx/discussions/2001
+RUN XX_MARCH=$(xx-info march) \
+  && curl -fsSL --proto '=https' "https://awscli.amazonaws.com/awscli-exe-linux-${XX_MARCH}.zip" -o "awscliv2.zip" \
+  && unzip awscliv2.zip "aws/dist/*" -d /final/libexec/aws-cli \
+  && ln -srv /final/libexec/aws-cli/aws/dist/aws /final/bin/aws
+
 # ———————————————————————————————————————————————————————————————————— #
 
 # Define a builder stage that runs on the target platform.
@@ -251,9 +261,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install envdir, which is used by pathogen builds
 RUN pip3 install envdir==1.0.1
-
-# Install tooling for our AWS Batch builds, which use `aws s3`.
-RUN pip3 install awscli==1.18.195
 
 # Install Snakemake and related optional dependencies.
 # Pinned to 7.32.3 for stability (2023-09-09)
@@ -436,7 +443,6 @@ COPY --from=builder-target-platform /usr/local/lib/python3.10/site-packages/ /us
 #   -trs, 15 June 2018
 COPY --from=builder-target-platform \
     /usr/local/bin/augur \
-    /usr/local/bin/aws \
     /usr/local/bin/envdir \
     /usr/local/bin/nextstrain \
     /usr/local/bin/pangolin \
