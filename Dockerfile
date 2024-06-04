@@ -167,6 +167,12 @@ RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.10.1/seqki
 # devel/validate-platforms.
 ARG CACHE_DATE
 
+# Install our own CLI so builds can do things like `nextstrain deploy`
+RUN mkdir -p /nextstrain/cli \
+ && curl -fsSL --proto '=https' https://nextstrain.org/cli/download/latest/standalone-"$(/builder-scripts/target-triple)".tar.gz \
+  | tar xzvf - --no-same-owner --no-same-permissions -C /nextstrain/cli \
+ && chmod -R a+rX /nextstrain/cli
+
 # Download Nextclade v3
 # Set default Nextclade version to 3
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-$(/builder-scripts/target-triple) \
@@ -279,9 +285,6 @@ ARG CACHE_DATE
 
 # Add helper scripts
 COPY builder-scripts/ /builder-scripts/
-
-# Install our own CLI so builds can do things like `nextstrain deploy`
-RUN pip3 install nextstrain-cli
 
 # Fauna
 WORKDIR /nextstrain/fauna
@@ -397,7 +400,6 @@ COPY --from=builder-target-platform \
     /usr/local/bin/bio \
     /usr/local/bin/envdir \
     /usr/local/bin/evofr \
-    /usr/local/bin/nextstrain \
     /usr/local/bin/pathogen-distance \
     /usr/local/bin/pathogen-embed \
     /usr/local/bin/pathogen-cluster \
@@ -407,6 +409,9 @@ COPY --from=builder-target-platform \
 
 # Add installed Node libs
 COPY --from=builder-build-platform /usr/lib/node_modules/ /usr/lib/node_modules/
+
+# Add globally linked Nextstrain CLI executable.
+RUN ln -sv /nextstrain/cli/nextstrain /usr/local/bin/nextstrain
 
 # Add globally linked Auspice script.
 #
