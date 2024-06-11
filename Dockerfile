@@ -253,7 +253,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install envdir==1.0.1
 
 # Install tooling for our AWS Batch builds, which use `aws s3`.
-RUN pip3 install awscli==1.18.195
+RUN python3 -m venv /usr/local/libexec/awscli \
+ && /usr/local/libexec/awscli/bin/python -m pip install awscli==1.18.195 \
+ && ln -sv /usr/local/libexec/awscli/bin/aws /usr/local/bin/aws
 
 # Install Snakemake and related optional dependencies.
 # Pinned to 7.32.3 for stability (2023-09-09)
@@ -424,6 +426,9 @@ RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
 COPY --from=builder-target-platform /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+
+# AWS CLI
+COPY --from=builder-target-platform /usr/local/libexec/awscli/ /usr/local/libexec/awscli/
 
 # Add installed Python scripts that we need.
 #
