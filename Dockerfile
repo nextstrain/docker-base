@@ -447,6 +447,9 @@ COPY --from=builder-target-platform \
     /usr/local/bin/nextstrain \
     /usr/local/bin/pangolin \
     /usr/local/bin/pangolearn.smk \
+    /usr/local/bin/pathogen-distance \
+    /usr/local/bin/pathogen-embed \
+    /usr/local/bin/pathogen-cluster \
     /usr/local/bin/scorpio \
     /usr/local/bin/snakemake \
     /usr/local/bin/treetime \
