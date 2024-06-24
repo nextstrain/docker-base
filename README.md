@@ -167,7 +167,7 @@ script and build stage in the Dockerfile.
 
 ### Continuous integration
 
-Every push to this repository triggers a new build of the image [a GitHub Actions workflow][].  This helps ensure the image builds successfully with the new commits.
+Every push to this repository triggers a new build of the image with [a GitHub Actions workflow](https://github.com/nextstrain/docker-base/actions/workflows/ci.yml).  This helps ensure the image builds successfully with the new commits.
 
 Images built from the `master` branch are additionally pushed to the [Docker
 registry][`nextstrain/base`].  The build instructions used by the workflow are in
@@ -204,5 +204,4 @@ in `./devel/clean`.
 [multi-stage build]: https://docs.docker.com/develop/develop-images/multistage-build/
 [Docker best practices]: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 [Dockerfile reference documentation]: https://docs.docker.com/engine/reference/builder/
-[GitHub Actions]: https://github.com/nextstrain/docker-base/actions/workflows/ci.yml
 [Cram]: https://bitheap.org/cram/
