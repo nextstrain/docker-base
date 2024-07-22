@@ -199,6 +199,46 @@ jobs:
         ./devel/copy-images -i ghcr.io -o docker.io -t ${{ needs.build.outputs.tag }} -l
 
   # Run pathogen repo CI builds with the final image
+  # This is running pathogen-repo-ci@v0 for pathogen repos that do not conform
+  # to the standard pathogen repo structure and is not expected to be updated.
+  # Any new pathogen repos should be added to the job using the latest version
+  # of the pathogen-repo-ci below.
+  test-pathogen-repo-ci-v0:
+    # Only one of push-{branch,build} runs for any given workflow run, and
+    # we're ok with either of them.
+    needs: [build, push-branch, push-build]
+    if: |2
+         success()
+      || needs.push-branch.result == 'success'
+      || needs.push-build.result == 'success'
+    strategy:
+      matrix:
+        include:
+          - { pathogen: avian-flu,       build-args: test_target }
+          - { pathogen: ebola }
+          - { pathogen: lassa }
+          - { pathogen: mumps }
+          - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
+          - { pathogen: rsv }
+          - { pathogen: seasonal-flu,    build-args: --configfile profiles/ci/builds.yaml -p }
+
+    name: test-pathogen-repo-ci-v0 (${{ matrix.pathogen }})
+    uses: nextstrain/.github/.github/workflows/pathogen-repo-ci.yaml@v0
+    with:
+      repo: nextstrain/${{ matrix.pathogen }}
+      build-args: ${{ matrix.build-args }}
+      runtimes: |
+        - docker
+      env: |
+        NEXTSTRAIN_DOCKER_IMAGE: nextstrain/base:${{ needs.build.outputs.tag }}
+      artifact-name: ${{ matrix.pathogen }}-outputs
+      continue-on-error: true
+    secrets: inherit
+
+  # Run pathogen repo CI builds with the final image
+  # This is running pathogen-repo-ci@master for pathogen repos that _do_ follow
+  # standard pathogen repo structure and new pathogens should be added here
+  # to be supported for future updates such as testing on multiple platforms.
   test-pathogen-repo-ci:
     # Only one of push-{branch,build} runs for any given workflow run, and
     # we're ok with either of them.
@@ -210,25 +250,14 @@ jobs:
     strategy:
       # XXX TODO: Test on multiple platforms via the matrix too, as above?
       matrix:
-        include:
-          - { pathogen: avian-flu,       build-args: test_target }
-          - { pathogen: ebola }
-          - { pathogen: lassa }
-          - { pathogen: mumps }
-          - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
-          - { pathogen: rsv }
-          - { pathogen: seasonal-flu,    build-args: --configfile profiles/ci/builds.yaml -p }
-
-          # Disable some pathogens that do not conform to pathogen-repo-ci@v0
-          # TODO: Consider adding a separate job that uses pathogen-repo-ci@v1 for these pathogens
-          # - { pathogen: mpox }
-          # - { pathogen: zika }
+        pathogen:
+          - mpox
+          - zika
 
     name: test-pathogen-repo-ci (${{ matrix.pathogen }})
-    uses: nextstrain/.github/.github/workflows/pathogen-repo-ci.yaml@v0
+    uses: nextstrain/.github/.github/workflows/pathogen-repo-ci.yaml@master
     with:
       repo: nextstrain/${{ matrix.pathogen }}
-      build-args: ${{ matrix.build-args }}
       runtimes: |
         - docker
       env: |
