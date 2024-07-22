@@ -251,7 +251,10 @@ jobs:
       # XXX TODO: Test on multiple platforms via the matrix too, as above?
       matrix:
         pathogen:
+          - dengue
+          - measles
           - mpox
+          - seasonal-cov
           - zika
 
     name: test-pathogen-repo-ci (${{ matrix.pathogen }})
