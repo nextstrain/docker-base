@@ -127,7 +127,7 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
 # if the processor architecture is not amd64.
 # TODO: Build from source to avoid emulation. Instructions: http://www.iqtree.org/doc/Compilation-Guide
 WORKDIR /download/IQ-TREE
-RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.1.2/iqtree-2.1.2-Linux.tar.gz \
+RUN curl -fsSL https://github.com/iqtree/iqtree2/releases/download/v2.3.5.cmaple/iqtree-2.3.5.cmaple-Linux-intel.tar.gz \
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree2 /final/bin/iqtree
 
