@@ -216,7 +216,6 @@ jobs:
         include:
           - { pathogen: avian-flu,       build-args: --configfile config/gisaid.yaml -pf test_target }
           - { pathogen: ebola }
-          - { pathogen: lassa }
           - { pathogen: mumps }
           - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
           - { pathogen: rsv }
@@ -252,6 +251,7 @@ jobs:
       matrix:
         pathogen:
           - dengue
+          - lassa
           - measles
           - mpox
           - seasonal-cov
