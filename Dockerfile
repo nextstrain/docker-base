@@ -158,20 +158,6 @@ RUN curl -L https://github.com/shenwei356/csvtk/releases/download/v0.30.0/csvtk_
 # Download seqkit
 RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.2.0/seqkit_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz --no-same-owner -C /final/bin
 
-# Download gofasta (for ncov/Pangolin)
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Instructions: https://github.com/virus-evolution/gofasta/tree/v0.0.6#installation
-RUN curl -fsSL https://github.com/virus-evolution/gofasta/releases/download/v0.0.6/gofasta-linux-amd64 \
-  -o /final/bin/gofasta
-
-# Download minimap2 (for ncov/Pangolin)
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Instructions: https://github.com/lh3/minimap2/tree/v2.24#install
-RUN curl -fsSL https://github.com/lh3/minimap2/releases/download/v2.24/minimap2-2.24_x64-linux.tar.bz2 \
-  | tar xjvpf - --no-same-owner --strip-components=1 -C /final/bin minimap2-2.24_x64-linux/minimap2
-
 
 # 3. Add unpinned programs
 
@@ -268,15 +254,6 @@ RUN pip3 install google-cloud-storage==2.7.0
 
 # Install epiweeks (for ncov)
 RUN pip3 install epiweeks==2.1.2
-
-# Install Pangolin and PangoLEARN + deps (for ncov)
-# The cov-lineages projects aren't available on PyPI, so install via git URLs.
-RUN pip3 install git+https://github.com/cov-lineages/pangolin.git@v3.1.17
-RUN pip3 install git+https://github.com/cov-lineages/pangoLEARN.git@2021-12-06
-RUN pip3 install git+https://github.com/cov-lineages/scorpio.git@v0.3.16
-RUN pip3 install git+https://github.com/cov-lineages/constellations.git@v0.1.1
-RUN pip3 install git+https://github.com/cov-lineages/pango-designation.git@19d9a537b9
-RUN pip3 install pysam==0.19.1
 
 # Install pango_aliasor (for forecasts-ncov)
 RUN pip3 install pango_aliasor==0.3.0
@@ -446,12 +423,9 @@ COPY --from=builder-target-platform \
     /usr/local/bin/aws \
     /usr/local/bin/envdir \
     /usr/local/bin/nextstrain \
-    /usr/local/bin/pangolin \
-    /usr/local/bin/pangolearn.smk \
     /usr/local/bin/pathogen-distance \
     /usr/local/bin/pathogen-embed \
     /usr/local/bin/pathogen-cluster \
-    /usr/local/bin/scorpio \
     /usr/local/bin/snakemake \
     /usr/local/bin/treetime \
     /usr/local/bin/
