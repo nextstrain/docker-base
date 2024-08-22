@@ -224,7 +224,7 @@ RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-$
 # This is in place for Python programs which are not easy to install for a
 # different target platform¹.
 # ¹ https://github.com/pypa/pip/issues/5453
-FROM --platform=$TARGETPLATFORM python:3.10-slim-bullseye AS builder-target-platform
+FROM --platform=$TARGETPLATFORM python:3.11-slim-bullseye AS builder-target-platform
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
@@ -351,7 +351,7 @@ RUN pip3 install evofr
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
-FROM python:3.10-slim-bullseye AS final
+FROM python:3.11-slim-bullseye AS final
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
@@ -427,7 +427,7 @@ ENV MAFFT_BINARIES=/usr/local/libexec
 RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
-COPY --from=builder-target-platform /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+COPY --from=builder-target-platform /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 
 # AWS CLI
 COPY --from=builder-target-platform /usr/local/libexec/awscli/ /usr/local/libexec/awscli/
