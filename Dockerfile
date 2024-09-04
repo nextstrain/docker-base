@@ -13,7 +13,7 @@ FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
 # Define a builder stage that runs on the build platform.
 # Even if the target platform is different, instructions will run natively for
 # faster compilation.
-FROM --platform=$BUILDPLATFORM debian:11-slim AS builder-build-platform
+FROM --platform=$BUILDPLATFORM debian:bookworm-slim AS builder-build-platform
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
@@ -26,7 +26,6 @@ COPY --from=xx / /
 # curl: for downloading source files
 # git: used in builder-scripts/download-repo
 # make: used for building from Makefiles (search for usage); may be used by package managers to build from source
-# pkg-config: for building VCFtools; may be used by package managers to build from source
 # nodejs: for installing Auspice
 # clang: for compiling C/C++ projects; may be used by package managers to build from source
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -37,7 +36,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         git \
         make \
-        pkg-config \
         dpkg-dev
 
 # Install a specific Node.js version
@@ -57,12 +55,14 @@ ARG TARGETARCH
 # https://github.com/tonistiigi/xx#building-on-debian
 # binutils, gcc, libc6-dev: for compiling C/C++ programs (TODO: verify)
 # g++: for building VCFtools; may be used by package managers to build from source
+# pkg-config: for building VCFtools; may be used by package managers to build from source
 # zlib1g-dev: for building VCFtools; may be used by package managers to build from source
 RUN xx-apt-get install -y \
   binutils \
   gcc \
   g++ \
   libc6-dev \
+  pkg-config \
   zlib1g-dev
 
 # Add dependencies. All should be pinned to specific versions, except
@@ -224,7 +224,7 @@ RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-$
 # This is in place for Python programs which are not easy to install for a
 # different target platform¹.
 # ¹ https://github.com/pypa/pip/issues/5453
-FROM --platform=$TARGETPLATFORM python:3.10-slim-bullseye AS builder-target-platform
+FROM --platform=$TARGETPLATFORM python:3.10-slim-bookworm AS builder-target-platform
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
@@ -350,7 +350,7 @@ RUN pip3 install evofr
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
-FROM python:3.10-slim-bullseye AS final
+FROM python:3.10-slim-bookworm AS final
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
@@ -407,7 +407,7 @@ ARG TARGETPLATFORM
 # ¹ https://cvxopt.org/install/#building-and-installing-from-source
 RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
       apt-get update && apt-get install -y --no-install-recommends \
-          libopenblas-base \
+          libopenblas0 \
       ; \
     fi
 
