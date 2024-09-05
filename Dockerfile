@@ -366,6 +366,7 @@ SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 # libsqlite3: for pyfastx (for Augur)
 # perl: for running VCFtools
 # ruby: may be used by workflows
+# sqlite3: for `augur merge`
 # wget: may be used by workflows
 # zlib1g: for pyfastx (for Augur)
 # nodejs: for running Auspice
@@ -382,6 +383,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libsqlite3-0 \
         perl \
         ruby \
+        sqlite3 \
         util-linux \
         wget \
         xz-utils \
