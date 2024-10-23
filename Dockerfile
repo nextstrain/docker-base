@@ -313,6 +313,7 @@ RUN if [[ "$TARGETPLATFORM" == linux/arm64 ]]; then \
     fi
 
 RUN pip3 install pathogen-embed==3.0.0
+RUN pip3 install xlrd==2.0.1
 
 # 2. Add unpinned programs
 
