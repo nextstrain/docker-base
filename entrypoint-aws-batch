@@ -8,7 +8,7 @@ set -x
 case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
     s3://*.zip)
         aws s3 cp --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" "$PWD.zip"
-        unzip "$PWD.zip"
+        unzip -: -o "$PWD.zip"
         ;;
     s3://*)
         # Note that this doesn't preserve file permissions/modes.
