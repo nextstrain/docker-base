@@ -259,6 +259,9 @@ RUN pip3 install pango_aliasor==0.3.0
 RUN pip3 install pathogen-embed==3.0.0
 RUN pip3 install xlrd==2.0.1
 
+# Install openpyxl for pandas in GenoFLU
+RUN pip3 install openpyxl==3.1.0
+
 # 2. Add unpinned programs
 
 # Allow caching to be avoided from here on out in this stage by calling
@@ -309,6 +312,7 @@ SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 # less: for usability in an interactive prompt
 # libgomp1: for running FastTree
 # libsqlite3: for pyfastx (for Augur)
+# ncbi-blast+: for GenoFLU in avian-flu
 # perl: for running VCFtools
 # ruby: may be used by workflows
 # sqlite3: for `augur merge`
@@ -326,6 +330,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         less \
         libgomp1 \
         libsqlite3-0 \
+        ncbi-blast+ \
         perl \
         ruby \
         sqlite3 \
