@@ -404,9 +404,17 @@ COPY --from=builder-build-platform /usr/lib/node_modules/ /usr/lib/node_modules/
 # correctly discovered by node.
 RUN ln -sv /usr/lib/node_modules/auspice/auspice.js /usr/local/bin/auspice
 
+# Setup a non-root user for optional use
+RUN useradd nextstrain \
+    --system \
+    --user-group \
+    --shell /bin/bash \
+    --home-dir /nextstrain \
+    --no-log-init
+
 # Add Nextstrain components
-COPY --from=builder-build-platform  /nextstrain /nextstrain
-COPY --from=builder-target-platform /nextstrain /nextstrain
+COPY --from=builder-build-platform  --chown=nextstrain:nextstrain /nextstrain /nextstrain
+COPY --from=builder-target-platform --chown=nextstrain:nextstrain /nextstrain /nextstrain
 
 # Add our entrypoints and helpers
 COPY entrypoint entrypoint-aws-batch drop-privs create-envd delete-envd /sbin/
@@ -415,14 +423,6 @@ RUN chmod a+rx /sbin/entrypoint* /sbin/drop-privs /sbin/{create,delete}-envd
 # Make /nextstrain a global HOME, writable by any UID (like /tmp)
 RUN chmod a+rwXt /nextstrain
 ENV HOME=/nextstrain
-
-# Setup a non-root user for optional use
-RUN useradd nextstrain \
-    --system \
-    --user-group \
-    --shell /bin/bash \
-    --home-dir /nextstrain \
-    --no-log-init
 
 # No nesting of runtimes, please.  Use the ambient runtime inside this runtime.
 ENV NEXTSTRAIN_HOME=/nextstrain
