@@ -214,7 +214,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { pathogen: avian-flu,       build-args: --configfile config/gisaid.yaml -pf test_target }
+          - { pathogen: avian-flu,       build-args: --snakefile segment-focused/Snakefile -pf test_target }
           - { pathogen: ebola }
           - { pathogen: mumps }
           - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
