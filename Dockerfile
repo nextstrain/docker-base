@@ -424,6 +424,9 @@ RUN chmod a+rx /sbin/entrypoint* /sbin/drop-privs /sbin/{create,delete}-envd /sb
 RUN chmod a+rwXt /nextstrain
 ENV HOME=/nextstrain
 
+# Run the final setup as our target user for permissions reasons.
+USER nextstrain:nextstrain
+
 # No nesting of runtimes, please.  Use the ambient runtime inside this runtime.
 ENV NEXTSTRAIN_HOME=/nextstrain
 RUN nextstrain check-setup --set-default ambient \
@@ -435,6 +438,9 @@ RUN nextstrain check-setup --set-default ambient \
 WORKDIR /nextstrain/build
 RUN chown nextstrain:nextstrain /nextstrain/build
 
+# Switch back to root.  The entrypoint will drop to nextstrain:nextstrain as
+# necessary when a container starts.
+USER root
 ENTRYPOINT ["/sbin/entrypoint"]
 
 # Finally, add metadata at the end so it doesn't bust cached layers.
