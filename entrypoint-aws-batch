@@ -2,7 +2,9 @@
 set -euo pipefail
 
 # Show what we're running for the benefit of the logs.
-set -x
+if [[ "${NEXTSTRAIN_AWS_BATCH_VERBOSE:=1}" != 0 ]]; then
+    set -x
+fi
 
 # Download the working dir.
 case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
