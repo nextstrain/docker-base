@@ -23,5 +23,6 @@ else
         create-envd \
         envdir /nextstrain/env.d \
         delete-envd \
+        chdir-workdir \
         "$@"
 fi

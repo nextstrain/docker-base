@@ -2,12 +2,24 @@
 set -euo pipefail
 
 # Show what we're running for the benefit of the logs.
-set -x
+if [[ "${NEXTSTRAIN_AWS_BATCH_VERBOSE:=1}" != 0 ]]; then
+    set -x
+fi
 
 # Download the working dir.
 case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
     s3://*.zip)
         aws s3 cp --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" "$PWD.zip"
+
+        for dir in /nextstrain/{augur,auspice,fauna}; do
+            relative_dir="$(realpath "$dir" --relative-to="$PWD")"/
+
+            if zipinfo -1 "$PWD.zip" "$relative_dir" &>/dev/null; then
+                echo "removing $dir because workdir ZIP contains $relative_dir overlay"
+                rm -rf "$dir"
+            fi
+        done
+
         unzip -: -o "$PWD.zip"
         ;;
     s3://*)
