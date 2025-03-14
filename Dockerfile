@@ -417,8 +417,8 @@ COPY --from=builder-build-platform  --chown=nextstrain:nextstrain /nextstrain /n
 COPY --from=builder-target-platform --chown=nextstrain:nextstrain /nextstrain /nextstrain
 
 # Add our entrypoints and helpers
-COPY entrypoint entrypoint-aws-batch drop-privs create-envd delete-envd /sbin/
-RUN chmod a+rx /sbin/entrypoint* /sbin/drop-privs /sbin/{create,delete}-envd
+COPY entrypoint entrypoint-aws-batch drop-privs create-envd delete-envd chdir-workdir /sbin/
+RUN chmod a+rx /sbin/entrypoint* /sbin/drop-privs /sbin/{create,delete}-envd /sbin/chdir-workdir
 
 # Make /nextstrain a global HOME, writable by any UID (like /tmp)
 RUN chmod a+rwXt /nextstrain

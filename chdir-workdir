@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ -n "${NEXTSTRAIN_WORKDIR:-}" ]]; then
+    mkdir --parents "$NEXTSTRAIN_WORKDIR"
+    cd "$NEXTSTRAIN_WORKDIR"
+fi
+
+exec "$@"
