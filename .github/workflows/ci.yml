@@ -216,7 +216,6 @@ jobs:
         include:
           - { pathogen: avian-flu,       build-args: --snakefile segment-focused/Snakefile -pf test_target }
           - { pathogen: ebola }
-          - { pathogen: mumps }
           - { pathogen: ncov,            build-args: all_regions -j 2 --profile nextstrain_profiles/nextstrain-ci }
           - { pathogen: rsv }
           - { pathogen: seasonal-flu,    build-args: --configfile profiles/ci/builds.yaml -p }
@@ -254,6 +253,7 @@ jobs:
           - lassa
           - measles
           - mpox
+          - mumps
           - oropouche
           - rabies
           - seasonal-cov
