@@ -262,6 +262,9 @@ RUN pip3 install xlrd==2.0.1
 # Install openpyxl for pandas in GenoFLU
 RUN pip3 install openpyxl==3.1.0
 
+# Install bio, which is used by pathogen builds
+RUN pip3 install bio==1.7.1
+
 # 2. Add unpinned programs
 
 # Allow caching to be avoided from here on out in this stage by calling
