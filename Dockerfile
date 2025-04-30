@@ -387,6 +387,7 @@ COPY --from=builder-target-platform /usr/local/libexec/awscli/ /usr/local/libexe
 COPY --from=builder-target-platform \
     /usr/local/bin/augur \
     /usr/local/bin/aws \
+    /usr/local/bin/bio \
     /usr/local/bin/envdir \
     /usr/local/bin/nextstrain \
     /usr/local/bin/pathogen-distance \
