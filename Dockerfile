@@ -262,6 +262,9 @@ RUN pip3 install xlrd==2.0.1
 # Install openpyxl for pandas in GenoFLU
 RUN pip3 install openpyxl==3.1.0
 
+# Install pyarrow for pandas to support parquet files.
+RUN pip3 install pyarrow==20.0.0
+
 # Install bio, which is used by pathogen builds
 RUN pip3 install bio==1.8.0
 
