@@ -39,12 +39,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         dpkg-dev
 
 # Install a specific Node.js version
-# https://github.com/nodesource/distributions/blob/4f746d991e099f9494b12e275abe1aab21f1ddf0/README.md#installation-instructions
-RUN apt-get update && apt-get install -y ca-certificates curl gnupg \
- && mkdir -p /etc/apt/keyrings \
- && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
- && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
- && apt-get update && apt-get install nodejs -y
+# https://github.com/nodesource/distributions/blob/ba48c1fe6e843e9ffb60aefc5da5d00234c83f04/README.md#using-debian-as-root-nodejs-20
+RUN apt-get update && apt-get install -y curl \
+ && curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh \
+ && bash nodesource_setup.sh \
+ && apt-get install -y nodejs
 
 # Used for platform-specific instructions
 ARG TARGETPLATFORM
@@ -348,12 +347,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zstd
 
 # Install a specific Node.js version
-# https://github.com/nodesource/distributions/blob/4f746d991e099f9494b12e275abe1aab21f1ddf0/README.md#installation-instructions
-RUN apt-get update && apt-get install -y ca-certificates curl gnupg \
- && mkdir -p /etc/apt/keyrings \
- && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
- && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
- && apt-get update && apt-get install nodejs -y
+# https://github.com/nodesource/distributions/blob/ba48c1fe6e843e9ffb60aefc5da5d00234c83f04/README.md#using-debian-as-root-nodejs-20
+RUN apt-get update && apt-get install -y curl \
+ && curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh \
+ && bash nodesource_setup.sh \
+ && apt-get install -y nodejs
 
 # Used for platform-specific instructions
 ARG TARGETPLATFORM
