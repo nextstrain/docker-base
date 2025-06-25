@@ -52,7 +52,7 @@ jobs:
         username: nextstrain-bot
         password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - run: ./devel/build -p linux/amd64,linux/arm64 -r ghcr.io -t "$TAG" -l logs/
+    - run: ./devel/build -p linux/amd64 -r ghcr.io -t "$TAG" -l logs/
 
     - if: always()
       name: Upload build logs as artifacts
