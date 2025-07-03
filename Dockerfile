@@ -245,9 +245,11 @@ RUN python3 -m venv /usr/local/libexec/awscli \
 # Install Snakemake and related optional dependencies.
 # Pinned to 9.6.2 for stability (latest version on 2025-07-03)
 RUN pip3 install snakemake[reports]==9.6.2
-# Google Cloud Storage package is required for Snakemake to fetch remote files
-# from Google Storage URIs.
-RUN pip3 install google-cloud-storage==2.7.0
+# Snakemake plugins for remote storage providers
+# Pinned for stability (latest versions on 2025-07-03)
+RUN pip3 install snakemake-storage-plugin-http==0.3.0
+RUN pip3 install snakemake-storage-plugin-s3==0.3.3
+RUN pip3 install snakemake-storage-plugin-gcs==1.1.4
 
 # Install epiweeks (for ncov)
 RUN pip3 install epiweeks==2.1.2
