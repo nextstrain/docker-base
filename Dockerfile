@@ -243,9 +243,8 @@ RUN python3 -m venv /usr/local/libexec/awscli \
  && ln -sv /usr/local/libexec/awscli/bin/aws /usr/local/bin/aws
 
 # Install Snakemake and related optional dependencies.
-# Pinned to 7.32.3 for stability (2023-09-09)
-# Pulp>=2.8.0 breaks snakemake <=8.1.1, see https://github.com/snakemake/snakemake/issues/2607
-RUN pip3 install snakemake[reports]==7.32.3 "pulp<2.8"
+# Pinned to 9.6.2 for stability (latest version on 2025-07-03)
+RUN pip3 install snakemake[reports]==9.6.2
 # Google Cloud Storage package is required for Snakemake to fetch remote files
 # from Google Storage URIs.
 RUN pip3 install google-cloud-storage==2.7.0
