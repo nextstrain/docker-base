@@ -249,7 +249,6 @@ RUN pip3 install snakemake[reports]==9.6.2
 # Pinned for stability (latest versions on 2025-07-03)
 RUN pip3 install snakemake-storage-plugin-http==0.3.0
 RUN pip3 install snakemake-storage-plugin-s3==0.3.3
-RUN pip3 install snakemake-storage-plugin-gcs==1.1.4
 
 # Install epiweeks (for ncov)
 RUN pip3 install epiweeks==2.1.2
