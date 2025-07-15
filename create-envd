@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
+if [ -n "${NEXTSTRAIN_SKIP_ENVD:-}" ]; then
+    exec "$@"
+fi
+
 # Make an empty directory, at the least, so subsequent steps and programs can
 # expect it.  Doing this at container run time instead of image build time
 # means the permissions match the current process.  This is made possible by
