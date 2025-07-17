@@ -208,7 +208,7 @@ RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-$
 # This is in place for Python programs which are not easy to install for a
 # different target platform¹.
 # ¹ https://github.com/pypa/pip/issues/5453
-FROM --platform=$TARGETPLATFORM python:3.10-slim-bookworm AS builder-target-platform
+FROM --platform=$TARGETPLATFORM python:3.11-slim-bookworm AS builder-target-platform
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
@@ -242,12 +242,12 @@ RUN python3 -m venv /usr/local/libexec/awscli \
  && ln -sv /usr/local/libexec/awscli/bin/aws /usr/local/bin/aws
 
 # Install Snakemake and related optional dependencies.
-# Pinned to 7.32.3 for stability (2023-09-09)
-# Pulp>=2.8.0 breaks snakemake <=8.1.1, see https://github.com/snakemake/snakemake/issues/2607
-RUN pip3 install snakemake[reports]==7.32.3 "pulp<2.8"
-# Google Cloud Storage package is required for Snakemake to fetch remote files
-# from Google Storage URIs.
-RUN pip3 install google-cloud-storage==2.7.0
+# Pinned to 9.6.2 for stability (latest version on 2025-07-03)
+RUN pip3 install snakemake[reports]==9.6.2
+# Snakemake plugins for remote storage providers
+# Pinned for stability (latest versions on 2025-07-03)
+RUN pip3 install snakemake-storage-plugin-http==0.3.0
+RUN pip3 install snakemake-storage-plugin-s3==0.3.3
 
 # Install epiweeks (for ncov)
 RUN pip3 install epiweeks==2.1.2
@@ -303,7 +303,7 @@ RUN pip3 install evofr
 # ———————————————————————————————————————————————————————————————————— #
 
 # Now build the final image.
-FROM python:3.10-slim-bookworm AS final
+FROM python:3.11-slim-bookworm AS final
 
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
@@ -371,7 +371,7 @@ ENV MAFFT_BINARIES=/usr/local/libexec
 RUN chmod a+rx /usr/local/bin/* /usr/local/libexec/*
 
 # Add installed Python libs
-COPY --from=builder-target-platform /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+COPY --from=builder-target-platform /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 
 # AWS CLI
 COPY --from=builder-target-platform /usr/local/libexec/awscli/ /usr/local/libexec/awscli/
