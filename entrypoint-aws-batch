@@ -52,8 +52,8 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
                 return "$zipstatus"
             fi
         }
-        zip -u "$PWD.zip" -r . --exclude ".snakemake/*"                             || succeed-when-nothing-to-update $?
-        zip -u "$PWD.zip" -r . --include ".snakemake/log/*" ".snakemake/metadata/*" || succeed-when-nothing-to-update $?
+        zip -u "$PWD.zip" -r . --exclude ".snakemake/*"                                                    || succeed-when-nothing-to-update $?
+        zip -u "$PWD.zip" -r . --include ".snakemake/log/*" ".snakemake/metadata/*" ".snakemake/storage/*" || succeed-when-nothing-to-update $?
         aws s3 cp --no-progress "$PWD.zip" "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL"
         ;;
     s3://*)
