@@ -390,6 +390,7 @@ COPY --from=builder-target-platform \
     /usr/local/bin/aws \
     /usr/local/bin/bio \
     /usr/local/bin/envdir \
+    /usr/local/bin/evofr \
     /usr/local/bin/nextstrain \
     /usr/local/bin/pathogen-distance \
     /usr/local/bin/pathogen-embed \
