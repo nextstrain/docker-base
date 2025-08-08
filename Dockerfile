@@ -122,11 +122,13 @@ RUN curl -fsSL https://mafft.cbrc.jp/alignment/software/mafft-7.475-linux.tgz \
  && cp -p libexec/* /final/libexec
 
 # Download IQ-TREE
-# NOTE: Running this program requires support for emulation on the Docker host
-# if the processor architecture is not amd64.
-# TODO: Build from source to avoid emulation. Instructions: http://www.iqtree.org/doc/Compilation-Guide
 WORKDIR /download/IQ-TREE
-RUN curl -fsSL https://github.com/iqtree/iqtree3/releases/download/v3.0.1/iqtree-3.0.1-Linux-intel.tar.gz \
+RUN case "$TARGETARCH" in \
+      amd64) IQTREE_URL="https://github.com/iqtree/iqtree3/releases/download/v3.0.1/iqtree-3.0.1-Linux-intel.tar.gz" ;; \
+      arm64) IQTREE_URL="https://github.com/iqtree/iqtree3/releases/download/v3.0.1/iqtree-3.0.1-Linux-arm.tar.gz" ;; \
+      *) echo "Unsupported TARGETARCH: $TARGETARCH" >&2; exit 1 ;; \
+    esac \
+ && curl -fsSL "$IQTREE_URL" \
   | tar xzvpf - --no-same-owner --strip-components=1 \
  && mv bin/iqtree3 /final/bin/iqtree
 
