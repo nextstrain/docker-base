@@ -9,7 +9,7 @@ fi
 # Download the working dir.
 case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
     s3://*.zip)
-        aws s3 cp --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" "$PWD.zip"
+        aws s3 cp ${AWS_ENDPOINT_URL:+--endpoint-url "$AWS_ENDPOINT_URL"} --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" "$PWD.zip"
 
         for dir in /nextstrain/{augur,auspice,fauna}; do
             relative_dir="$(realpath "$dir" --relative-to="$PWD")"/
@@ -24,7 +24,7 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
         ;;
     s3://*)
         # Note that this doesn't preserve file permissions/modes.
-        aws s3 sync --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" .
+        aws s3 ${AWS_ENDPOINT_URL:+--endpoint-url "$AWS_ENDPOINT_URL"}  sync --no-progress "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" .
         ;;
     *)
         echo "entrypoint-aws-batch: No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
@@ -54,10 +54,10 @@ case "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" in
         }
         zip -u "$PWD.zip" -r . --exclude ".snakemake/*"                                                    || succeed-when-nothing-to-update $?
         zip -u "$PWD.zip" -r . --include ".snakemake/log/*" ".snakemake/metadata/*" ".snakemake/storage/*" || succeed-when-nothing-to-update $?
-        aws s3 cp --no-progress "$PWD.zip" "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL"
+        aws s3 cp ${AWS_ENDPOINT_URL:+--endpoint-url "$AWS_ENDPOINT_URL"}  --no-progress "$PWD.zip" "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL"
         ;;
     s3://*)
-        aws s3 sync --no-progress . "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" --exclude ".snakemake/*" --include ".snakemake/log/*"
+        aws s3 sync ${AWS_ENDPOINT_URL:+--endpoint-url "$AWS_ENDPOINT_URL"} --no-progress . "$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL" --exclude ".snakemake/*" --include ".snakemake/log/*"
         ;;
     *)
         echo "entrypoint-aws-batch: No handler for NEXTSTRAIN_AWS_BATCH_WORKDIR_URL <$NEXTSTRAIN_AWS_BATCH_WORKDIR_URL>" >&2
