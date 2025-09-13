@@ -25,7 +25,7 @@ jobs:
 
     - uses: actions/checkout@v5
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: '>=3.8'
 
@@ -104,7 +104,7 @@ jobs:
         role-to-assume: arn:aws:iam::827581582529:role/GitHubActionsRoleNextstrainTmpBucket
     - run: aws sts get-caller-identity
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: ~3
 
