@@ -23,8 +23,8 @@ Workdir ZIP archive is downloaded and extracted.
    extracting: splines                 
   + ls -l
   total 0
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 reticulating
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 splines
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 reticulating
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 splines
   upload: ../build.zip to s3://nextstrain-tmp/*.zip (glob)
 
 /nextstrain/{augur,auspice} are removed when the workdir ZIP contains overlays.
@@ -54,31 +54,31 @@ Workdir ZIP archive is downloaded and extracted.
   + ls -lR . ../augur ../auspice
   .:
   total 0
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 reticulating
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 splines
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 reticulating
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 splines
   
   ../augur:
   total 12
-  -rw-rw-r-- 1 nextstrain nextstrain   22 Mar 10 21:45 README.md
-  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10 21:32 a
-  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10 21:46 augur
+  -rw-rw-r-- 1 nextstrain nextstrain   22 Mar 10  2025 README.md
+  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10  2025 a
+  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10  2025 augur
   
   ../augur/a:
   total 4
-  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10 21:32 b
+  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10  2025 b
   
   ../augur/a/b:
   total 4
-  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10 21:33 c
+  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10  2025 c
   
   ../augur/a/b/c:
   total 8
-  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10 21:32 hello.txt
-  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10 21:32 world.txt
+  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10  2025 hello.txt
+  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10  2025 world.txt
   
   ../augur/augur:
   total 4
-  -rw-rw-r-- 1 nextstrain nextstrain 34 Mar 10 21:46 __init__.py
+  -rw-rw-r-- 1 nextstrain nextstrain 34 Mar 10  2025 __init__.py
   
   ../auspice:
   total 0
@@ -107,31 +107,31 @@ Workdir ZIP archive is downloaded and extracted.
   + ls -lR . ../augur ../auspice
   .:
   total 0
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 reticulating
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 splines
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 reticulating
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 splines
   
   ../augur:
   total 12
-  -rw-rw-r-- 1 nextstrain nextstrain   22 Mar 10 21:45 README.md
-  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10 21:32 a
-  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10 21:46 augur
+  -rw-rw-r-- 1 nextstrain nextstrain   22 Mar 10  2025 README.md
+  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10  2025 a
+  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10  2025 augur
   
   ../augur/a:
   total 4
-  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10 21:32 b
+  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10  2025 b
   
   ../augur/a/b:
   total 4
-  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10 21:33 c
+  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10  2025 c
   
   ../augur/a/b/c:
   total 8
-  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10 21:32 hello.txt
-  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10 21:32 world.txt
+  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10  2025 hello.txt
+  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10  2025 world.txt
   
   ../augur/augur:
   total 4
-  -rw-rw-r-- 1 nextstrain nextstrain 34 Mar 10 21:46 __init__.py
+  -rw-rw-r-- 1 nextstrain nextstrain 34 Mar 10  2025 __init__.py
   
   ../auspice:
   total 0
@@ -158,31 +158,31 @@ Workdir ZIP archive is downloaded and extracted.
   + ls -lR . ../augur ../auspice
   .:
   total 0
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 reticulating
-  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10 21:46 splines
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 reticulating
+  -rw-rw-r-- 1 nextstrain nextstrain 0 Mar 10  2025 splines
   
   ../augur:
   total 12
-  -rw-rw-r-- 1 nextstrain nextstrain   22 Mar 10 21:45 README.md
-  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10 21:32 a
-  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10 21:46 augur
+  -rw-rw-r-- 1 nextstrain nextstrain   22 Mar 10  2025 README.md
+  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10  2025 a
+  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10  2025 augur
   
   ../augur/a:
   total 4
-  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10 21:32 b
+  drwxrwxr-x 3 nextstrain nextstrain 4096 Mar 10  2025 b
   
   ../augur/a/b:
   total 4
-  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10 21:33 c
+  drwxrwxr-x 2 nextstrain nextstrain 4096 Mar 10  2025 c
   
   ../augur/a/b/c:
   total 8
-  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10 21:32 hello.txt
-  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10 21:32 world.txt
+  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10  2025 hello.txt
+  -rw-rw-r-- 1 nextstrain nextstrain 6 Mar 10  2025 world.txt
   
   ../augur/augur:
   total 4
-  -rw-rw-r-- 1 nextstrain nextstrain 34 Mar 10 21:46 __init__.py
+  -rw-rw-r-- 1 nextstrain nextstrain 34 Mar 10  2025 __init__.py
   
   ../auspice:
   total 0
