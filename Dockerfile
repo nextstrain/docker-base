@@ -296,7 +296,7 @@ RUN pip3 install phylo-treetime
 # with --volume=.../augur:/nextstrain/augur and still have it globally
 # accessible and importable.
 WORKDIR /nextstrain/augur
-RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
+RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "victorlin/subsample-filepath-configs" . \
  && pip3 install --editable .
 
 # Add evofr for forecasting
