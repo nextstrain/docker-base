@@ -37,11 +37,22 @@ jobs:
       cache-date: ${{ env.CACHE_DATE }}
       tag: ${{ env.TAG }}
 
-  # Build multi-platform builder and final images with caching from Docker Hub
-  # and GitHub Container Registry; push to GitHub Container Registry.
+  # Build platform-specific builder and final images with caching from Docker
+  # Hub and GitHub Container Registry; push to GitHub Container Registry.
   build:
+    name: build (${{ matrix.platform }})
     needs: vars
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            arch: amd64
+            runner: ubuntu-latest
+
+          - platform: linux/arm64
+            arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
 
     - uses: actions/checkout@v6
@@ -49,8 +60,6 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version: '>=3.8'
-
-    - uses: docker/setup-qemu-action@v3
 
     # GITHUB_TOKEN is unreliable¹ so use a token from nextstrain-bot.
     # ¹ https://github.com/docker/build-push-action/issues/463#issuecomment-939394233
@@ -60,7 +69,12 @@ jobs:
         username: nextstrain-bot
         password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - run: ./devel/build -p linux/amd64,linux/arm64 -r ghcr.io -t "$TAG" -l logs/
+    - run: |
+        ./devel/build \
+          -p ${{ matrix.platform }} \
+          -r ghcr.io \
+          -t "$TAG-${{ matrix.arch }}" \
+          -l logs-${{ matrix.arch }}/
       env:
         TAG: ${{ needs.vars.outputs.tag }}
         CACHE_DATE: ${{ needs.vars.outputs.cache-date }}
@@ -69,15 +83,15 @@ jobs:
       name: Upload build logs as artifacts
       uses: actions/upload-artifact@v6
       with:
-        name: build-logs
-        path: logs/
+        name: build-logs-${{ matrix.arch }}
+        path: logs-${{ matrix.arch }}/
 
     - if: always()
       name: Summarize build logs for the GitHub Actions run summary page
       run: |
-        for log in logs/*; do
+        for log in logs-${{ matrix.arch }}/*; do
         {
-          echo "## $(basename "$log")"
+          echo "## [${{ matrix.platform }}] $(basename "$log")"
           echo ''
           echo '```'
           ./devel/summarize-buildkit-output "$log" 2>&1
@@ -86,16 +100,55 @@ jobs:
         } >> "$GITHUB_STEP_SUMMARY"
         done
 
+  # Merge platform-specific images into multi-platform images
+  merge-builds:
+    needs: [vars, build]
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.vars.outputs.tag }}
+    steps:
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: nextstrain-bot
+        password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
+
+    - name: Create base-builder-build-platform image
+      run: |
+        docker buildx imagetools create \
+          -t "ghcr.io/nextstrain/base-builder-build-platform:$TAG" \
+             "ghcr.io/nextstrain/base-builder-build-platform:$TAG-amd64" \
+             "ghcr.io/nextstrain/base-builder-build-platform:$TAG-arm64"
+
+    - name: Create base-builder-target-platform image
+      run: |
+        docker buildx imagetools create \
+          -t "ghcr.io/nextstrain/base-builder-target-platform:$TAG" \
+             "ghcr.io/nextstrain/base-builder-target-platform:$TAG-amd64" \
+             "ghcr.io/nextstrain/base-builder-target-platform:$TAG-arm64"
+
+    - name: Create base image
+      run: |
+        docker buildx imagetools create \
+          -t "ghcr.io/nextstrain/base:$TAG" \
+             "ghcr.io/nextstrain/base:$TAG-amd64" \
+             "ghcr.io/nextstrain/base:$TAG-arm64"
+
   # Run tests with the final image from GitHub Container Registry.
   test:
     name: test (${{ matrix.platform }})
-    needs: [vars, build]
-    runs-on: ubuntu-latest
+    needs: [vars, merge-builds]
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            # TODO: use ubuntu-24.04-arm and remove emulation when Nextstrain
+            # CLI can be installed natively on aarch64.¹
+            # ¹ <https://github.com/nextstrain/cli/pull/490>
+            runner: ubuntu-latest
     permissions:
       contents: read
       id-token: write
@@ -116,9 +169,7 @@ jobs:
       with:
         python-version: ~3
 
-    # The ubuntu-latest runner is linux/amd64 so anything else will
-    # run with emulation, which is still better than nothing.
-    - if: matrix.platform != 'linux/amd64'
+    - if: matrix.platform == 'linux/arm64'
       uses: docker/setup-qemu-action@v3
 
     - uses: actions/checkout@v6
@@ -141,7 +192,7 @@ jobs:
 
   validate-platforms:
     name: Validate platforms
-    needs: [vars, build]
+    needs: [vars, merge-builds]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
@@ -161,7 +212,7 @@ jobs:
   # Docker Hub, where they will persist. Do this regardless of test results.
   push-branch:
     if: startsWith(needs.vars.outputs.tag, 'branch-') && github.event_name != 'pull_request'
-    needs: [vars, build]
+    needs: [vars, merge-builds]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
@@ -185,7 +236,7 @@ jobs:
   # Docker Hub, where they will persist. Only do this if tests pass.
   push-build:
     if: startsWith(needs.vars.outputs.tag, 'build-')
-    needs: [vars, build, test, validate-platforms]
+    needs: [vars, merge-builds, test, validate-platforms]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
@@ -283,7 +334,7 @@ jobs:
   # Delete the builder and final images from GitHub Container Registry.
   cleanup-registry:
     if: always()
-    needs: [vars, build, test, validate-platforms, push-branch, push-build]
+    needs: [vars, merge-builds, test, validate-platforms, push-branch, push-build]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
@@ -294,5 +345,4 @@ jobs:
         script: |
           const script = require('./devel/delete-from-ghcr.js');
           const tag = "${{ needs.vars.outputs.tag }}";
-          const token = "${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}";
-          script({fetch, octokit: github, tag, token});
+          script({octokit: github, tag});
