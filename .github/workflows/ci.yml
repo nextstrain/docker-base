@@ -145,10 +145,7 @@ jobs:
           - platform: linux/amd64
             runner: ubuntu-latest
           - platform: linux/arm64
-            # TODO: use ubuntu-24.04-arm and remove emulation when Nextstrain
-            # CLI can be installed natively on aarch64.¹
-            # ¹ <https://github.com/nextstrain/cli/pull/490>
-            runner: ubuntu-latest
+            runner: ubuntu-24.04-arm
     permissions:
       contents: read
       id-token: write
