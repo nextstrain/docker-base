@@ -42,7 +42,9 @@ def get_id_map(f):
             platform_info = get_platform_info(start_match["tag"])
             command = start_match["command"]
             id_map[layer_id]["line"] = line
-            id_map[layer_id]["name"] = f"[{platform_info}] {command}"
+            id_map[layer_id]["name"] = command
+            if platform_info is not None:
+                id_map[layer_id]["name"] = f"[{platform_info}] {command}"
 
         elif cached_match := cached_pattern.match(line):
             layer_id = cached_match["layer_id"]
