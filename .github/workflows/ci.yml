@@ -167,7 +167,7 @@ jobs:
         python-version: ~3
 
     - if: matrix.platform == 'linux/arm64'
-      uses: docker/setup-qemu-action@v3
+      uses: docker/setup-qemu-action@v4
 
     - uses: actions/checkout@v6
 
@@ -194,7 +194,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
-    - uses: docker/setup-qemu-action@v3
+    - uses: docker/setup-qemu-action@v4
 
     - uses: docker/login-action@v3
       with:
