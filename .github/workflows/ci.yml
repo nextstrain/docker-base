@@ -63,7 +63,7 @@ jobs:
 
     # GITHUB_TOKEN is unreliable¹ so use a token from nextstrain-bot.
     # ¹ https://github.com/docker/build-push-action/issues/463#issuecomment-939394233
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: nextstrain-bot
@@ -107,7 +107,7 @@ jobs:
     env:
       TAG: ${{ needs.vars.outputs.tag }}
     steps:
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: nextstrain-bot
@@ -150,7 +150,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: nextstrain-bot
@@ -196,7 +196,7 @@ jobs:
 
     - uses: docker/setup-qemu-action@v4
 
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: nextstrain-bot
@@ -214,13 +214,13 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: nextstrain-bot
         password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: docker.io
         username: nextstrainbot
@@ -238,13 +238,13 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: nextstrain-bot
         password: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_MANAGE_PACKAGES }}
 
-    - uses: docker/login-action@v3
+    - uses: docker/login-action@v4
       with:
         registry: docker.io
         username: nextstrainbot
