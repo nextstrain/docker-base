@@ -275,6 +275,12 @@ RUN pip3 install pyarrow==20.0.0
 # Install bio, which is used by pathogen builds
 RUN pip3 install bio==1.8.0
 
+# Install zstandard, which used to be an indirect dependency of augur
+# until xopen removed it and we pivoted to the stdlib/backport in
+# <https://github.com/nextstrain/augur/pull/2009>
+# Keeping in runtimes to not disrupt use by pathogen builds
+RUN pip3 install zstandard==0.25.0
+
 # 2. Add unpinned programs
 
 # Allow caching to be avoided from here on out in this stage by calling
