@@ -14,7 +14,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: nextstrain/.github/actions/shellcheck@master
 
   vars:
@@ -55,7 +55,7 @@ jobs:
             runner: ubuntu-24.04-arm
     steps:
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: actions/setup-python@v6
       with:
@@ -169,7 +169,7 @@ jobs:
     - if: matrix.platform == 'linux/arm64'
       uses: docker/setup-qemu-action@v4
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - run: pip install cram
 
@@ -192,7 +192,7 @@ jobs:
     needs: [vars, merge-builds]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: docker/setup-qemu-action@v4
 
@@ -212,7 +212,7 @@ jobs:
     needs: [vars, merge-builds]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: docker/login-action@v4
       with:
@@ -236,7 +236,7 @@ jobs:
     needs: [vars, merge-builds, test, validate-platforms]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: docker/login-action@v4
       with:
@@ -337,7 +337,7 @@ jobs:
     needs: [vars, merge-builds, test, validate-platforms, push-branch, push-build]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: actions/github-script@v9
       with:
