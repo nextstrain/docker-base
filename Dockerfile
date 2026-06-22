@@ -250,8 +250,9 @@ RUN python3 -m venv /usr/local/libexec/awscli \
  && ln -sv /usr/local/libexec/awscli/bin/aws /usr/local/bin/aws
 
 # Install Snakemake and related optional dependencies.
-# Pinned to 9.6.2 for stability (latest version on 2025-07-03)
-RUN pip3 install snakemake[reports]==9.6.2
+# Pinned to 9.17.0 for stability, latest guaranteed compatible version
+# based on <https://github.com/nextstrain/public/issues/39>
+RUN pip3 install snakemake[reports]==9.17.0
 # Snakemake plugins for remote storage providers
 # Pinned for stability (latest versions on 2025-07-03)
 RUN pip3 install snakemake-storage-plugin-http==0.3.0
