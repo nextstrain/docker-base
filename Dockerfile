@@ -301,7 +301,8 @@ COPY builder-scripts/ /builder-scripts/
 # Fauna
 WORKDIR /nextstrain/fauna
 RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . \
- && pip3 install --requirement=requirements.txt
+ && python3 -m venv .venv \
+ && .venv/bin/pip3 install --requirement=requirements.txt
 
 # Add Treetime
 RUN pip3 install phylo-treetime
