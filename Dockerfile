@@ -23,6 +23,7 @@ COPY --from=xx / /
 # Add system deps for building
 # autoconf, automake: for building VCFtools; may be used by package managers to build from source
 # ca-certificates: for secure HTTPS connections
+# cmake: for building DIAMOND
 # curl: for downloading source files
 # git: used in builder-scripts/download-repo
 # make: used for building from Makefiles (search for usage); may be used by package managers to build from source
@@ -34,6 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         automake \
         clang \
         ca-certificates \
+        cmake \
         curl \
         git \
         make \
@@ -56,13 +58,16 @@ ARG TARGETARCH
 # https://github.com/tonistiigi/xx#building-on-debian
 # binutils, gcc, libc6-dev: for compiling C/C++ programs (TODO: verify)
 # g++: for building VCFtools; may be used by package managers to build from source
+# libsqlite3-dev, libzstd-dev: for building DIAMOND; may be used by package managers to build from source
 # pkg-config: for building VCFtools; may be used by package managers to build from source
-# zlib1g-dev: for building VCFtools; may be used by package managers to build from source
+# zlib1g-dev: for building DIAMOND, VCFtools; may be used by package managers to build from source
 RUN xx-apt-get install -y \
   binutils \
   gcc \
   g++ \
   libc6-dev \
+  libsqlite3-dev \
+  libzstd-dev \
   pkg-config \
   zlib1g-dev
 
@@ -109,6 +114,15 @@ RUN curl -fsSL https://api.github.com/repos/vcftools/vcftools/tarball/1cab5204eb
  && make && make install \
  && cp -rp built/bin/*    /final/bin \
  && cp -rp built/share/*  /final/share
+
+# Build+test DIAMOND
+WORKDIR /build/diamond
+RUN curl -fsSL https://github.com/bbuchfink/diamond/archive/refs/tags/v2.2.4.tar.gz \
+  | tar xzvpf - --no-same-owner --strip-components=1 \
+ && CC=xx-clang CXX=xx-clang++ cmake -B build -S . \
+ && cmake --build build -j$(nproc) \
+ && ctest --test-dir build -C Release \
+ && cp -p build/diamond /final/bin
 
 
 # 2. Download pre-built programs
