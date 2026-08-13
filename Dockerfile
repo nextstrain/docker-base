@@ -284,6 +284,9 @@ RUN pip3 install epiweeks==2.1.2
 RUN pip3 install pango_aliasor==0.3.0
 
 RUN pip3 install pathogen-embed==3.0.0
+# Install ml_dtypes for pip to keep numpy<2.0 for pathogen-embed/numba
+# This can be removed if pathogen-embed ever unpins numba.
+RUN pip3 install ml_dtypes==0.5.4
 RUN pip3 install xlrd==2.0.1
 
 # Install openpyxl for pandas in GenoFLU
