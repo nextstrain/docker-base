@@ -283,7 +283,11 @@ RUN pip3 install epiweeks==2.1.2
 # Install pango_aliasor (for forecasts-ncov)
 RUN pip3 install pango_aliasor==0.3.0
 
-RUN pip3 install pathogen-embed==3.0.0
+# pathogen-embed
+WORKDIR /nextstrain/pathogen-embed
+RUN python3 -m venv .venv \
+ && .venv/bin/pip3 install pathogen-embed==3.0.0
+
 RUN pip3 install xlrd==2.0.1
 
 # Install openpyxl for pandas in GenoFLU
@@ -423,9 +427,6 @@ COPY --from=builder-target-platform \
     /usr/local/bin/bio \
     /usr/local/bin/envdir \
     /usr/local/bin/evofr \
-    /usr/local/bin/pathogen-distance \
-    /usr/local/bin/pathogen-embed \
-    /usr/local/bin/pathogen-cluster \
     /usr/local/bin/snakemake \
     /usr/local/bin/treetime \
     /usr/local/bin/
@@ -435,6 +436,9 @@ COPY --from=builder-build-platform /usr/lib/node_modules/ /usr/lib/node_modules/
 
 # Add globally linked Nextstrain CLI executable.
 RUN ln -sv /nextstrain/cli/nextstrain /usr/local/bin/nextstrain
+
+# Add globally linked pathogen-embed executables.
+RUN ln -sv /nextstrain/pathogen-embed/.venv/bin/pathogen-{cluster,distance,embed} /usr/local/bin/
 
 # Add globally linked Auspice script.
 #
