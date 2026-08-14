@@ -283,9 +283,7 @@ RUN pip3 install epiweeks==2.1.2
 # Install pango_aliasor (for forecasts-ncov)
 RUN pip3 install pango_aliasor==0.3.0
 
-# Install pathogen-embed and evofr together for proper dependency resolution of numpy.
-# They can be separated when pathogen-embed unpins numba/numpy.
-RUN pip3 install pathogen-embed==3.0.0 evofr
+RUN pip3 install pathogen-embed==4.0.0
 RUN pip3 install xlrd==2.0.1
 
 # Install openpyxl for pandas in GenoFLU
@@ -330,6 +328,9 @@ RUN pip3 install phylo-treetime
 WORKDIR /nextstrain/augur
 RUN /builder-scripts/download-repo https://github.com/nextstrain/augur "$(/builder-scripts/latest-augur-release-tag)" . \
  && pip3 install --editable .
+
+# Add evofr for forecasting
+RUN pip3 install evofr
 
 # ———————————————————————————————————————————————————————————————————— #
 
