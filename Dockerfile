@@ -42,10 +42,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         dpkg-dev \
         unzip
 
-# Install a specific Node.js version
+# Install a specific Node.js version to build Auspice (currently Node v24)
 # https://github.com/nodesource/distributions/blob/ba48c1fe6e843e9ffb60aefc5da5d00234c83f04/README.md#using-debian-as-root-nodejs-20
 RUN apt-get update && apt-get install -y curl \
- && curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh \
+ && curl -fsSL https://deb.nodesource.com/setup_24.x -o nodesource_setup.sh \
  && bash nodesource_setup.sh \
  && apt-get install -y nodejs
 
@@ -216,7 +216,9 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/
 # ⁴ https://github.com/mapbox/node-pre-gyp/blob/v1.0.10/lib/node-pre-gyp.js#L186
 WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
- && npm install --omit dev && npm link
+ && npm install \
+ && npm link --ignore-scripts \
+ && npm prune --omit dev
 
 # Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
 RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets \
@@ -382,10 +384,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zlib1g \
         zstd
 
-# Install a specific Node.js version
+# Install a specific Node.js version to use as Auspice's runtime (currently Node v24)
 # https://github.com/nodesource/distributions/blob/ba48c1fe6e843e9ffb60aefc5da5d00234c83f04/README.md#using-debian-as-root-nodejs-20
 RUN apt-get update && apt-get install -y curl \
- && curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh \
+ && curl -fsSL https://deb.nodesource.com/setup_24.x -o nodesource_setup.sh \
  && bash nodesource_setup.sh \
  && apt-get install -y nodejs
 
