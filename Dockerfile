@@ -216,7 +216,9 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/
 # ⁴ https://github.com/mapbox/node-pre-gyp/blob/v1.0.10/lib/node-pre-gyp.js#L186
 WORKDIR /nextstrain/auspice
 RUN /builder-scripts/download-repo https://github.com/nextstrain/auspice release . \
- && npm install --omit dev && npm link
+ && npm install \
+ && npm link --ignore-scripts \
+ && npm prune --omit dev
 
 # Add NCBI Datasets command line tools for access to NCBI Datsets Virus Data Packages
 RUN curl -fsSL https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-${TARGETARCH}/datasets \
