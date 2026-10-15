@@ -323,6 +323,9 @@ RUN /builder-scripts/download-repo https://github.com/nextstrain/fauna master . 
 # Add Treetime
 RUN pip3 install phylo-treetime
 
+# Add treeknit
+RUN pip3 install treeknit
+
 # Augur
 # Augur is an editable install so we can overlay the augur version in the image
 # with --volume=.../augur:/nextstrain/augur and still have it globally
