@@ -161,6 +161,23 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/
 RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextclade-$(/builder-scripts/target-triple) \
   -o /final/bin/nextclade2
 
+# Download TreeTime v1 as treetime1
+# TreeTime v1 is a rewrite of TreeTime as a standalone executable. It does not
+# replace TreeTime v0 (the phylo-treetime Python package below), which provides
+# the `treetime` command and which Augur imports. Workflows opt in by calling
+# treetime1. Releases are nightly builds until TreeTime v1 is released; the
+# checksums come from the SHA256SUMS file of the pinned release.
+ARG TREETIME1_VERSION=1.0.0-nightly.20261026T130313Z+8513a64
+RUN target="$(/builder-scripts/target-triple)" \
+ && case "$target" in \
+      x86_64-unknown-linux-gnu)  sha256=786ff42ef8f7ad8a854e3c5e280b2d63b98a28cb5565a86977a11de7c31f483a ;; \
+      aarch64-unknown-linux-gnu) sha256=3143bea5acd31abaa28eea9b95f07a5f15bad195f1cd0484284e1962067c8859 ;; \
+      *) echo "No TreeTime v1 checksum for $target" >&2; exit 1 ;; \
+    esac \
+ && curl -fsSL "https://github.com/neherlab/treetime-nightly/releases/download/${TREETIME1_VERSION}/treetime-${target}" \
+  -o /final/bin/treetime1 \
+ && echo "$sha256  /final/bin/treetime1" | sha256sum --check --strict
+
 # Download tsv-utils
 # NOTE: Running this program requires support for emulation on the Docker host
 # if the processor architecture is not amd64.
