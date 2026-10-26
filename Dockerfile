@@ -195,6 +195,14 @@ RUN curl -fsSL https://github.com/nextstrain/nextclade/releases/latest/download/
   -o /final/bin/nextclade3 \
   && ln -sv nextclade3 /final/bin/nextclade
 
+# Download TreeTime v1 as treetime1
+# TreeTime v1 is a rewrite of TreeTime as a standalone executable. It does not
+# replace TreeTime v0 (the phylo-treetime Python package below), which provides
+# the `treetime` command and which Augur imports. Workflows opt in by calling
+# treetime1. Until TreeTime v1 is released, this is the latest nightly build.
+RUN curl -fsSL https://github.com/neherlab/treetime-nightly/releases/latest/download/treetime-$(/builder-scripts/target-triple) \
+  -o /final/bin/treetime1
+
 # Auspice
 # Building auspice means we can run it without hot-reloading, which is
 # time-consuming and generally unnecessary in the container image.
