@@ -55,6 +55,7 @@ main() {
             nextstrain --version
             nextalign --version
             nextclade --version
+            treetime1 --version
             augur --version
             auspice --version
             python3 -c "from importlib.metadata import version; print(version(\"evofr\"))"
