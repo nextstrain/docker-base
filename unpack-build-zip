@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+import os
+import sys
+import zipfile
+
+try:
+    import zipfile_zstd  # noqa: F401 (patches zipfile for zstd support on Python < 3.14)
+except ImportError:
+    pass
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: unpack-build-zip <archive.zip> [dest_dir]", file=sys.stderr)
+        sys.exit(1)
+
+    zip_path = sys.argv[1]
+    dest = os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else ".")
+
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        print(f"Archive:  {zip_path}")
+        for member in zf.infolist():
+            filename = member.filename
+            # Normalize target path, allowing relative subpaths like ../augur/ but not escaping /
+            target = os.path.normpath(os.path.join(dest, filename))
+
+            if member.is_dir():
+                print(f"   creating: {filename}")
+                os.makedirs(target, exist_ok=True)
+            else:
+                # Format to match unzip output spacing: pad to 24 characters if short
+                if len(filename) < 24:
+                    print(f" extracting: {filename:<24s}")
+                else:
+                    print(f" extracting: {filename}  ")
+
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with zf.open(member) as src, open(target, "wb") as dst:
+                    while chunk := src.read(1024 * 1024):
+                        dst.write(chunk)
+
+if __name__ == "__main__":
+    main()

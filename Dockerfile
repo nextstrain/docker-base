@@ -314,6 +314,9 @@ RUN pip3 install bio==1.8.0
 # Keeping in runtimes to not disrupt use by pathogen builds
 RUN pip3 install zstandard==0.25.0
 
+# Install zipfile-zstd for Zstandard ZIP support in Python < 3.14
+RUN pip3 install zipfile-zstd==0.0.4
+
 # 2. Add unpinned programs
 
 # Allow caching to be avoided from here on out in this stage by calling
@@ -473,7 +476,7 @@ COPY --from=builder-build-platform  --chown=nextstrain:nextstrain /nextstrain /n
 COPY --from=builder-target-platform --chown=nextstrain:nextstrain /nextstrain /nextstrain
 
 # Add our entrypoints and helpers
-COPY entrypoint entrypoint-aws-batch drop-privs create-envd delete-envd chdir-workdir /sbin/
+COPY entrypoint entrypoint-aws-batch unpack-build-zip update-build-zip drop-privs create-envd delete-envd chdir-workdir /sbin/
 RUN chmod a+rx /sbin/entrypoint* /sbin/drop-privs /sbin/{create,delete}-envd /sbin/chdir-workdir
 
 # Make /nextstrain a global HOME, writable by any UID (like /tmp)
