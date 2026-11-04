@@ -184,8 +184,9 @@ RUN curl -L https://github.com/shenwei356/seqkit/releases/download/v2.10.1/seqki
 ARG CACHE_DATE
 
 # Install our own CLI so builds can do things like `nextstrain deploy`
+# Timeout and retry for <https://github.com/nextstrain/nextstrain.org/issues/1409>
 RUN mkdir -p /nextstrain/cli \
- && curl -fsSL --proto '=https' https://nextstrain.org/cli/download/latest/standalone-"$(/builder-scripts/target-triple)".tar.gz \
+ && curl -fsSL --proto '=https' --connect-timeout 15 --retry 3 https://nextstrain.org/cli/download/latest/standalone-"$(/builder-scripts/target-triple)".tar.gz \
   | tar xzvf - --no-same-owner --no-same-permissions -C /nextstrain/cli \
  && chmod -R a+rX /nextstrain/cli
 
